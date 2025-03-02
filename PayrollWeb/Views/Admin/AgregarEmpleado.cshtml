@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "Agregar Empleado";
+}
+
+<h2>Agregar Empleado</h2>
+
+<form action="/Empleado/CrearEmpleado" method="post" id="formAgregarEmpleado">
+    <div>
+        <label for="Dui">DUI:</label>
+        <input type="text" id="Dui" name="Dui" required />
+        @if (ViewData.ModelState["Dui"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Dui"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Nombre">Nombre:</label>
+        <input type="text" id="Nombre" name="Nombre" required />
+        @if (ViewData.ModelState["Nombre"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Nombre"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Apellidos">Apellidos:</label>
+        <input type="text" id="Apellidos" name="Apellidos" required />
+        @if (ViewData.ModelState["Apellidos"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Apellidos"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Telefono">Teléfono:</label>
+        <input type="text" id="Telefono" name="Telefono" required />
+        @if (ViewData.ModelState["Telefono"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Telefono"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Direccion">Dirección:</label>
+        <input type="text" id="Direccion" name="Direccion" required />
+        @if (ViewData.ModelState["Direccion"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Direccion"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="CuentaCorriente">Cuenta Corriente:</label>
+        <input type="text" id="CuentaCorriente" name="CuentaCorriente" required />
+        @if (ViewData.ModelState["CuentaCorriente"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["CuentaCorriente"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Estado">Estado:</label>
+        <select id="Estado" name="Estado">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+        </select>
+        @if (ViewData.ModelState["Estado"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Estado"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Correo">Correo:</label>
+        <input type="email" id="Correo" name="Correo" required />
+        @if (ViewData.ModelState["Correo"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Correo"]?.Errors[0]?.ErrorMessage</span>
+        }
+    </div>
+
+    <div>
+        <label for="Contrasena">Contraseña:</label>
+        <input type="password" id="Contrasena" name="Contrasena" required />
+        <a id="togglePassword" href="#"><i class="bi bi-eye"></i></a>
+        @if (ViewData.ModelState["Contrasena"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["Contrasena"]?.Errors[0]?.ErrorMessage</span>
+        }
+        <button type="button" id="btnGenerarContrasena">Generar Contraseña</button>
+    </div>
+
+    <button type="submit">Guardar</button>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#btnGenerarContrasena").click(function() {
+            $.ajax({
+                url: '/Empleado/GenerarContrasena', // Ruta al método del controlador
+                type: 'GET',
+                success: function(data) {
+                    // Actualizar el valor del campo de contraseña con la nueva contraseña generada
+                    $('#Contrasena').val(data);
+                },
+                error: function() {
+                    alert('Hubo un error al generar la contraseña');
+                }
+            });
+        });
+    });
+
+        document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('Contrasena');
+        // Cambiar el tipo del input entre password y text
+        const type = passwordField.type === 'password' ? 'text' : 'password';
+        passwordField.type = type;
+    });
+</script>

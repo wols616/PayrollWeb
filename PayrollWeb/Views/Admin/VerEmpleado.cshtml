@@ -1,0 +1,55 @@
+﻿@model Empleado
+
+@{
+    ViewData["Title"] = "Ver Empleado";
+}
+
+<h2>Detalles del Empleado</h2>
+
+<div>
+    <h3>Información del Empleado</h3>
+    <table>
+        <tr>
+            <td><strong>Nombre:</strong></td>
+            <td>@Model.Nombre</td>
+        </tr>
+        <tr>
+            <td><strong>Apellidos:</strong></td>
+            <td>@Model.Apellidos</td>
+        </tr>
+        <tr>
+            <td><strong>DUI:</strong></td>
+            <td>@Model.Dui</td>
+        </tr>
+        <tr>
+            <td><strong>Correo:</strong></td>
+            <td>@Model.Correo</td>
+        </tr>
+        <tr>
+            <td><strong>Teléfono:</strong></td>
+            <td>@Model.Telefono</td>
+        </tr>
+        <tr>
+            <td><strong>Dirección:</strong></td>
+            <td>@Model.Direccion</td>
+        </tr>
+        <tr>
+            <td><strong>Cuenta Corriente:</strong></td>
+            <td>@Model.CuentaCorriente</td>
+        </tr>
+        <tr>
+            <td><strong>Estado:</strong></td>
+            <td>@Model.Estado</td>
+        </tr>
+        <tr>
+            <td><strong>Contraseña:</strong></td>
+            <td>@Model.Contrasena</td>
+        </tr>
+    </table>
+</div>
+
+<a href="@Url.Action("VerEditarEmpleado", "Empleado", new { id = Model.IdEmpleado })" class="btn btn-primary"><i class="bi bi-pencil-square"></i></a>
+
+<div>
+    <a href="@Url.Action("VerEmpleados", "Empleado")">Regresar a la lista de empleados</a>
+</div>
