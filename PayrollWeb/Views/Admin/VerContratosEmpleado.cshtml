@@ -13,11 +13,14 @@ else
     <h2>Empleado no encontrado</h2>
 }
 
+<a href="@Url.Action("VerAgregarContrato", "Contrato", new {idEmpleado = ViewBag.Empleado.IdEmpleado})" class="btn btn-primary">Agregar Nuevo Contrato</a>
+
 @if (Model != null && Model.Any())
 {
     <table class="table table-bordered">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Puesto</th>
                 <th>Categoría</th>
                 <th>Sueldo Base</th>
@@ -32,6 +35,7 @@ else
             @foreach (var contrato in Model)
             {
                 <tr>
+                    <td>@contrato.IdContrato</td>
                     <td>@contrato.Puesto</td>
                     <td>@contrato.Categoria</td>
                     <td>@contrato.SueldoBase</td>
@@ -40,8 +44,14 @@ else
                     <td>@contrato.TipoContrato</td>
                     <td>@contrato.Vigente</td>
                     <td>
-                        <a href="@Url.Action("VerEditarContrato", "Contrato", new { idContrato = contrato.IdContrato, idEmpleado = ViewBag.Empleado.IdEmpleado })" class="btn btn-primary"><i class="bi bi-pencil-square"></i></a>
-                        <a href="@Url.Action("CancelarContrato", "Contrato", new { idContrato = contrato.IdContrato })" class="btn btn-danger"><i class="bi bi-x-circle"></i></a>
+                        @if (contrato.Vigente == "N")
+                        {
+                            <button class="btn btn-secondary" disabled><i class="bi bi-x-circle"></i></button>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("CancelarContrato", "Contrato", new { idContrato = contrato.IdContrato })" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar este contrato?');"><i class="bi bi-x-circle"></i></a>
+                        }
                     </td>
                 </tr>
             }
@@ -54,3 +64,5 @@ else
 }
 
 <a href="@Url.Action("VerEmpleados", "Contrato")" class="btn btn-secondary">Volver</a>
+
+

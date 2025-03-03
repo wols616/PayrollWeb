@@ -61,19 +61,20 @@ namespace PayrollWeb.Models
 
                         if (filasAfectadas > 0)
                         {
-                            Console.WriteLine("Contrato agregado correctamente", "Éxito");
+                            System.Diagnostics.Debug.WriteLine("Contrato agregado correctamente", "Éxito");
                         }
                         else
                         {
-                            Console.WriteLine("No se pudo agregar el contrato", "Error");
+                            System.Diagnostics.Debug.WriteLine("No se pudo agregar el contrato", "Error");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al agregar el contrato: " + ex.Message, "Error");
+                System.Diagnostics.Debug.WriteLine("Error al agregar el contrato: " + ex.Message);
             }
+
         }
 
         // MÉTODO PARA OBTENER TODOS LOS CONTRATOS
@@ -116,6 +117,45 @@ namespace PayrollWeb.Models
             }
 
             return listaContratos;
+        }
+
+        //Método para obtener un contrato por su id
+        public Contrato ObtenerContrato(int idContrato)
+        {
+            Contrato contrato = null;
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT * FROM Contrato WHERE id_contrato = @id_contrato";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = idContrato;
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                contrato = new Contrato
+                                {
+                                    IdContrato = Convert.ToInt32(reader["id_contrato"]),
+                                    IdEmpleado = Convert.ToInt32(reader["id_empleado"]),
+                                    FechaAlta = Convert.ToDateTime(reader["fecha_alta"]),
+                                    FechaBaja = reader["fecha_baja"] as DateTime?,
+                                    IdPuesto = Convert.ToInt32(reader["id_puesto"]),
+                                    TipoContrato = reader["tipo_contrato"].ToString(),
+                                    Vigente = reader["vigente"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el contrato: " + ex.Message);
+            }
+            return contrato;
         }
 
         public List<Contrato> ObtenerContratos(int idEmpleado)
@@ -310,7 +350,10 @@ namespace PayrollWeb.Models
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = IdContrato;
-                        cmd.Parameters.Add("@valor", SqlDbType.VarChar).Value = valor;
+                        cmd.Parameters.Add("@valor",
+                            valor is DateTime ? SqlDbType.DateTime : SqlDbType.VarChar
+                            ).Value = valor;
+
                         con.Open();
                         int filasAfectadas = cmd.ExecuteNonQuery();
                         if (filasAfectadas > 0)

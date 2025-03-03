@@ -6,6 +6,13 @@
     <i class="bi bi-plus-square-fill"></i>
 </a>
 
+@if (TempData["ErrorEliminar"] != null)
+{
+    <div id="errorEliminar" class="alert alert-danger">
+        @TempData["ErrorEliminar"]
+    </div>
+}
+
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -30,7 +37,7 @@
                     <td>@emp.Telefono</td>
                     <td>@emp.Correo</td>
                     <td>@emp.Estado</td>
-                    
+
                     <td>
                         @if (ViewBag.ShowActions)
                         {
@@ -59,3 +66,12 @@
     </tbody>
 
 </table>
+
+<script>
+    setTimeout(function() {
+        var errorDiv = document.getElementById('errorEliminar');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }, 5000); // 5000 ms = 5 segundos
+</script>
