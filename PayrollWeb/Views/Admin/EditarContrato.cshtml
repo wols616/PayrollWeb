@@ -1,0 +1,101 @@
+﻿@model ContratoViewModel
+
+@{
+    ViewData["Title"] = "Editar Contrato";
+}
+
+<h2>Editar Contrato</h2>
+<nav>@Model.Categoria @Model.SueldoBase</nav>
+
+<form asp-action="ActualizarContrato" method="post">
+    <input type="hidden" asp-for="IdContrato" />
+    <input type="hidden" asp-for="IdEmpleado" />
+    <input type="hidden" asp-for="IdPuesto" />
+    <input type="hidden" asp-for="IdCategoria" />
+
+    <!-- Selector de Puesto -->
+    <div class="form-group">
+        <label asp-for="Puesto">Puesto:</label>
+        <select asp-for="Puesto" class="form-control" id="puestoSelect">
+            @foreach (var puesto in ViewBag.Puestos)
+            {
+                <option value="@puesto.NombrePuesto" data-categoria="@puesto.Categoria" data-sueldo="@puesto.SueldoBase" data-id-puesto="@puesto.IdPuesto" data-id-categoria="@puesto.IdCategoria">
+                    @puesto.NombrePuesto
+                </option>
+            }
+        </select>
+        <span asp-validation-for="Puesto" class="text-danger"></span>
+    </div>
+
+    <!-- Categoría (no editable) -->
+    <div class="form-group">
+        <label asp-for="Categoria">Categoría:</label>
+        <input asp-for="Categoria" class="form-control" id="categoriaInput" readonly />
+    </div>
+
+    <!-- Sueldo Base (no editable) -->
+    <div class="form-group">
+        <label asp-for="SueldoBase">Sueldo Base:</label>
+        <input asp-for="SueldoBase" class="form-control" id="sueldoBaseInput" readonly />
+    </div>
+
+    <!-- Fecha Alta -->
+    <div class="form-group">
+        <label asp-for="FechaAlta">Fecha Alta:</label>
+        <input asp-for="FechaAlta" class="form-control" type="date" />
+        <span asp-validation-for="FechaAlta" class="text-danger"></span>
+    </div>
+
+    <!-- Fecha Baja -->
+    <div class="form-group">
+        <label asp-for="FechaBaja">Fecha Baja:</label>
+        <input asp-for="FechaBaja" class="form-control" type="date" id="fechaBajaInput" />
+        <span asp-validation-for="FechaBaja" class="text-danger"></span>
+    </div>
+
+    <!-- Tipo de Contrato -->
+    <div class="form-group">
+        <label asp-for="TipoContrato">Tipo de Contrato:</label>
+        <input asp-for="TipoContrato" id="tipoContrato" class="form-control" readonly />
+        <span asp-validation-for="TipoContrato" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = ViewBag.Empleado.IdEmpleado })" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script>
+        function actualizarDatos() {
+            const puestoSelect = document.getElementById("puestoSelect");
+            const categoriaInput = document.getElementById("categoriaInput");
+            const sueldoBaseInput = document.getElementById("sueldoBaseInput");
+            const idPuestoInput = document.getElementById("IdPuesto");
+            const idCategoriaInput = document.getElementById("IdCategoria");
+
+            const selectedOption = puestoSelect.options[puestoSelect.selectedIndex];
+            categoriaInput.value = selectedOption.getAttribute("data-categoria");
+            sueldoBaseInput.value = parseFloat(selectedOption.getAttribute("data-sueldo"));
+            idPuestoInput.value = selectedOption.getAttribute("data-id-puesto");
+            idCategoriaInput.value = selectedOption.getAttribute("data-id-categoria");
+        }
+
+        function actualizarTipoContrato() {
+            const fechaBajaInput = document.getElementById("fechaBajaInput");
+            const tipoContratoInput = document.getElementById("tipoContrato");
+            tipoContratoInput.value = fechaBajaInput.value ? "Definido" : "Indefinido";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            actualizarDatos();
+            actualizarTipoContrato();
+        });
+
+        document.getElementById("puestoSelect").addEventListener("change", actualizarDatos);
+        document.getElementById("fechaBajaInput").addEventListener("change", actualizarTipoContrato);
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -19,10 +19,10 @@ namespace PayrollWeb.Controllers.Admin
         }
 
         //CONTROLADORES PARA ABRIR LAS VISTAS
-        public IActionResult VerEmpleados()
+        public IActionResult VerEmpleados(bool showActions = true)
         {
             List<Empleado> empleados = _empleado.MostrarEmpleados();
-
+            ViewBag.ShowActions = showActions;
             return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
@@ -50,6 +50,8 @@ namespace PayrollWeb.Controllers.Admin
         [HttpPost]
         public IActionResult CrearEmpleado(Empleado empleado)
         {
+            //empleado.Estado = "Activo";
+
             if (!_empleado.EsDUIUnico(empleado.Dui))
             {
                 ModelState.AddModelError("Dui", "El DUI ya está registrado");
@@ -68,7 +70,6 @@ namespace PayrollWeb.Controllers.Admin
                 // Regresar a la vista "VerAgregarEmpleado" y pasar el modelo actual con los errores
                 return View("/Views/Admin/AgregarEmpleado.cshtml", empleado);
             }
-
             empleado.AgregarEmpleado();
             return RedirectToAction("VerEmpleados");
         }
@@ -76,6 +77,19 @@ namespace PayrollWeb.Controllers.Admin
         [HttpPost]
         public IActionResult ActualizarEmpleado(Empleado empleado)
         {
+            if (!_empleado.EsDUIUnico(empleado.Dui))
+            {
+                ModelState.AddModelError("Dui", "El DUI ya está registrado");
+            }
+            if (!_empleado.EsCorreoUnico(empleado.Correo))
+            {
+                ModelState.AddModelError("Correo", "El correo ya está registrado");
+            }
+            if (!_empleado.EsCuentaUnica(empleado.CuentaCorriente))
+            {
+                ModelState.AddModelError("CuentaCorriente", "La cuenta corriente ya está registrada");
+            }
+
             if (ModelState.IsValid)
             {
                 _empleado.EditarEmpleado(empleado); // Pasa el objeto empleado

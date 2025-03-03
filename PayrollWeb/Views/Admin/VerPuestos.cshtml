@@ -1,0 +1,36 @@
+﻿@model List<Object>
+
+<h2>Lista de Puestos con Categoría</h2>
+<a href="@Url.Action("VerAgregarPuesto", "Puesto")" class="btn btn-primary">Agregar Nuevo Puesto</a>
+
+@if (TempData["ErrorEliminar"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorEliminar"]
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre del Puesto</th>
+            <th>Nombre de la Categoría</th>
+            <th>Sueldo Base</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.GetType().GetProperty("NombrePuesto")?.GetValue(item)</td>
+                <td>@item.GetType().GetProperty("Categoria")?.GetValue(item)</td>
+                <td>@item.GetType().GetProperty("SueldoBase")?.GetValue(item)</td>
+                <td>
+                    <a href="@Url.Action("VerEditarPuesto", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="@Url.Action("EliminarPuesto", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este puesto?');">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
