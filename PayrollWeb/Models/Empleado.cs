@@ -223,6 +223,11 @@ namespace PayrollWeb.Models
                 query.Append("contrasena = @contrasena, ");
                 parametros.Add(new SqlParameter("@contrasena", SqlDbType.VarChar) { Value = empleado.Contrasena });
             }
+            if (!string.IsNullOrEmpty(empleado.Estado))
+            {
+                query.Append("estado = @estado, ");
+                parametros.Add(new SqlParameter("@estado", SqlDbType.VarChar) { Value = empleado.Estado });
+            }
 
             if (parametros.Count == 0)
             {
@@ -260,6 +265,8 @@ namespace PayrollWeb.Models
                 Console.WriteLine("Error al editar el empleado: " + ex.Message, "Error");
             }
         }
+
+
 
 
         //Login

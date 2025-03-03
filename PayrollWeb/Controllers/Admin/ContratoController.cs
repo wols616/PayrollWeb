@@ -38,16 +38,14 @@ namespace PayrollWeb.Controllers.Admin
             return View("/Views/Admin/VerContratosEmpleado.cshtml", contratos);
         }
 
-        public IActionResult VerEditarContrato(int IdContrato, int idEmpleado)
+        public IActionResult VerAgregarContrato(int idEmpleado)
         {
-            ContratoViewModel contrato = _contrato.ObtenerContratoYPuesto(IdContrato);
+            List<ContratoViewModel> contratos = _contrato.ObtenerContratosYPuestos(idEmpleado);
             Empleado empleado = _empleado.ObtenerEmpleado(idEmpleado);
-            ViewBag.Empleado = empleado;
-
+            ViewBag.Contratos = contratos;
             ViewBag.Puestos = _puesto.ObtenerPuestosViewModel();
-            
-            
-            return View("/Views/Admin/EditarContrato.cshtml", contrato);
+            ViewBag.Empleado = empleado;
+            return View("/Views/Admin/AgregarContrato.cshtml");
         }
 
 
@@ -60,35 +58,29 @@ namespace PayrollWeb.Controllers.Admin
 
         //_______________________________________________________________________________________________________________________
 
-        [HttpPost]
-        public IActionResult ActualizarContrato(ContratoViewModel _contrato)
+        public IActionResult CrearContrato(ContratoViewModel _contrato)
         {
-            try
+            Contrato contrato = new Contrato
             {
-                // Mapear el ViewModel al modelo de base de datos
-                Contrato contrato = new Contrato
-                {
-                    IdContrato = _contrato.IdContrato,
-                    IdEmpleado = _contrato.IdEmpleado, // ✅ Ahora se obtiene directamente del ViewModel
-                    FechaAlta = _contrato.FechaAlta,
-                    FechaBaja = _contrato.FechaBaja,
-                    IdPuesto = _contrato.IdPuesto,
-                    TipoContrato = _contrato.TipoContrato
-                };
+                IdEmpleado = _contrato.IdEmpleado,
+                FechaAlta = _contrato.FechaAlta,
+                FechaBaja = _contrato.FechaBaja,
+                IdPuesto = _contrato.IdPuesto,
+                TipoContrato = _contrato.TipoContrato,
+                Vigente = _contrato.Vigente,
+            };
+            contrato.AgregarContrato();
 
-                // Llamar al método de actualización en el modelo
-                contrato.ActualizarContrato();
-
-                // Redirigir a la vista de contratos del empleado
-                return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
-            }
-            catch (Exception ex)
-            {
-                // Manejar errores
-                ModelState.AddModelError("", "Ocurrió un error al actualizar el contrato: " + ex.Message);
-                return View(_contrato);
-            }
+            return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
         }
 
+        public IActionResult CancelarContrato(int idContrato)
+        {
+            Contrato contrato = _contrato.ObtenerContrato(idContrato);
+
+            contrato.ActualizarContrato("vigente", "N");
+            contrato.ActualizarContrato("fecha_baja", DateTime.Now);
+            return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
+        }
     }
 }

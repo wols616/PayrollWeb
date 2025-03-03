@@ -1,17 +1,19 @@
 ﻿@model ContratoViewModel
 
 @{
-    ViewData["Title"] = "Editar Contrato";
+    ViewData["Title"] = "Agregar Contrato";
+    var contratos = ViewBag.Contratos as List<ContratoViewModel>;
+    decimal mayorSueldoBase = contratos != null && contratos.Count > 0 ? contratos.Max(c => c.SueldoBase) : 0;
 }
 
-<h2>Editar Contrato</h2>
-<nav>@Model.Categoria @Model.SueldoBase</nav>
+<h2>Agregar Contrato</h2>
 
-<form asp-action="ActualizarContrato" method="post">
-    <input type="hidden" asp-for="IdContrato" />
-    <input type="hidden" asp-for="IdEmpleado" />
+<form action="/Contrato/CrearContrato" method="post">
+    <input type="hidden" asp-for="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado" />
     <input type="hidden" asp-for="IdPuesto" />
     <input type="hidden" asp-for="IdCategoria" />
+    <input type="hidden" asp-for="IdContrato" value="0" />
+    <input type="hidden" asp-for="Vigente" value="S" />
 
     <!-- Selector de Puesto -->
     <div class="form-group">
@@ -19,9 +21,12 @@
         <select asp-for="Puesto" class="form-control" id="puestoSelect">
             @foreach (var puesto in ViewBag.Puestos)
             {
-                <option value="@puesto.NombrePuesto" data-categoria="@puesto.Categoria" data-sueldo="@puesto.SueldoBase" data-id-puesto="@puesto.IdPuesto" data-id-categoria="@puesto.IdCategoria">
-                    @puesto.NombrePuesto
-                </option>
+                if (puesto.SueldoBase >= mayorSueldoBase)
+                {
+                    <option value="@puesto.NombrePuesto" data-categoria="@puesto.Categoria" data-sueldo="@puesto.SueldoBase" data-id-puesto="@puesto.IdPuesto" data-id-categoria="@puesto.IdCategoria">
+                        @puesto.NombrePuesto
+                    </option>
+                }
             }
         </select>
         <span asp-validation-for="Puesto" class="text-danger"></span>
@@ -42,7 +47,7 @@
     <!-- Fecha Alta -->
     <div class="form-group">
         <label asp-for="FechaAlta">Fecha Alta:</label>
-        <input asp-for="FechaAlta" class="form-control" type="date" />
+        <input asp-for="FechaAlta" class="form-control" type="date" id="fechaAltaInput" />
         <span asp-validation-for="FechaAlta" class="text-danger"></span>
     </div>
 
@@ -56,11 +61,11 @@
     <!-- Tipo de Contrato -->
     <div class="form-group">
         <label asp-for="TipoContrato">Tipo de Contrato:</label>
-        <input asp-for="TipoContrato" id="tipoContrato" class="form-control" readonly />
+        <input asp-for="TipoContrato" id="tipoContrato" class="form-control" readonly value="Indefinido" />
         <span asp-validation-for="TipoContrato" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    <button type="submit" class="btn btn-success">Guardar Contrato</button>
     <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = ViewBag.Empleado.IdEmpleado })" class="btn btn-secondary">Cancelar</a>
 </form>
 
@@ -86,9 +91,36 @@
             tipoContratoInput.value = fechaBajaInput.value ? "Definido" : "Indefinido";
         }
 
+        function configurarFechaBaja() {
+            const fechaAltaInput = document.getElementById("fechaAltaInput");
+            const fechaBajaInput = document.getElementById("fechaBajaInput");
+
+            // Cuando se selecciona una fecha de alta
+            fechaAltaInput.addEventListener("change", function () {
+                if (fechaAltaInput.value) {
+                    // Calcular la fecha mínima para la fecha de baja (un día después de la fecha de alta)
+                    const fechaAlta = new Date(fechaAltaInput.value);
+                    fechaAlta.setDate(fechaAlta.getDate() + 1); // Sumar un día
+                    const fechaMinima = fechaAlta.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+
+                    // Establecer la fecha mínima en el campo de fecha de baja
+                    fechaBajaInput.min = fechaMinima;
+
+                    // Si la fecha de baja ya tiene un valor y es menor que la fecha mínima, limpiarla
+                    if (fechaBajaInput.value && fechaBajaInput.value < fechaMinima) {
+                        fechaBajaInput.value = "";
+                    }
+                } else {
+                    // Si no hay fecha de alta, eliminar la restricción de fecha mínima
+                    fechaBajaInput.removeAttribute("min");
+                }
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            actualizarDatos();
-            actualizarTipoContrato();
+            actualizarDatos(); // Actualizar datos iniciales
+            actualizarTipoContrato(); // Actualizar tipo de contrato inicial
+            configurarFechaBaja(); // Configurar la validación de fechas
         });
 
         document.getElementById("puestoSelect").addEventListener("change", actualizarDatos);
