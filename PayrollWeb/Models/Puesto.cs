@@ -62,6 +62,78 @@ namespace PayrollWeb.Models
             return listaPuestos;
         }
 
+        //Método para obtener un puesto por su ID
+        public Puesto ObtenerPuesto(int idPuesto)
+        {
+            Puesto puesto = new Puesto();
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT * FROM Puesto WHERE id_puesto = @idPuesto";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@idPuesto", idPuesto);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                puesto.IdPuesto = Convert.ToInt32(reader["id_puesto"]);
+                                puesto.NombrePuesto = reader["nombre_puesto"].ToString();
+                                puesto.IdCategoria = Convert.ToInt32(reader["id_categoria"]);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el puesto: " + ex.Message, "Error");
+            }
+            return puesto;
+        }
+
+        public List<Object> MostrarPuestosConCategoria()
+        {
+            List<Object> listaPuestos = new List<Object>();
+
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT Puesto.id_puesto, Puesto.nombre_puesto, Categoria.nombre_categoria, Categoria.sueldo_base, Categoria.id_categoria FROM Puesto " +
+                        "JOIN Categoria ON Categoria.id_categoria = Puesto.id_categoria";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var puesto = new
+                                {
+                                    IdPuesto = Convert.ToInt32(reader["id_puesto"]),
+                                    NombrePuesto = reader["nombre_puesto"].ToString(),
+                                    IdCategoria = Convert.ToInt32(reader["id_categoria"]),
+                                    Categoria = reader["nombre_categoria"].ToString(),
+                                    SueldoBase = Convert.ToDecimal(reader["sueldo_base"])
+                                };
+                                listaPuestos.Add(puesto);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener los puestos: " + ex.Message, "Error");
+            }
+
+            return listaPuestos;
+        }
+
         //agregar
         public bool AgregarPuesto()
         {
@@ -160,5 +232,135 @@ namespace PayrollWeb.Models
                 return false;
             }
         }
+
+        public bool EliminarPuesto(int idPuesto)
+        {
+            bool exito = false;
+
+            // Consulta SQL para verificar si el puesto está referenciado en otras tablas (en este caso, la tabla Contrato)
+            string queryVerificar = @"
+    IF EXISTS (SELECT 1 FROM Contrato WHERE id_puesto = @idPuesto)
+    BEGIN
+        SELECT 1; -- Si tiene registros asociados en Contrato, no se puede eliminar
+    END
+    ELSE
+    BEGIN
+        SELECT 0; -- Si no tiene registros asociados, se puede eliminar
+    END";
+
+            using (SqlConnection connection = conexion.GetConnection())
+            {
+                try
+                {
+                    // Abrir la conexión
+                    connection.Open();
+
+                    // Verificar si el puesto está referenciado en la tabla Contrato
+                    using (SqlCommand commandVerificar = new SqlCommand(queryVerificar, connection))
+                    {
+                        commandVerificar.Parameters.AddWithValue("@idPuesto", idPuesto);
+                        var result = commandVerificar.ExecuteScalar();
+
+                        if (Convert.ToInt32(result) == 1)
+                        {
+                            return false; // El puesto no puede ser eliminado porque tiene registros asociados en Contrato
+                        }
+                    }
+
+                    // Consulta SQL para eliminar el puesto si no tiene registros asociados
+                    string queryEliminar = "DELETE FROM Puesto WHERE id_puesto = @idPuesto";
+
+                    // Eliminar el puesto si no tiene registros asociados
+                    using (SqlCommand commandEliminar = new SqlCommand(queryEliminar, connection))
+                    {
+                        commandEliminar.Parameters.AddWithValue("@idPuesto", idPuesto);
+                        int rowsAffected = commandEliminar.ExecuteNonQuery();
+
+                        // Si se afectaron filas, la eliminación fue exitosa
+                        if (rowsAffected > 0)
+                        {
+                            exito = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al eliminar el puesto: " + ex.Message);
+                }
+            }
+
+            return exito;
+        }
+
+
+        public bool ExistePuesto()
+        {
+            string query = "SELECT COUNT(*) FROM Puesto WHERE Puesto.Nombre_puesto = @NombrePuesto AND Puesto.id_categoria = @IdCategoria";
+
+            using (SqlConnection con = conexion.GetConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@NombrePuesto", NombrePuesto);
+                    cmd.Parameters.AddWithValue("@IdCategoria", IdCategoria);
+                    con.Open();
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
+                }
+            }
+        }
+
+        public List<PuestoViewModel> ObtenerPuestosViewModel()
+        {
+            List<PuestoViewModel> listaPuestosViewModel = new List<PuestoViewModel>();
+
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = @"
+                SELECT p.id_puesto, p.nombre_puesto, c.id_categoria, c.nombre_categoria, c.sueldo_base
+                FROM Puesto p
+                JOIN Categoria c ON p.id_categoria = c.id_categoria";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                PuestoViewModel puestoViewModel = new PuestoViewModel
+                                {
+                                    IdPuesto = Convert.ToInt32(reader["id_puesto"]),
+                                    NombrePuesto = reader["nombre_puesto"].ToString(),
+                                    IdCategoria = Convert.ToInt32(reader["id_categoria"]),
+                                    Categoria = reader["nombre_categoria"].ToString(),
+                                    SueldoBase = Convert.ToDecimal(reader["sueldo_base"])
+                                };
+                                listaPuestosViewModel.Add(puestoViewModel);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener los puestos: " + ex.Message, "Error");
+            }
+
+            return listaPuestosViewModel;
+        }
+
+
+    }
+
+    public class PuestoViewModel
+    {
+        public int IdPuesto { get; set; }
+        public int IdCategoria { get; set; }
+        public string NombrePuesto { get; set; }
+        public string Categoria { get; set; }
+        public decimal SueldoBase { get; set; }
     }
 }

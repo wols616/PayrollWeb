@@ -1,0 +1,56 @@
+﻿@model List<ContratoViewModel>
+
+@{
+    ViewData["Title"] = "Contratos del Empleado";
+}
+
+@if (ViewBag.Empleado != null)
+{
+    <h2>Contratos de @ViewBag.Empleado.Nombre</h2>
+}
+else
+{
+    <h2>Empleado no encontrado</h2>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Puesto</th>
+                <th>Categoría</th>
+                <th>Sueldo Base</th>
+                <th>Fecha Alta</th>
+                <th>Fecha Baja</th>
+                <th>Tipo Contrato</th>
+                <th>Vigente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contrato in Model)
+            {
+                <tr>
+                    <td>@contrato.Puesto</td>
+                    <td>@contrato.Categoria</td>
+                    <td>@contrato.SueldoBase</td>
+                    <td>@contrato.FechaAlta.ToString("dd/MM/yyyy")</td>
+                    <td>@(contrato.FechaBaja.HasValue ? contrato.FechaBaja.Value.ToString("dd/MM/yyyy") : "N/A")</td>
+                    <td>@contrato.TipoContrato</td>
+                    <td>@contrato.Vigente</td>
+                    <td>
+                        <a href="@Url.Action("VerEditarContrato", "Contrato", new { idContrato = contrato.IdContrato, idEmpleado = ViewBag.Empleado.IdEmpleado })" class="btn btn-primary"><i class="bi bi-pencil-square"></i></a>
+                        <a href="@Url.Action("CancelarContrato", "Contrato", new { idContrato = contrato.IdContrato })" class="btn btn-danger"><i class="bi bi-x-circle"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No hay contratos disponibles.</p>
+}
+
+<a href="@Url.Action("VerEmpleados", "Contrato")" class="btn btn-secondary">Volver</a>

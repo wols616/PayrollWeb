@@ -1,0 +1,39 @@
+﻿@model PayrollWeb.Models.Puesto
+
+@{
+    ViewData["Title"] = "Editar Puesto";
+}
+
+<h2>Editar Puesto</h2>
+
+<form action="/Puesto/ActualizarPuesto" method="post" id="formEditarPuesto">
+    <input type="hidden" name="IdPuesto" value="@Model.IdPuesto" for="IdPuesto" />
+
+    <div class="mb-3">
+        <label for="NombrePuesto" class="form-label">Nombre del Puesto:</label>
+        <input type="text" name="NombrePuesto" value="@Model.NombrePuesto" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="IdCategoria" class="form-label">Categoría:</label>
+        <select for="IdCategoria" name="IdCategoria" class="form-control" required>
+            <option value="">Seleccione una categoría</option>
+            @foreach (var categoria in ViewBag.Categorias)
+            {
+                <option value="@categoria.IdCategoria"
+                        selected="@(categoria.IdCategoria == Model.IdCategoria ? "selected" : null)">
+                    @categoria.NombreCategoria
+                </option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Actualizar</button>
+    <a href="@Url.Action("VerPuestos", "Puesto")" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

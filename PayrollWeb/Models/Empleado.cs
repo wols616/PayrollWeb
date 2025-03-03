@@ -470,12 +470,6 @@ namespace PayrollWeb.Models
             }
         }
 
-
-
-
-
-
-
         public bool EsCuentaUnica(string cuenta)
         {
             string query = "SELECT COUNT(*) FROM Empleado WHERE cuenta_corriente = @cuenta";

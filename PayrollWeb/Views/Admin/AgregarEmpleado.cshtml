@@ -5,6 +5,8 @@
 <h2>Agregar Empleado</h2>
 
 <form action="/Empleado/CrearEmpleado" method="post" id="formAgregarEmpleado">
+    
+    <input type="hidden" name="Estado" value="Activo"/>
     <div>
         <label for="Dui">DUI:</label>
         <input type="text" id="Dui" name="Dui" required />
@@ -59,7 +61,7 @@
         }
     </div>
 
-    <div>
+@*     <div>
         <label for="Estado">Estado:</label>
         <select id="Estado" name="Estado">
             <option value="Activo">Activo</option>
@@ -69,7 +71,7 @@
         {
             <span style="color:red;">@ViewData.ModelState["Estado"]?.Errors[0]?.ErrorMessage</span>
         }
-    </div>
+    </div> *@
 
     <div>
         <label for="Correo">Correo:</label>

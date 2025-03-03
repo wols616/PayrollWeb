@@ -161,6 +161,105 @@ namespace PayrollWeb.Models
             return listaContratos;
         }
 
+        public List<ContratoViewModel> ObtenerContratosYPuestos(int idEmpleado)
+        {
+            List<ContratoViewModel> listaContratos = new List<ContratoViewModel>();
+
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = @"
+                SELECT c.id_contrato, p.id_puesto, cat.id_categoria, c.fecha_alta, c.fecha_baja, c.tipo_contrato, c.vigente, 
+                       p.nombre_puesto, cat.nombre_categoria, cat.sueldo_base
+                FROM Contrato c
+                JOIN Puesto p ON c.id_puesto = p.id_puesto
+                JOIN Categoria cat ON p.id_categoria = cat.id_categoria
+                WHERE c.id_empleado = @id_empleado";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var contrato = new ContratoViewModel
+                                {
+                                    IdContrato = Convert.ToInt32(reader["id_contrato"]),
+                                    IdPuesto = Convert.ToInt32(reader["id_puesto"]),
+                                    IdCategoria = Convert.ToInt32(reader["id_categoria"]),
+                                    Puesto = reader["nombre_puesto"].ToString(),
+                                    Categoria = reader["nombre_categoria"].ToString(),
+                                    SueldoBase = Convert.ToDecimal(reader["sueldo_base"]),
+                                    FechaAlta = Convert.ToDateTime(reader["fecha_alta"]),
+                                    FechaBaja = reader["fecha_baja"] as DateTime?,
+                                    TipoContrato = reader["tipo_contrato"].ToString(),
+                                    Vigente = reader["vigente"].ToString()
+                                };
+                                listaContratos.Add(contrato);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener los contratos: " + ex.Message);
+            }
+
+            return listaContratos;
+        }
+
+        public ContratoViewModel ObtenerContratoYPuesto(int idContrato)
+        {
+            ContratoViewModel contrato = null;
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = @"
+                SELECT c.id_contrato, p.id_puesto, cat.id_categoria, c.fecha_alta, c.fecha_baja, c.tipo_contrato, c.vigente, 
+                       p.nombre_puesto, cat.nombre_categoria, cat.sueldo_base
+                FROM Contrato c
+                JOIN Puesto p ON c.id_puesto = p.id_puesto
+                JOIN Categoria cat ON p.id_categoria = cat.id_categoria
+                WHERE c.id_contrato = @id_contrato";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = idContrato;
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                contrato = new ContratoViewModel
+                                {
+                                    IdContrato = Convert.ToInt32(reader["id_contrato"]),
+                                    IdPuesto = Convert.ToInt32(reader["id_puesto"]),
+                                    IdCategoria = Convert.ToInt32(reader["id_categoria"]),
+                                    Puesto = reader["nombre_puesto"].ToString(),
+                                    Categoria = reader["nombre_categoria"].ToString(),
+                                    SueldoBase = Convert.ToDecimal(reader["sueldo_base"]),
+                                    FechaAlta = Convert.ToDateTime(reader["fecha_alta"]),
+                                    FechaBaja = reader["fecha_baja"] as DateTime?,
+                                    TipoContrato = reader["tipo_contrato"].ToString(),
+                                    Vigente = reader["vigente"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el contrato: " + ex.Message);
+            }
+            return contrato;
+        }
+
         // MÉTODO PARA ACTUALIZAR CONTRATO
         public void ActualizarContrato()
         {
@@ -169,7 +268,7 @@ namespace PayrollWeb.Models
                 using (SqlConnection con = conexion.GetConnection())
                 {
                     string query = "UPDATE Contrato SET id_empleado = @id_empleado, fecha_alta = @fecha_alta, fecha_baja = @fecha_baja, " +
-                                   "id_puesto = @id_puesto, tipo_contrato = @tipo_contrato, vigente = @vigente WHERE id_contrato = @id_contrato";
+                                   "id_puesto = @id_puesto, tipo_contrato = @tipo_contrato WHERE id_contrato = @id_contrato";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
@@ -179,7 +278,6 @@ namespace PayrollWeb.Models
                         cmd.Parameters.Add("@fecha_baja", SqlDbType.DateTime).Value = (object)FechaBaja ?? DBNull.Value; // Manejar nulos
                         cmd.Parameters.Add("@id_puesto", SqlDbType.Int).Value = IdPuesto;
                         cmd.Parameters.Add("@tipo_contrato", SqlDbType.VarChar).Value = TipoContrato;
-                        cmd.Parameters.Add("@vigente", SqlDbType.VarChar).Value = Vigente;
 
                         con.Open();
                         int filasAfectadas = cmd.ExecuteNonQuery();
@@ -329,5 +427,19 @@ namespace PayrollWeb.Models
                 return false;
             }
         }
+    }
+    public class ContratoViewModel
+    {
+        public int IdContrato { get; set; }
+        public int IdPuesto { get; set; }
+        public int IdCategoria { get; set; }
+        public int IdEmpleado { get; set; }
+        public string Puesto { get; set; }
+        public string Categoria { get; set; }
+        public decimal SueldoBase { get; set; }
+        public DateTime FechaAlta { get; set; }
+        public DateTime? FechaBaja { get; set; }
+        public string TipoContrato { get; set; }
+        public string Vigente { get; set; }
     }
 }
