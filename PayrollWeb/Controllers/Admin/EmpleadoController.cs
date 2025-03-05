@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PayrollWeb.Controllers.Admin
 {
@@ -13,19 +14,23 @@ namespace PayrollWeb.Controllers.Admin
         Empleado _empleado = new Empleado();
         MetodosUtiles metodosUtiles = new MetodosUtiles();
 
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
         //CONTROLADORES PARA ABRIR LAS VISTAS
-        public IActionResult VerEmpleados()
+
+        [Authorize]
+        public IActionResult VerEmpleados(bool showActions = true)
         {
             List<Empleado> empleados = _empleado.MostrarEmpleados();
-
+            ViewBag.ShowActions = showActions;
             return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
+        [Authorize]
         public IActionResult VerEmpleado(int id)
         {
             Empleado empleado = _empleado.ObtenerEmpleado(id);
@@ -34,11 +39,13 @@ namespace PayrollWeb.Controllers.Admin
         }
 
         //Método para mostrar la vista de agregar empleado
+        [Authorize]
         public IActionResult VerAgregarEmpleado()
         {
             return View("/Views/Admin/AgregarEmpleado.cshtml");
         }
 
+        [Authorize]
         public IActionResult VerEditarEmpleado(int id)
         {
             Empleado empleado = _empleado.ObtenerEmpleado(id);
@@ -50,6 +57,8 @@ namespace PayrollWeb.Controllers.Admin
         [HttpPost]
         public IActionResult CrearEmpleado(Empleado empleado)
         {
+            //empleado.Estado = "Activo";
+
             if (!_empleado.EsDUIUnico(empleado.Dui))
             {
                 ModelState.AddModelError("Dui", "El DUI ya está registrado");
@@ -68,7 +77,6 @@ namespace PayrollWeb.Controllers.Admin
                 // Regresar a la vista "VerAgregarEmpleado" y pasar el modelo actual con los errores
                 return View("/Views/Admin/AgregarEmpleado.cshtml", empleado);
             }
-
             empleado.AgregarEmpleado();
             return RedirectToAction("VerEmpleados");
         }
@@ -76,19 +84,55 @@ namespace PayrollWeb.Controllers.Admin
         [HttpPost]
         public IActionResult ActualizarEmpleado(Empleado empleado)
         {
-            if (ModelState.IsValid)
+            Empleado existingEmpleado = _empleado.ObtenerEmpleado(empleado.IdEmpleado);
+
+            if (existingEmpleado == null)
             {
-                _empleado.EditarEmpleado(empleado); // Pasa el objeto empleado
-                return RedirectToAction("VerEmpleados");
+                ModelState.AddModelError(string.Empty, "Empleado no encontrado");
+                return View("EditarEmpleado", empleado); // Retorna la vista con errores
             }
-            return View(empleado); // Si hay errores en el modelo, vuelve a la vista
+
+            // Validar DUI si cambió
+            if (empleado.Dui != existingEmpleado.Dui && !_empleado.EsDUIUnico(empleado.Dui))
+            {
+                ModelState.AddModelError("Dui", "El DUI ya está registrado");
+            }
+
+            // Validar Correo si cambió
+            if (empleado.Correo != existingEmpleado.Correo && !_empleado.EsCorreoUnico(empleado.Correo))
+            {
+                ModelState.AddModelError("Correo", "El correo ya está registrado");
+            }
+
+            // Validar Cuenta Corriente si cambió
+            if (empleado.CuentaCorriente != existingEmpleado.CuentaCorriente && !_empleado.EsCuentaUnica(empleado.CuentaCorriente))
+            {
+                ModelState.AddModelError("CuentaCorriente", "La cuenta corriente ya está registrada");
+            }
+
+            // Si hay errores, regresa a la vista con el modelo y los errores
+            if (!ModelState.IsValid)
+            {
+                return View("/Views/Admin/EditarEmpleado.cshtml", empleado);
+            }
+
+            _empleado.EditarEmpleado(empleado);
+            return RedirectToAction("VerEmpleados");
         }
+
+
 
         public IActionResult EliminarEmpleado(int id)
         {
-            _empleado.EliminarEmpleado(id);
+            bool resultado = _empleado.EliminarEmpleado(id);
+            if (!resultado)
+            {
+                TempData["ErrorEliminar"] = "No se puede eliminar el empleado porque tiene contratos asociados.";
+            }
             return RedirectToAction("VerEmpleados");
         }
+
+
 
         public IActionResult GenerarContrasena()
         {

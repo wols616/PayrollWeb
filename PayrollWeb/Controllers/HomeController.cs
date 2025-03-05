@@ -7,7 +7,8 @@ namespace PayrollWeb.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-
+    Administrador _administrador = new Administrador();
+    Empleado _empleado = new Empleado();
     public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
@@ -15,7 +16,28 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return View();
+
+        if (User.IsInRole("Admin"))
+        {
+            var AdminIdClaim = User.Claims.FirstOrDefault(c => c.Type == "IdAdministrador");
+            if (AdminIdClaim != null)
+            {
+                int adminId = Int32.Parse(AdminIdClaim.Value);
+                ViewBag.Admin = _administrador.ObtenerAdministrador(adminId);
+
+            }
+        }
+        else if (User.IsInRole("Empleado"))
+        {
+            var EmpleadoIdClaim = User.Claims.FirstOrDefault(c => c.Type == "IdEmpleado");
+            if (EmpleadoIdClaim != null)
+            {
+                int EmpleadoId = Int32.Parse(EmpleadoIdClaim.Value);
+                ViewBag.Empleado = _administrador.ObtenerAdministrador(EmpleadoId);
+            }
+        }
+
+        return View();   
     }
 
     public IActionResult Privacy()

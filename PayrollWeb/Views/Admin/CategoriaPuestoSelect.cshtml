@@ -1,0 +1,32 @@
+﻿
+
+@{
+    ViewData["Title"] = "Seleccionar Categoría o Puesto";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <a href="@Url.Action("VerCategorias", "Categoria")" class="btn btn-primary btn-block">Categorias</a>
+        </div>
+        <div class="col-md-6">
+            <a href="@Url.Action("VerPuestos", "Puesto")" class="btn btn-primary btn-block">Puestos</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        text-align: center;
+    }
+    .btn-block {
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+    }
+    .mt-5 {
+        margin-top: 3rem;
+    }
+</style>

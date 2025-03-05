@@ -6,13 +6,13 @@
 
 <h2>Editar Empleado</h2>
 
-<form action="/Empleado/ActualizarEmpleado" method="post" id="formEditarEmpleado">
+<form asp-controller="Empleado" asp-action="ActualizarEmpleado" method="post" id="formEditarEmpleado">
     
     <input type="hidden" name="IdEmpleado" value="@Model.IdEmpleado" />
-    <input type="hidden" name="Estado" value="@Model.Estado" />
+@*     <input type="hidden" name="Estado" value="@Model.Estado" /> *@
 
     @* Mostrar los errores globales si existen *@
-    @if (!ViewData.ModelState.IsValid)
+@*     @if (!ViewData.ModelState.IsValid)
     {
         <div style="color:red;">
             <ul>
@@ -22,7 +22,7 @@
                 }
             </ul>
         </div>
-    }
+    } *@
 
     <div>
         <label for="Dui">DUI:</label>
@@ -78,13 +78,13 @@
         }
     </div>
 
-@*     <div>
+    <div>
         <label for="Estado" type="hidden">Estado:</label>
         <select id="Estado" type="hidden" name="Estado" asp-for="Estado">
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
         </select>
-    </div> *@
+    </div>
 
 
     <div>

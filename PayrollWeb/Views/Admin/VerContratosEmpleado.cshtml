@@ -1,0 +1,68 @@
+﻿@model List<ContratoViewModel>
+
+@{
+    ViewData["Title"] = "Contratos del Empleado";
+}
+
+@if (ViewBag.Empleado != null)
+{
+    <h2>Contratos de @ViewBag.Empleado.Nombre</h2>
+}
+else
+{
+    <h2>Empleado no encontrado</h2>
+}
+
+<a href="@Url.Action("VerAgregarContrato", "Contrato", new {idEmpleado = ViewBag.Empleado.IdEmpleado})" class="btn btn-primary">Agregar Nuevo Contrato</a>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Puesto</th>
+                <th>Categoría</th>
+                <th>Sueldo Base</th>
+                <th>Fecha Alta</th>
+                <th>Fecha Baja</th>
+                <th>Tipo Contrato</th>
+                <th>Vigente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contrato in Model)
+            {
+                <tr>
+                    <td>@contrato.IdContrato</td>
+                    <td>@contrato.Puesto</td>
+                    <td>@contrato.Categoria</td>
+                    <td>@contrato.SueldoBase</td>
+                    <td>@contrato.FechaAlta.ToString("dd/MM/yyyy")</td>
+                    <td>@(contrato.FechaBaja.HasValue ? contrato.FechaBaja.Value.ToString("dd/MM/yyyy") : "N/A")</td>
+                    <td>@contrato.TipoContrato</td>
+                    <td>@contrato.Vigente</td>
+                    <td>
+                        @if (contrato.Vigente == "N")
+                        {
+                            <button class="btn btn-secondary" disabled><i class="bi bi-x-circle"></i></button>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("CancelarContrato", "Contrato", new { idContrato = contrato.IdContrato })" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar este contrato?');"><i class="bi bi-x-circle"></i></a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No hay contratos disponibles.</p>
+}
+
+<a href="@Url.Action("VerEmpleados", "Contrato")" class="btn btn-secondary">Volver</a>
+
+

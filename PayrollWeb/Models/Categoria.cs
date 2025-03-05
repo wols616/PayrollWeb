@@ -21,19 +21,18 @@ namespace PayrollWeb.Models
             this.NombreCategoria = nombreCategoria;
             this.SueldoBase = sueldobase;
         }
+        Conexion conexion = new Conexion();
 
         public Categoria() { }
 
         //METODOS CRUD CATEGORIA
         //SELECT CATEGORIA
-        public static List<Categoria> ObtenerCategorias()
+        public List<Categoria> ObtenerCategorias()
         {
             List<Categoria> categoriaList = new List<Categoria>();
 
             // Consulta SQL para obtener todas las deducciones
             string query = "SELECT * FROM Categoria";
-
-            Conexion conexion = new Conexion();
 
             using (SqlConnection connection = conexion.GetConnection())
             {
@@ -82,7 +81,6 @@ namespace PayrollWeb.Models
             // Consulta SQL para insertar una nueva deducción
             string query = "INSERT INTO Categoria (nombre_categoria, sueldo_base) VALUES (@NombreCategoria, @SueldoBase)";
 
-            Conexion conexion = new Conexion();
             using (SqlConnection connection = conexion.GetConnection())
             {
                 try
@@ -119,7 +117,6 @@ namespace PayrollWeb.Models
         public Categoria ObtenerCategoria(int idCategoria)
         {
             Categoria categoria = null;
-            Conexion conexion = new Conexion();
 
             try
             {
@@ -152,6 +149,66 @@ namespace PayrollWeb.Models
             return categoria;
         }
 
+        // ELIMINAR CATEGORIA
+        public bool EliminarCategoria(int idCategoria)
+        {
+            bool exito = false;
+
+            // Consulta SQL para verificar si la categoría está referenciada en otras tablas
+            string queryVerificar = @"
+            IF EXISTS (SELECT 1 FROM Puesto WHERE id_categoria = @idCategoria)
+            BEGIN
+                SELECT 1; -- Si tiene registros asociados, no eliminar
+            END
+            ELSE
+            BEGIN
+                SELECT 0; -- Si no tiene registros asociados, se puede eliminar
+            END";
+
+            using (SqlConnection connection = conexion.GetConnection())
+            {
+                try
+                {
+                    // Abrir la conexión
+                    connection.Open();
+
+                    // Verificar si la categoría está referenciada en otras tablas
+                    using (SqlCommand commandVerificar = new SqlCommand(queryVerificar, connection))
+                    {
+                        commandVerificar.Parameters.AddWithValue("@idCategoria", idCategoria);
+                        var result = commandVerificar.ExecuteScalar();
+
+                        if (Convert.ToInt32(result) == 1)
+                        {
+                            return false; // La categoría no puede ser eliminada porque tiene registros asociados
+                        }
+                    }
+
+                    // Consulta SQL para eliminar la categoría
+                    string queryEliminar = "DELETE FROM Categoria WHERE id_categoria = @idCategoria";
+
+                    // Eliminar la categoría si no tiene registros asociados
+                    using (SqlCommand commandEliminar = new SqlCommand(queryEliminar, connection))
+                    {
+                        commandEliminar.Parameters.AddWithValue("@idCategoria", idCategoria);
+                        int rowsAffected = commandEliminar.ExecuteNonQuery();
+
+                        // Si se afectaron filas, la eliminación fue exitosa
+                        if (rowsAffected > 0)
+                        {
+                            exito = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al eliminar la categoria: " + ex.Message);
+                }
+            }
+
+            return exito;
+        }
+
         // ACTUALIZAR CATEGORIA
         public bool ActualizarCategoria()
         {
@@ -160,7 +217,6 @@ namespace PayrollWeb.Models
             // Consulta SQL para actualizar una deducción
             string query = "UPDATE Categoria SET nombre_categoria = @NuevoNombre, sueldo_base = @NuevoSueldo WHERE id_categoria = @IdCategoria";
 
-            Conexion conexion = new Conexion();
             using (SqlConnection connection = conexion.GetConnection())
             {
                 try
@@ -197,15 +253,15 @@ namespace PayrollWeb.Models
         //extras
         public bool ExisteCategoria()
         {
-            string query = "SELECT COUNT(*) FROM Categoria WHERE nombre_categoria = @NombreCategoria AND sueldo_base = @SueldoBase";
+            string query = "SELECT COUNT(*) FROM Categoria WHERE nombre_categoria = @NombreCategoria";
 
-            using (SqlConnection conexion = new SqlConnection(""))
+            using (SqlConnection con = conexion.GetConnection())
             {
-                using (SqlCommand cmd = new SqlCommand(query, conexion))
+                using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@NombreCategoria", NombreCategoria);
                     cmd.Parameters.AddWithValue("@SueldoBase", SueldoBase);
-                    conexion.Open();
+                    con.Open();
                     int count = (int)cmd.ExecuteScalar();
                     return count > 0;
                 }

@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Utils\" />
-    <Folder Include="Views\Emp\" />
+    <Folder Include="Views\Compartidas\" />
   </ItemGroup>
 
 </Project>

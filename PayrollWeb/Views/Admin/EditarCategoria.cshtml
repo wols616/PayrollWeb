@@ -1,0 +1,32 @@
+﻿@model Categoria
+
+@{
+    ViewData["Title"] = "Editar Categoría";
+}
+
+<h2>Editar Categoría</h2>
+
+<form action="/Categoria/ActualizarCategoria" method="post">
+    <input type="hidden" asp-for="IdCategoria" />
+
+    <div class="mb-3">
+        <label for="NombreCategoria" class="form-label">Nombre de la Categoría:</label>
+        <input type="text" name="NombreCategoria" value="@Model.NombreCategoria" class="form-control" required />
+        <span asp-validation-for="NombreCategoria" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="SueldoBase" class="form-label">Sueldo Base:</label>
+        <input type="number" asp-for="SueldoBase" class="form-control" step="0.01" required />
+        <span asp-validation-for="SueldoBase" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Actualizar</button>
+    <a href="@Url.Action("VerCategorias", "Categoria")" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

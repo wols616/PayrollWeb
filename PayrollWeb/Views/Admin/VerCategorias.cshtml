@@ -1,0 +1,37 @@
+﻿@model List<Categoria>
+
+<h2>Lista de Categorías</h2>
+<a href="@Url.Action("VerAgregarCategoria", "Categoria")" class="btn btn-primary">Agregar Nueva Categoría</a>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Sueldo Base</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var categoria in Model)
+        {
+            <tr>
+                <td>@categoria.IdCategoria</td>
+                <td>@categoria.NombreCategoria</td>
+                <td>@categoria.SueldoBase.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                <td>
+                    <a href="@Url.Action("VerEditarCategoria", "Categoria", new { id = categoria.IdCategoria })" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="@Url.Action("EliminarCategoria", "Categoria", new { id = categoria.IdCategoria })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta categoría?');">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

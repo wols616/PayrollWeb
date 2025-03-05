@@ -3,6 +3,19 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    @if (User.IsInRole("Admin"))
+    {
+        <h1 class="display-4">Welcome @ViewBag.Admin.Nombre @ViewBag.Admin.Apellidos</h1>
+    }
+    else if (User.IsInRole("Empleado"))
+    {
+        <h1 class="display-4">Welcome @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos</h1>
+    }
+    else
+    {
+        <h1 class="display-4">Welcome</h1>
+    }
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+
