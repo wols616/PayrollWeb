@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PayrollWeb.Models;
 
 namespace PayrollWeb.Controllers.Admin
@@ -9,10 +10,14 @@ namespace PayrollWeb.Controllers.Admin
         Contrato _contrato = new Contrato();
         Puesto _puesto = new Puesto();
         Categoria _categoria = new Categoria();
+
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
+
+        [Authorize]
         public IActionResult VerContratosEmpleado(int idEmpleado)
         {
             if (idEmpleado <= 0)
@@ -38,6 +43,7 @@ namespace PayrollWeb.Controllers.Admin
             return View("/Views/Admin/VerContratosEmpleado.cshtml", contratos);
         }
 
+        [Authorize]
         public IActionResult VerAgregarContrato(int idEmpleado)
         {
             List<ContratoViewModel> contratos = _contrato.ObtenerContratosYPuestos(idEmpleado);
@@ -48,7 +54,7 @@ namespace PayrollWeb.Controllers.Admin
             return View("/Views/Admin/AgregarContrato.cshtml");
         }
 
-
+        [Authorize]
         public IActionResult VerEmpleados(bool showActions = false)
         {
             List<Empleado> empleados = _empleado.MostrarEmpleados();

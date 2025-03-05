@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PayrollWeb.Models;
 using System.Diagnostics;
 
@@ -8,23 +9,28 @@ namespace PayrollWeb.Controllers.Admin
     {
         Puesto _puesto = new Puesto();
         Categoria _categoria = new Categoria();
+        
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
         //CONTROLADORES PARA ABRIR LAS VISTAS
+        [Authorize]
         public IActionResult VerPuestos()
         {
             return View("/Views/Admin/VerPuestos.cshtml", _puesto.MostrarPuestosConCategoria());
         }
 
+        [Authorize]
         public IActionResult VerAgregarPuesto()
         {
             ViewBag.Categorias = _categoria.ObtenerCategorias();
             return View("/Views/Admin/AgregarPuesto.cshtml");
         }
 
+        [Authorize]
         public IActionResult VerEditarPuesto(int id)
         {
             Puesto puesto = _puesto.ObtenerPuesto(id);
