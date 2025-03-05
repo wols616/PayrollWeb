@@ -1,0 +1,63 @@
+﻿@model Empleado
+
+@{
+    ViewData["Title"] = "Perfil del Empleado";
+}
+
+<div class="container">
+    <h2>Perfil del Empleado</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ID Empleado</strong></td>
+                        <td>@Model.IdEmpleado</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DUI</strong></td>
+                        <td>@Model.Dui</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nombre</strong></td>
+                        <td>@Model.Nombre</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Apellidos</strong></td>
+                        <td>@Model.Apellidos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Teléfono</strong></td>
+                        <td>@Model.Telefono</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dirección</strong></td>
+                        <td>@Model.Direccion</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cuenta Corriente</strong></td>
+                        <td>@Model.CuentaCorriente</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Estado</strong></td>
+                        <td>@Model.Estado</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Correo</strong></td>
+                        <td>@Model.Correo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Contraseña</strong></td>
+                        <td>@Model.Contrasena</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

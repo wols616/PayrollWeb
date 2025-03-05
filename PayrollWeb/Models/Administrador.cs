@@ -52,5 +52,41 @@ namespace PayrollWeb.Models
 
             return idAdministrador;
         }
+
+        //Método para obtener un administrador por su id
+        public Administrador ObtenerAdministrador(int id)
+        {
+            Administrador administrador = new Administrador();
+            using (SqlConnection con = conexion.GetConnection())
+            {
+                try
+                {
+                    con.Open();
+                    string query = "SELECT * FROM Administrador WHERE id_administrador = @id";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                administrador.IdAdministrador = Convert.ToInt32(dr["id_administrador"]);
+                                administrador.Dui = dr["dui"].ToString();
+                                administrador.Nombre = dr["nombre"].ToString();
+                                administrador.Apellidos = dr["apellidos"].ToString();
+                                administrador.Telefono = dr["telefono"].ToString();
+                                administrador.Correo = dr["correo"].ToString();
+                                administrador.Contrasena = dr["contrasena"].ToString();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al obtener el administrador: " + ex.Message, "Error");
+                }
+            }
+            return administrador;
+        }
     }
 }

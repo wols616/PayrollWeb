@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PayrollWeb.Models;
 
 namespace PayrollWeb.Controllers.Admin
@@ -12,21 +13,25 @@ namespace PayrollWeb.Controllers.Admin
         }
 
         //CONTROLADORES PARA ABRIR LAS VISTAS
+        [Authorize]
         public IActionResult VerCategoriaPuestoSelect()
         {
             return View("/Views/Admin/CategoriaPuestoSelect.cshtml");
         }
 
+        [Authorize]
         public IActionResult VerCategorias()
         {
             return View("/Views/Admin/VerCategorias.cshtml", _categoria.ObtenerCategorias());
         }
 
+        [Authorize]
         public IActionResult VerAgregarCategoria()
         {
             return View("/Views/Admin/AgregarCategoria.cshtml");
         }
 
+        [Authorize]
         public IActionResult VerEditarCategoria(int id)
         {
             return View("/Views/Admin/EditarCategoria.cshtml", _categoria.ObtenerCategoria(id));

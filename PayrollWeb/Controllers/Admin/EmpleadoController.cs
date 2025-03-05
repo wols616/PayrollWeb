@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PayrollWeb.Controllers.Admin
 {
@@ -13,12 +14,15 @@ namespace PayrollWeb.Controllers.Admin
         Empleado _empleado = new Empleado();
         MetodosUtiles metodosUtiles = new MetodosUtiles();
 
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
         //CONTROLADORES PARA ABRIR LAS VISTAS
+
+        [Authorize]
         public IActionResult VerEmpleados(bool showActions = true)
         {
             List<Empleado> empleados = _empleado.MostrarEmpleados();
@@ -26,6 +30,7 @@ namespace PayrollWeb.Controllers.Admin
             return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
+        [Authorize]
         public IActionResult VerEmpleado(int id)
         {
             Empleado empleado = _empleado.ObtenerEmpleado(id);
@@ -34,11 +39,13 @@ namespace PayrollWeb.Controllers.Admin
         }
 
         //Método para mostrar la vista de agregar empleado
+        [Authorize]
         public IActionResult VerAgregarEmpleado()
         {
             return View("/Views/Admin/AgregarEmpleado.cshtml");
         }
 
+        [Authorize]
         public IActionResult VerEditarEmpleado(int id)
         {
             Empleado empleado = _empleado.ObtenerEmpleado(id);

@@ -1,5 +1,26 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewBag.Title = "Iniciar Sesión";
 }
+
+<h2>Iniciar Sesión</h2>
+
+@if (ViewBag.Error != null)
+{
+    <div style="color: red;">@ViewBag.Error</div>
+}
+
+<form method="post" action="/Account/Login">
+    <label>Correo:</label>
+    <input type="text" name="Correo" required />
+
+    <label>Contraseña:</label>
+    <input type="password" name="Contrasena" required />
+
+    <label>Tipo de Usuario:</label>
+    <select name="Tipo" required>
+        <option value="Empleado">Empleado</option>
+        <option value="Admin">Admin</option>
+    </select>
+
+    <button type="submit">Ingresar</button>
+</form>
