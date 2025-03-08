@@ -393,21 +393,30 @@ namespace PayrollWeb.Models
             }
         }
 
-        public void ActualizarDatosSensibles(int idEmpleado, string contrasena, string correo, string cuentaCorriente)
+        public void ActualizarDatosSensibles(int idEmpleado, string correo, string cuentaCorriente, string nuevaContrasena)
         {
             try
             {
                 using (SqlConnection con = conexion.GetConnection())
                 {
-                    string query = "UPDATE Empleado SET contrasena = @contrasena, correo = @correo, cuenta_corriente = @cuentaCorriente " +
-                                   "WHERE id_empleado = @idEmpleado";
+                    // Construir la consulta dinámicamente según si se proporciona una nueva contraseña
+                    string query = "UPDATE Empleado SET correo = @correo, cuenta_corriente = @cuentaCorriente";
+                    if (!string.IsNullOrEmpty(nuevaContrasena))
+                    {
+                        query += ", contrasena = @contrasena";
+                    }
+                    query += " WHERE id_empleado = @idEmpleado";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.Add("@idEmpleado", SqlDbType.Int).Value = idEmpleado;
-                        cmd.Parameters.Add("@contrasena", SqlDbType.VarChar).Value = contrasena;
                         cmd.Parameters.Add("@correo", SqlDbType.VarChar).Value = correo;
                         cmd.Parameters.Add("@cuentaCorriente", SqlDbType.VarChar).Value = cuentaCorriente;
+
+                        if (!string.IsNullOrEmpty(nuevaContrasena))
+                        {
+                            cmd.Parameters.Add("@contrasena", SqlDbType.VarChar).Value = nuevaContrasena;
+                        }
 
                         con.Open();
                         int filasAfectadas = cmd.ExecuteNonQuery();
@@ -428,6 +437,33 @@ namespace PayrollWeb.Models
                 Console.WriteLine("Error al actualizar los datos de cuenta: " + ex.Message, "Error");
             }
         }
+
+        public bool ValidarPassword(int idEmpleado, string passwordActual)
+        {
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT contrasena FROM Empleado WHERE id_empleado = @idEmpleado";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@idEmpleado", SqlDbType.Int).Value = idEmpleado;
+
+                        con.Open();
+                        string contrasenaAlmacenada = cmd.ExecuteScalar()?.ToString();
+
+                        // Comparar la contraseña proporcionada con la almacenada
+                        return contrasenaAlmacenada == passwordActual;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al validar la contraseña: " + ex.Message, "Error");
+                return false;
+            }
+        }
+
 
         public bool EsDUIUnico(string dui)
         {
