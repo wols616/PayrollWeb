@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Utils\" />
     <Folder Include="Views\Compartidas\" />
   </ItemGroup>
 

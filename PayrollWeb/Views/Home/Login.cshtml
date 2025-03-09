@@ -11,16 +11,44 @@
 
 <form method="post" action="/Account/Login">
     <label>Correo:</label>
-    <input type="text" name="Correo" required />
+    <input type="email" name="Correo" class="form-control" required />
 
     <label>Contraseña:</label>
-    <input type="password" name="Contrasena" required />
+    <div class="input-group">
+        <input type="password" name="Contrasena" id="password" class="form-control" required />
+        <div class="input-group-append">
+            <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
+                <i id="toggleIcon" class="bi bi-eye"></i>
+            </button>
+        </div>
+    </div>
 
     <label>Tipo de Usuario:</label>
-    <select name="Tipo" required>
+    <select name="Tipo" class="form-control" required>
         <option value="Empleado">Empleado</option>
         <option value="Admin">Admin</option>
     </select>
 
-    <button type="submit">Ingresar</button>
+    <button type="submit" class="btn btn-primary mt-2">Ingresar</button>
 </form>
+
+<script>
+    function togglePassword() {
+        var passwordInput = document.getElementById("password");
+        var toggleIcon = document.getElementById("toggleIcon");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleIcon.classList.remove("bi-eye");
+            toggleIcon.classList.add("bi-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            toggleIcon.classList.remove("bi-eye-slash");
+            toggleIcon.classList.add("bi-eye");
+        }
+    }
+</script>
+
+<!-- Asegúrate de tener Bootstrap y Bootstrap Icons en tu proyecto -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">

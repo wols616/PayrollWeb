@@ -8,8 +8,15 @@
 
 @if (TempData["ErrorEliminar"] != null)
 {
-    <div id="errorEliminar" class="alert alert-danger">
+    <div id="errorEliminar" class="alert alert-danger alert-delete-later">
         @TempData["ErrorEliminar"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div id="errorEliminar" class="alert alert-success alert-delete-later">
+        @TempData["Success"]
     </div>
 }
 
@@ -69,9 +76,10 @@
 
 <script>
     setTimeout(function() {
-        var errorDiv = document.getElementById('errorEliminar');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-    }, 5000); // 5000 ms = 5 segundos
+        // Seleccionamos todos los elementos con la clase 'alert-delete-later'
+        var alertElements = document.querySelectorAll('.alert-delete-later');
+        alertElements.forEach(function(alert) {
+            alert.remove();  // Eliminamos cada mensaje de la lista
+        });
+    }, 3000); // 3000 ms = 3 segundos
 </script>

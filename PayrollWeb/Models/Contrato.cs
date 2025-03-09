@@ -38,7 +38,7 @@ namespace PayrollWeb.Models
         }
 
         // MÉTODO PARA AGREGAR CONTRATO
-        public void AgregarContrato()
+        public bool AgregarContrato()
         {
             try
             {
@@ -62,10 +62,12 @@ namespace PayrollWeb.Models
                         if (filasAfectadas > 0)
                         {
                             System.Diagnostics.Debug.WriteLine("Contrato agregado correctamente", "Éxito");
+                            return true;
                         }
                         else
                         {
                             System.Diagnostics.Debug.WriteLine("No se pudo agregar el contrato", "Error");
+                            return false;
                         }
                     }
                 }
@@ -73,6 +75,7 @@ namespace PayrollWeb.Models
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error al agregar el contrato: " + ex.Message);
+                return false;
             }
 
         }
