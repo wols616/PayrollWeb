@@ -75,7 +75,11 @@ namespace PayrollWeb.Controllers.Admin
                 TipoContrato = _contrato.TipoContrato,
                 Vigente = _contrato.Vigente,
             };
-            contrato.AgregarContrato();
+
+            if (contrato.AgregarContrato())
+            {
+                TempData["Success"] = "Contrato creado correctamente.";
+            }
 
             return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
         }

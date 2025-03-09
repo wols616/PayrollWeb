@@ -12,7 +12,7 @@ namespace PayrollWeb.Controllers.Admin
     public class EmpleadoController : Controller
     {
         Empleado _empleado = new Empleado();
-        MetodosUtiles metodosUtiles = new MetodosUtiles();
+        Metodos _metodos = new Metodos();
 
         [Authorize]
         public IActionResult Index()
@@ -42,13 +42,15 @@ namespace PayrollWeb.Controllers.Admin
         [Authorize]
         public IActionResult VerAgregarEmpleado()
         {
-            return View("/Views/Admin/AgregarEmpleado.cshtml");
+            Empleado empleado = new Empleado();
+            return View("/Views/Admin/AgregarEmpleado.cshtml", empleado);
         }
 
         [Authorize]
         public IActionResult VerEditarEmpleado(int id)
         {
             Empleado empleado = _empleado.ObtenerEmpleado(id);
+            empleado.Contrasena = Metodos.DesencriptarContrasena(empleado.Contrasena);
             return View("/Views/Admin/EditarEmpleado.cshtml", empleado);
         }
 
@@ -71,14 +73,31 @@ namespace PayrollWeb.Controllers.Admin
             {
                 ModelState.AddModelError("CuentaCorriente", "La cuenta corriente ya está registrada");
             }
+            if (!_empleado.ValidarFormatoPassword(empleado.Contrasena))
+            {
+                ModelState.AddModelError("Contrasena", "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial");
+            }
 
             if (!ModelState.IsValid)
             {
                 // Regresar a la vista "VerAgregarEmpleado" y pasar el modelo actual con los errores
                 return View("/Views/Admin/AgregarEmpleado.cshtml", empleado);
             }
-            empleado.AgregarEmpleado();
-            return RedirectToAction("VerEmpleados");
+
+            //Encriptar la contraseña
+            empleado.Contrasena = Metodos.EncriptarContrasena(empleado.Contrasena);
+
+            if (empleado.AgregarEmpleado())
+            {
+                TempData["Success"] = "Empleado agregado correctamente.";
+                return RedirectToAction("VerEmpleados");
+            }
+            else
+            {
+                TempData["Error"] = "Ocurrió un error al agregar el empleado.";
+                return View("/Views/Admin/AgregarEmpleado.cshtml", empleado);
+            }
+
         }
 
         [HttpPost]
@@ -109,12 +128,19 @@ namespace PayrollWeb.Controllers.Admin
             {
                 ModelState.AddModelError("CuentaCorriente", "La cuenta corriente ya está registrada");
             }
+            if (!_empleado.ValidarFormatoPassword(empleado.Contrasena))
+            {
+                ModelState.AddModelError("Contrasena", "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial");
+            }
 
             // Si hay errores, regresa a la vista con el modelo y los errores
             if (!ModelState.IsValid)
             {
                 return View("/Views/Admin/EditarEmpleado.cshtml", empleado);
             }
+
+            // Encriptar la contraseña
+            empleado.Contrasena = Metodos.EncriptarContrasena(empleado.Contrasena);
 
             _empleado.EditarEmpleado(empleado);
             return RedirectToAction("VerEmpleados");

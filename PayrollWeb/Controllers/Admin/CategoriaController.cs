@@ -56,13 +56,13 @@ namespace PayrollWeb.Controllers.Admin
 
         public IActionResult ActualizarCategoria(Categoria categoria)
         {
-            if (categoria.ExisteCategoria())
-            {
-                ModelState.AddModelError("NombreCategoria", "La categoría ya está registrada");
-            }
-            if (!ModelState.IsValid) { 
-                return View("/Views/Admin/EditarCategoria.cshtml", categoria); 
-            }
+            //if (categoria.ExisteCategoria())
+            //{
+            //    ModelState.AddModelError("NombreCategoria", "La categoría ya está registrada");
+            //}
+            //if (!ModelState.IsValid) { 
+            //    return View("/Views/Admin/EditarCategoria.cshtml", categoria); 
+            //}
             categoria.ActualizarCategoria();
             return RedirectToAction("VerCategorias");
         }
