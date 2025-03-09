@@ -40,7 +40,7 @@ namespace PayrollWeb.Models
 
 
         //Agregar
-        public void AgregarEmpleado()
+        public bool AgregarEmpleado()
         {
             // Hacer validaciones
 
@@ -69,10 +69,12 @@ namespace PayrollWeb.Models
                         if (filasAfectadas > 0)
                         {
                             Console.WriteLine("Empleado agregado correctamente", "Éxito");
+                            return true;
                         }
                         else
                         {
                             Console.WriteLine("No se pudo agregar el empleado", "Error");
+                            return false;
                         }
                     }
                 }
@@ -80,6 +82,7 @@ namespace PayrollWeb.Models
             catch (Exception ex)
             {
                 Console.WriteLine("Error al agregar el empleado: " + ex.Message, "Error");
+                return false;
             }
         }
 
@@ -355,7 +358,7 @@ namespace PayrollWeb.Models
             return empleado;
         }
 
-        public void ActualizarDatosGenerales(int idEmpleado, string dui, string nombre, string apellidos, string telefono, string direccion)
+        public bool ActualizarDatosGenerales(int idEmpleado, string dui, string nombre, string apellidos, string telefono, string direccion)
         {
             try
             {
@@ -379,10 +382,12 @@ namespace PayrollWeb.Models
                         if (filasAfectadas > 0)
                         {
                             Console.WriteLine("Datos personales actualizados correctamente", "Éxito");
+                            return true;
                         }
                         else
                         {
                             Console.WriteLine("No se pudo actualizar los datos personales", "Error");
+                            return false;
                         }
                     }
                 }
@@ -390,24 +395,34 @@ namespace PayrollWeb.Models
             catch (Exception ex)
             {
                 Console.WriteLine("Error al actualizar los datos personales: " + ex.Message, "Error");
+                return false;
             }
         }
 
-        public void ActualizarDatosSensibles(int idEmpleado, string contrasena, string correo, string cuentaCorriente)
+        public void ActualizarDatosSensibles(int idEmpleado, string correo, string cuentaCorriente, string nuevaContrasena)
         {
             try
             {
                 using (SqlConnection con = conexion.GetConnection())
                 {
-                    string query = "UPDATE Empleado SET contrasena = @contrasena, correo = @correo, cuenta_corriente = @cuentaCorriente " +
-                                   "WHERE id_empleado = @idEmpleado";
+                    // Construir la consulta dinámicamente según si se proporciona una nueva contraseña
+                    string query = "UPDATE Empleado SET correo = @correo, cuenta_corriente = @cuentaCorriente";
+                    if (!string.IsNullOrEmpty(nuevaContrasena))
+                    {
+                        query += ", contrasena = @contrasena";
+                    }
+                    query += " WHERE id_empleado = @idEmpleado";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.Add("@idEmpleado", SqlDbType.Int).Value = idEmpleado;
-                        cmd.Parameters.Add("@contrasena", SqlDbType.VarChar).Value = contrasena;
                         cmd.Parameters.Add("@correo", SqlDbType.VarChar).Value = correo;
                         cmd.Parameters.Add("@cuentaCorriente", SqlDbType.VarChar).Value = cuentaCorriente;
+
+                        if (!string.IsNullOrEmpty(nuevaContrasena))
+                        {
+                            cmd.Parameters.Add("@contrasena", SqlDbType.VarChar).Value = nuevaContrasena;
+                        }
 
                         con.Open();
                         int filasAfectadas = cmd.ExecuteNonQuery();
@@ -428,6 +443,33 @@ namespace PayrollWeb.Models
                 Console.WriteLine("Error al actualizar los datos de cuenta: " + ex.Message, "Error");
             }
         }
+
+        public bool ValidarPassword(int idEmpleado, string passwordActual)
+        {
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT contrasena FROM Empleado WHERE id_empleado = @idEmpleado";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@idEmpleado", SqlDbType.Int).Value = idEmpleado;
+
+                        con.Open();
+                        string contrasenaAlmacenada = cmd.ExecuteScalar()?.ToString();
+
+                        // Comparar la contraseña proporcionada con la almacenada
+                        return contrasenaAlmacenada == passwordActual;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al validar la contraseña: " + ex.Message, "Error");
+                return false;
+            }
+        }
+
 
         public bool EsDUIUnico(string dui)
         {
@@ -635,12 +677,51 @@ namespace PayrollWeb.Models
             var random = new Random();
             var contrasena = new char[longitud];
 
-            for (int i = 0; i < longitud; i++)
+            bool tieneMayuscula = false;
+            bool tieneMinuscula = false;
+            bool tieneNumero = false;
+            bool tieneCaracterEspecial = false;
+
+            do
             {
-                contrasena[i] = caracteres[random.Next(caracteres.Length)];
+                for (int i = 0; i < longitud; i++)
+                {
+                    contrasena[i] = caracteres[random.Next(caracteres.Length)];
+
+                    if (Char.IsUpper(contrasena[i]))
+                        tieneMayuscula = true;
+                    if (Char.IsLower(contrasena[i]))
+                        tieneMinuscula = true;
+                    if (Char.IsDigit(contrasena[i]))
+                        tieneNumero = true;
+                    if ("!@#$%^&*()".Contains(contrasena[i]))
+                        tieneCaracterEspecial = true;
+                }
             }
+            while (!(tieneMayuscula && tieneMinuscula && tieneNumero && tieneCaracterEspecial)); // Continúa generando hasta que cumpla todos los requisitos
 
             return new string(contrasena);
+        }
+
+        //Método para validar si una contraseña cumple con los requisitos de seguridad
+        public bool ValidarFormatoPassword(string contrasena)
+        {
+            bool tieneMayuscula = false;
+            bool tieneMinuscula = false;
+            bool tieneNumero = false;
+            bool tieneCaracterEspecial = false;
+            foreach (char caracter in contrasena)
+            {
+                if (Char.IsUpper(caracter))
+                    tieneMayuscula = true;
+                if (Char.IsLower(caracter))
+                    tieneMinuscula = true;
+                if (Char.IsDigit(caracter))
+                    tieneNumero = true;
+                if ("!@#$%^&*()".Contains(caracter))
+                    tieneCaracterEspecial = true;
+            }
+            return tieneMayuscula && tieneMinuscula && tieneNumero && tieneCaracterEspecial;
         }
 
         //string impresion;

@@ -1,5 +1,19 @@
 ﻿@model List<ContratoViewModel>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
 @{
     ViewData["Title"] = "Contratos del Empleado";
 }
@@ -65,4 +79,15 @@ else
 
 <a href="@Url.Action("VerEmpleados", "Contrato")" class="btn btn-secondary">Volver</a>
 
+@section Scripts {
+    <script>
+    setTimeout(function() {
+            // Seleccionamos todos los elementos con la clase 'alert-delete-later'
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();  // Eliminamos cada mensaje de la lista
+            });
+        }, 3000); // 3000 ms = 3 segundos
+    </script>
+}
 

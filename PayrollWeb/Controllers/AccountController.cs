@@ -61,7 +61,7 @@ namespace PayrollWeb.Controllers
             else
             {
                 int idEmpleado = -1;
-                idEmpleado = _empleado.LoginEmpleado(correo, contrasena);
+                idEmpleado = _empleado.LoginEmpleado(correo, Metodos.EncriptarContrasena(contrasena));
 
                 if (idEmpleado == -1)
                 {

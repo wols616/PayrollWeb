@@ -19,7 +19,7 @@
 
     <div>
         <label for="SueldoBase">Sueldo Base:</label>
-        <input type="number" id="SueldoBase" name="SueldoBase" step="0.01" required />
+        <input type="number" id="SueldoBase" name="SueldoBase" step="0.01" min="0" required />
         @if (ViewData.ModelState["SueldoBase"]?.Errors.Count > 0)
         {
             <span style="color:red;">@ViewData.ModelState["SueldoBase"]?.Errors[0]?.ErrorMessage</span>

@@ -17,7 +17,7 @@
 
     <div class="mb-3">
         <label for="SueldoBase" class="form-label">Sueldo Base:</label>
-        <input type="number" asp-for="SueldoBase" class="form-control" step="0.01" required />
+        <input type="number" asp-for="SueldoBase" class="form-control" step="0.01" min="0" required />
         <span asp-validation-for="SueldoBase" class="text-danger"></span>
     </div>
 

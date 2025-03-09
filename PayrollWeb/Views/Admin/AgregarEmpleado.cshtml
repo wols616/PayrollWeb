@@ -1,5 +1,21 @@
-﻿@{
+﻿@model Empleado
+
+@{
     ViewData["Title"] = "Agregar Empleado";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
 }
 
 <h2>Agregar Empleado</h2>
@@ -9,7 +25,7 @@
     <input type="hidden" name="Estado" value="Activo"/>
     <div>
         <label for="Dui">DUI:</label>
-        <input type="text" id="Dui" name="Dui" required />
+        <input value="@Model.Dui" type="text" id="Dui" name="Dui" required maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" />
         @if (ViewData.ModelState["Dui"]?.Errors.Count > 0)
         {
             <span style="color:red;">@ViewData.ModelState["Dui"]?.Errors[0]?.ErrorMessage</span>
@@ -18,7 +34,7 @@
 
     <div>
         <label for="Nombre">Nombre:</label>
-        <input type="text" id="Nombre" name="Nombre" required />
+        <input value="@Model.Nombre" type="text" id="Nombre" name="Nombre" required />
         @if (ViewData.ModelState["Nombre"]?.Errors.Count > 0)
         {
             <span style="color:red;">@ViewData.ModelState["Nombre"]?.Errors[0]?.ErrorMessage</span>
@@ -27,7 +43,7 @@
 
     <div>
         <label for="Apellidos">Apellidos:</label>
-        <input type="text" id="Apellidos" name="Apellidos" required />
+        <input value="@Model.Apellidos" type=" text" id="Apellidos" name="Apellidos" required />
         @if (ViewData.ModelState["Apellidos"]?.Errors.Count > 0)
         {
             <span style="color:red;">@ViewData.ModelState["Apellidos"]?.Errors[0]?.ErrorMessage</span>
@@ -36,16 +52,12 @@
 
     <div>
         <label for="Telefono">Teléfono:</label>
-        <input type="text" id="Telefono" name="Telefono" required />
-        @if (ViewData.ModelState["Telefono"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Telefono"]?.Errors[0]?.ErrorMessage</span>
-        }
+        <input value="@Model.Telefono" type="text" id="Telefono" name="Telefono" required maxlength="9" oninput="formatearTelefono(this)" pattern="[0-9]{4}-[0-9]{4}" />
     </div>
 
     <div>
         <label for="Direccion">Dirección:</label>
-        <input type="text" id="Direccion" name="Direccion" required />
+        <input value="@Model.Direccion" type="text" id="Direccion" name="Direccion" required />
         @if (ViewData.ModelState["Direccion"]?.Errors.Count > 0)
         {
             <span style="color:red;">@ViewData.ModelState["Direccion"]?.Errors[0]?.ErrorMessage</span>
@@ -54,28 +66,12 @@
 
     <div>
         <label for="CuentaCorriente">Cuenta Corriente:</label>
-        <input type="text" id="CuentaCorriente" name="CuentaCorriente" required />
-        @if (ViewData.ModelState["CuentaCorriente"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["CuentaCorriente"]?.Errors[0]?.ErrorMessage</span>
-        }
+        <input value="@Model.CuentaCorriente" type="text" id="CuentaCorriente" name="CuentaCorriente" required maxlength="12" oninput="formatearCuentaCorriente(this)" pattern="[0-9]{12}" />
     </div>
-
-@*     <div>
-        <label for="Estado">Estado:</label>
-        <select id="Estado" name="Estado">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-        </select>
-        @if (ViewData.ModelState["Estado"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Estado"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div> *@
 
     <div>
         <label for="Correo">Correo:</label>
-        <input type="email" id="Correo" name="Correo" required />
+        <input value="@Model.Correo" type="email" id="Correo" name="Correo" required />
         @if (ViewData.ModelState["Correo"]?.Errors.Count > 0)
         {
             <span style="color:red;">@ViewData.ModelState["Correo"]?.Errors[0]?.ErrorMessage</span>
@@ -120,4 +116,33 @@
         const type = passwordField.type === 'password' ? 'text' : 'password';
         passwordField.type = type;
     });
+
+        function formatearDUI(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 8) {
+            value = value.substring(0, 8) + '-' + value.substring(8, 9);
+        }
+        input.value = value.substring(0, 10);
+    }
+
+    function formatearTelefono(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 4) {
+            value = value.substring(0, 4) + '-' + value.substring(4, 8);
+        }
+        input.value = value.substring(0, 9);
+    }
+
+    function formatearCuentaCorriente(input) {
+        let value = input.value.replace(/\D/g, '');
+        input.value = value.substring(0, 12);
+    }
+
+    setTimeout(function() {
+            // Seleccionamos todos los elementos con la clase 'alert-delete-later'
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();  // Eliminamos cada mensaje de la lista
+            });
+        }, 3000); // 3000 ms = 3 segundos
 </script>
