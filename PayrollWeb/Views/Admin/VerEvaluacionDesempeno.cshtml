@@ -1,0 +1,122 @@
+﻿@model List<EvaluacionDesempenoViewModel>
+
+@{
+    ViewData["Title"] = "Ver Evaluación de Desempeño";
+}
+
+<h2>Evaluaciones de @ViewBag.Empleado.Nombre</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+<!-- Botón para agregar una nueva evaluación usando JavaScript -->
+<a href="#" class="btn btn-primary mb-3" onclick="abrirAgregarModal(@ViewBag.Empleado.IdEmpleado)">Agregar Nueva Evaluación</a>
+
+<!-- Botón para redirigir a la vista de agregar KPI -->
+<a href="@Url.Action("VerAgregarKpi", "KPI")" class="btn btn-primary mb-3">Indicadores clave de desempeño</a>
+
+
+
+<!-- Tabla de Evaluaciones de Desempeño -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>KPI Evaluado</th>
+            <th>Puntuación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var evaluacion in Model)
+        {
+            <tr>
+                <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
+                <td>@evaluacion.KPI.Nombre</td>
+                <td>@evaluacion.puntuacion</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editarEvaluacion(@evaluacion.IdEvaluacionDesempeno, '@evaluacion.fecha.ToString("yyyy-MM-dd")', @evaluacion.id_kpi, @evaluacion.puntuacion)">Editar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar o editar evaluación -->
+<div class="modal fade" id="evaluacionModal" tabindex="-1" aria-labelledby="evaluacionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="evaluacionModalLabel">Agregar Evaluación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluacionForm" method="post">
+                    <input type="hidden" id="evaluacionId" name="IdEvaluacionDesempeno">
+                    <input type="hidden" id="idEmpleado" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
+                    <div class="mb-3">
+                        <label for="fecha" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="fecha" name="Fecha" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="idKpi" class="form-label">KPI Evaluado</label>
+                        <select class="form-control" id="idKpi" name="IdKpi" required>
+                            @foreach (var kpi in ViewBag.KPIs)
+                            {
+                                <option value="@kpi.IdKpi">@kpi.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="puntuacion" class="form-label">Puntuación</label>
+                        <input type="number" class="form-control" id="puntuacion" name="Puntuacion" min="0" max="100" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirAgregarModal(idEmpleado) {
+        document.getElementById("evaluacionForm").action = "/Evaluacion/CrearEvaluacion";
+        document.getElementById("evaluacionModalLabel").innerText = "Agregar Evaluación";
+        document.getElementById("evaluacionId").value = "";
+        document.getElementById("fecha").value = "";
+        document.getElementById("idKpi").value = "";
+        document.getElementById("puntuacion").value = "";
+        var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
+        modal.show();
+    }
+
+    function editarEvaluacion(id, fecha, idKpi, puntuacion) {
+        document.getElementById("evaluacionForm").action = "/Evaluacion/ActualizarEvaluacion";
+        document.getElementById("evaluacionModalLabel").innerText = "Editar Evaluación";
+        document.getElementById("evaluacionId").value = id;
+        document.getElementById("fecha").value = fecha;
+        document.getElementById("idKpi").value = idKpi;
+        document.getElementById("puntuacion").value = puntuacion;
+        var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
+        modal.show();
+    }
+
+    setTimeout(function() {
+        // Seleccionamos todos los elementos con la clase 'alert-delete-later'
+        var alertElements = document.querySelectorAll('.alert-delete-later');
+        alertElements.forEach(function(alert) {
+            alert.remove();  // Eliminamos cada mensaje de la lista
+        });
+    }, 3000); // 3000 ms = 3 segundos
+</script>
