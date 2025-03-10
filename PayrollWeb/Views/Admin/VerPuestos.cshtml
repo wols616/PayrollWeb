@@ -29,6 +29,8 @@
                 <td>
                     <a href="@Url.Action("VerEditarPuesto", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-warning btn-sm">Editar</a>
                     <a href="@Url.Action("EliminarPuesto", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este puesto?');">Eliminar</a>
+                    <a href="@Url.Action("VerComplementos", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-success btn-sm">Complementos</a>
+
                 </td>
             </tr>
         }

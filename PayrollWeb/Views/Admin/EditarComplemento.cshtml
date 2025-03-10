@@ -1,0 +1,49 @@
+﻿@model Complemento_Puesto
+
+@{
+    ViewData["Title"] = "Editar Complemento";
+}
+
+<h2>Editar Complemento</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+<form asp-action="ActualizarComplemento" method="post">
+    <input type="hidden" asp-for="IdComplementoPuesto" />
+    <input type="hidden" asp-for="IdPuesto" />
+
+    <div class="form-group">
+        <label for="NombreComplemento">Nombre del Complemento:</label>
+        <input type="text" class="form-control" asp-for="NombreComplemento" required>
+    </div>
+
+    <div class="form-group">
+        <label for="Monto">Monto:</label>
+        <input type="number" class="form-control" asp-for="Monto" step="0.01" min="0" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <a asp-action="VerComplementos" asp-route-id="@Model.IdPuesto" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script>
+        setTimeout(function() {
+            document.querySelectorAll('.alert-delete-later').forEach(function(alert) {
+                alert.remove();
+            });
+        }, 3000);
+    </script>
+}

@@ -1,0 +1,69 @@
+﻿@model List<Complemento_Puesto>
+
+@{
+    ViewData["Title"] = "Ver Complementos";
+}
+
+<h2>Complementos del @ViewBag.Puesto.NombrePuesto</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+@if (Model != null && Model.Count > 0)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Monto</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var complemento in Model)
+            {
+                <tr>
+                    <td>@complemento.IdComplementoPuesto</td>
+                    <td>@complemento.NombreComplemento</td>
+                    <td>@complemento.Monto.ToString("C")</td>
+                    <td>
+                        <a asp-action="VerEditarComplemento" asp-route-id="@complemento.IdComplementoPuesto" class="btn btn-warning btn-sm">Actualizar</a>
+                        <a asp-action="EliminarComplemento" asp-route-id="@complemento.IdComplementoPuesto" asp-route-idPuesto="@ViewBag.Puesto.IdPuesto" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este complemento?');">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        No existen complementos para este puesto.
+    </div>
+}
+
+<a asp-action="VerAgregarComplementos" asp-route-idPuesto="@ViewBag.Puesto.IdPuesto" class="btn btn-primary">Agregar Complemento</a>
+
+@section Scripts {
+    <script>
+        setTimeout(function() {
+            // Seleccionamos todos los elementos con la clase 'alert-delete-later'
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();  // Eliminamos cada mensaje de la lista
+            });
+        }, 3000); // 3000 ms = 3 segundos
+    </script>
+}
