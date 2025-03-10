@@ -1,0 +1,86 @@
+﻿@model List<PayrollWeb.Models.KPI>
+
+@{
+    ViewData["Title"] = "Gestión de KPIs";
+}
+
+<h2>Gestión de KPIs</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<!-- Botón para abrir el modal de agregar KPI -->
+<button class="btn btn-primary mb-3" onclick="abrirAgregarModal()">Agregar Nuevo KPI</button>
+
+<!-- Tabla de KPIs existentes -->
+<h4>Lista de KPIs</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var kpi in Model)
+        {
+            <tr>
+                <td>@kpi.IdKpi</td>
+                <td>@kpi.Nombre</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editarKpi(@kpi.IdKpi, '@kpi.Nombre')">Editar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar o editar KPI -->
+<div class="modal fade" id="kpiModal" tabindex="-1" aria-labelledby="kpiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="kpiModalLabel">Agregar KPI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="kpiForm" method="post">
+                    <input type="hidden" id="kpiId" name="id">
+                    <div class="mb-3">
+                        <label for="kpiNombre" class="form-label">Nombre del KPI</label>
+                        <input type="text" class="form-control" id="kpiNombre" name="Nombre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirAgregarModal() {
+        document.getElementById("kpiForm").action = "/Kpi/CrearKpi";
+        document.getElementById("kpiModalLabel").innerText = "Agregar KPI";
+        document.getElementById("kpiId").value = "";
+        document.getElementById("kpiNombre").value = "";
+        var modal = new bootstrap.Modal(document.getElementById('kpiModal'));
+        modal.show();
+    }
+
+    function editarKpi(id, nombre) {
+        document.getElementById("kpiForm").action = "/Kpi/ActualizarKpi";
+        document.getElementById("kpiModalLabel").innerText = "Editar KPI";
+        document.getElementById("kpiId").value = id;
+        document.getElementById("kpiNombre").value = nombre;
+        var modal = new bootstrap.Modal(document.getElementById('kpiModal'));
+        modal.show();
+    }
+</script>
