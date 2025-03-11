@@ -156,5 +156,34 @@ namespace PayrollWeb.Models
             }
         }
 
+        //Método para saber si un complemento ya existe
+        public bool ComplementoExistente()
+        {
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT * FROM Complemento_puesto WHERE nombre_complemento = @nombreComplemento";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@nombreComplemento", NombreComplemento);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al verificar si el complemento ya existe: " + ex.Message, "Error");
+            }
+            return false;
+        }
+
     }
 }

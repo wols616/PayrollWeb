@@ -1,15 +1,19 @@
 ﻿@model List<Categoria>
 
 <h2>Lista de Categorías</h2>
-<a href="@Url.Action("VerAgregarCategoria", "Categoria")" class="btn btn-primary">Agregar Nueva Categoría</a>
+
+<!-- Contenedor para mostrar mensajes dinámicos -->
+<div id="mensajeResultado"></div>
+
+<!-- Botón para abrir el modal de agregar categoría -->
+<a href="#" class="btn btn-primary mb-3" onclick="abrirAgregarCategoria()">Agregar Nueva Categoría</a>
 
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">
+    <div class="alert alert-danger alert-delete-later">
         @TempData["Error"]
     </div>
 }
-
 
 <table class="table table-striped">
     <thead>
@@ -28,10 +32,108 @@
                 <td>@categoria.NombreCategoria</td>
                 <td>@categoria.SueldoBase.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
                 <td>
-                    <a href="@Url.Action("VerEditarCategoria", "Categoria", new { id = categoria.IdCategoria })" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="#" class="btn btn-warning btn-sm" onclick="editarCategoria(@categoria.IdCategoria, '@categoria.NombreCategoria', @categoria.SueldoBase)">Editar</a>
                     <a href="@Url.Action("EliminarCategoria", "Categoria", new { id = categoria.IdCategoria })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta categoría?');">Eliminar</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<!-- Modal General para Agregar o Editar Categoría -->
+<div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="categoriaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoriaModalLabel">Agregar Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoriaForm">
+                    <input type="hidden" id="idCategoria" name="IdCategoria">
+
+                    <div class="mb-3">
+                        <label for="nombreCategoria" class="form-label">Nombre de la Categoría</label>
+                        <input type="text" class="form-control" id="nombreCategoria" name="NombreCategoria" required>
+                        <span class="text-danger" id="errorNombre"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sueldoBase" class="form-label">Sueldo Base</label>
+                        <input type="number" class="form-control" id="sueldoBase" name="SueldoBase" step="0.01" min="0" required>
+                        <span class="text-danger" id="errorSueldo"></span>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="guardarCategoria">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirAgregarCategoria() {
+        document.getElementById("categoriaForm").action = "/Categoria/CrearCategoria";
+        document.getElementById("categoriaModalLabel").innerText = "Agregar Categoría";
+        document.getElementById("categoriaForm").reset();
+        var modal = new bootstrap.Modal(document.getElementById('categoriaModal'));
+        modal.show();
+    }
+
+    function editarCategoria(id, nombre, sueldo) {
+        document.getElementById("categoriaForm").action = "/Categoria/ActualizarCategoria";
+        document.getElementById("categoriaModalLabel").innerText = "Editar Categoría";
+        document.getElementById("idCategoria").value = id;
+        document.getElementById("nombreCategoria").value = nombre;
+        document.getElementById("sueldoBase").value = sueldo;
+        var modal = new bootstrap.Modal(document.getElementById('categoriaModal'));
+        modal.show();
+    }
+
+    document.getElementById("guardarCategoria").addEventListener("click", function () {
+        let formData = {
+            IdCategoria: document.getElementById("idCategoria").value || 0,
+            NombreCategoria: document.getElementById("nombreCategoria").value,
+            SueldoBase: document.getElementById("sueldoBase").value
+        };
+
+        fetch(document.getElementById("categoriaForm").action, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarMensaje(data.message, "success");
+                setTimeout(() => location.reload(), 3000); // Recargar la página después de 3 segundos
+            } else {
+                mostrarErrores(data.errors);
+                mostrarMensaje("Hubo errores al procesar la solicitud.", "danger");
+            }
+        })
+        .catch(error => console.error("Error en la solicitud:", error));
+    });
+
+    function mostrarErrores(errores) {
+        document.getElementById("errorNombre").innerText = errores?.NombreCategoria || "";
+        document.getElementById("errorSueldo").innerText = errores?.SueldoBase || "";
+    }
+
+    function mostrarMensaje(mensaje, tipo) {
+        let mensajeDiv = document.createElement("div");
+        mensajeDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+        mensajeDiv.innerHTML = `
+            ${mensaje}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        `;
+
+        let mensajeResultado = document.getElementById("mensajeResultado");
+        mensajeResultado.innerHTML = "";
+        mensajeResultado.appendChild(mensajeDiv);
+
+        setTimeout(() => {
+            mensajeDiv.remove();
+        }, 2000); // Desaparece después de 2 segundos
+    }
+</script>
