@@ -21,23 +21,24 @@ namespace PayrollWeb.Controllers.Admin
         [Authorize]
         public IActionResult VerPuestos()
         {
+            ViewBag.Categorias = _categoria.ObtenerCategorias();
             return View("/Views/Admin/VerPuestos.cshtml", _puesto.MostrarPuestosConCategoria());
         }
 
-        [Authorize]
-        public IActionResult VerAgregarPuesto()
-        {
-            ViewBag.Categorias = _categoria.ObtenerCategorias();
-            return View("/Views/Admin/AgregarPuesto.cshtml");
-        }
+        //[Authorize]
+        //public IActionResult VerAgregarPuesto()
+        //{
+        //    ViewBag.Categorias = _categoria.ObtenerCategorias();
+        //    return View("/Views/Admin/AgregarPuesto.cshtml");
+        //}
 
-        [Authorize]
-        public IActionResult VerEditarPuesto(int id)
-        {
-            Puesto puesto = _puesto.ObtenerPuesto(id);
-            ViewBag.Categorias = _categoria.ObtenerCategorias();
-            return View("/Views/Admin/EditarPuesto.cshtml", puesto);
-        }
+        //[Authorize]
+        //public IActionResult VerEditarPuesto(int id)
+        //{
+        //    Puesto puesto = _puesto.ObtenerPuesto(id);
+        //    ViewBag.Categorias = _categoria.ObtenerCategorias();
+        //    return View("/Views/Admin/EditarPuesto.cshtml", puesto);
+        //}
 
         [Authorize]
 
@@ -48,49 +49,44 @@ namespace PayrollWeb.Controllers.Admin
             return View("/Views/Admin/VerComplementos.cshtml", complementos);
         }
 
-        [Authorize]
-        public IActionResult VerAgregarComplementos(int idPuesto)
-        {
-            ViewBag.Puesto = _puesto.ObtenerPuesto(idPuesto);
-            return View("/Views/Admin/AgregarComplemento.cshtml");
-        }
-        [Authorize]
-        public IActionResult VerEditarComplemento(int id)
-        {
-            Complemento_Puesto complemento = _complementoPuesto.ObtenerComplementoPorId(id);
-            return View("/Views/Admin/EditarComplemento.cshtml", complemento);
-        }
+        //[Authorize]
+        //public IActionResult VerAgregarComplementos(int idPuesto)
+        //{
+        //    ViewBag.Puesto = _puesto.ObtenerPuesto(idPuesto);
+        //    return View("/Views/Admin/AgregarComplemento.cshtml");
+        //}
+        //[Authorize]
+        //public IActionResult VerEditarComplemento(int id)
+        //{
+        //    Complemento_Puesto complemento = _complementoPuesto.ObtenerComplementoPorId(id);
+        //    return View("/Views/Admin/EditarComplemento.cshtml", complemento);
+        //}
 
 
 
         //__________________________________________________________________________________________________________________________________
         //CONTROLADORES PARA CONTROLAR LA LÓGICA
-        public IActionResult CrearPuesto(Puesto puesto)
+        public IActionResult CrearPuesto(string NombrePuesto, int IdCategoria)
         {
+            Puesto puesto = new Puesto { NombrePuesto = NombrePuesto, IdCategoria = IdCategoria };
             if (puesto.ExistePuesto())
             {
-                ModelState.AddModelError("ErrorPuestoExistente", "El puesto ya está registrado");
+                TempData["Error"] = "El puesto ya está registrado";
+                return RedirectToAction("VerPuestos");
             }
 
-            if (!ModelState.IsValid)
-            {
-                return View("/Views/Admin/AgregarPuesto.cshtml", puesto);
-            }
             puesto.AgregarPuesto();
             return RedirectToAction("VerPuestos");
         }
 
-        public IActionResult ActualizarPuesto(Puesto Puesto)
+        public IActionResult ActualizarPuesto(int IdPuesto, string NombrePuesto, int IdCategoria)
         {
-            if (Puesto.ExistePuesto())
+            Puesto puesto = new Puesto { IdPuesto = IdPuesto, NombrePuesto = NombrePuesto, IdCategoria = IdCategoria };
+            if (puesto.ExistePuesto())
             {
-                ModelState.AddModelError("ErrorPuestoExistente", "El puesto ya está registrado");
+                TempData["Error"] = "El puesto ya está registrado";
             }
-            if (!ModelState.IsValid)
-            {
-                return View("/Views/Admin/EditarPuesto.cshtml", Puesto);
-            }
-            Puesto.EditarPuesto();
+            puesto.EditarPuesto();
             return RedirectToAction("VerPuestos");
         }
 
@@ -99,8 +95,9 @@ namespace PayrollWeb.Controllers.Admin
             bool resultado = _puesto.EliminarPuesto(id);
             if (!resultado)
             {
-                TempData["ErrorEliminar"] = "No se puede eliminar el puesto porque ya hay contratos asociados a este";
+                TempData["Error"] = "No se puede eliminar el puesto porque ya hay contratos asociados a este";
             }
+            TempData["Success"] = "Puesto eliminado correctamente";
             return RedirectToAction("VerPuestos");
         }
 
@@ -112,6 +109,12 @@ namespace PayrollWeb.Controllers.Admin
                 Monto = Monto,
                 IdPuesto = IdPuesto
             };
+
+            if (complemento_Puesto.ComplementoExistente())
+            {
+                TempData["Error"] = "El complemento ya está registrado";
+                return RedirectToAction("VerComplementos", new { id = IdPuesto });
+            }
 
             if (!complemento_Puesto.AgregarComplemento())
             {
@@ -132,6 +135,12 @@ namespace PayrollWeb.Controllers.Admin
                 IdPuesto = IdPuesto,
                 IdComplementoPuesto = IdComplementoPuesto
             };
+
+            if (complemento.ComplementoExistente())
+            {
+                TempData["Error"] = "El complemento ya está registrado";
+                return RedirectToAction("VerComplementos", new { id = IdPuesto });
+            }
 
             if (!complemento.ActualizarComplemento())
             {

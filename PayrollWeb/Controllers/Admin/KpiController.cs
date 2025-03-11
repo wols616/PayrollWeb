@@ -11,10 +11,10 @@ namespace PayrollWeb.Controllers.Admin
             return View();
         }
 
-        public IActionResult VerAgregarKpi()
+        public IActionResult VerKpi()
         {
             List<KPI> listaKPI = _kpi.ObtenerKPI();
-            return View("/Views/Admin/AgregarKpi.cshtml", listaKPI);
+            return View("/Views/Admin/VerKpi.cshtml", listaKPI);
         }
 
         //Métodos para controlar la lógica
@@ -24,10 +24,10 @@ namespace PayrollWeb.Controllers.Admin
             if (!kpi.AgregarKPI())
             {
                 TempData["Error"] = "Error al agregar el KPI";
-                return RedirectToAction("VerAgregarKpi");
+                return RedirectToAction("VerKpi");
             }
             TempData["Success"] = "KPI agregado correctamente";
-            return RedirectToAction("VerAgregarKpi");
+            return RedirectToAction("VerKpi");
         }
 
         public IActionResult ActualizarKpi(int id,  string Nombre)
@@ -36,10 +36,10 @@ namespace PayrollWeb.Controllers.Admin
             if (!kpi.ActualizarKPI())
             {
                 TempData["Error"] = "Error al actualizar el KPI";
-                return RedirectToAction("VerAgregarKpi");
+                return RedirectToAction("VerKpi");
             }
             TempData["Success"] = "KPI actualizado correctamente";
-            return RedirectToAction("VerAgregarKpi");
+            return RedirectToAction("VerKpi");
         }
     }
 }

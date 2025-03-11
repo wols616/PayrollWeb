@@ -239,14 +239,14 @@ namespace PayrollWeb.Models
 
             // Consulta SQL para verificar si el puesto está referenciado en otras tablas (en este caso, la tabla Contrato)
             string queryVerificar = @"
-    IF EXISTS (SELECT 1 FROM Contrato WHERE id_puesto = @idPuesto)
-    BEGIN
-        SELECT 1; -- Si tiene registros asociados en Contrato, no se puede eliminar
-    END
-    ELSE
-    BEGIN
-        SELECT 0; -- Si no tiene registros asociados, se puede eliminar
-    END";
+        IF EXISTS (SELECT 1 FROM Contrato WHERE id_puesto = @idPuesto)
+        BEGIN
+            SELECT 1; -- Si tiene registros asociados en Contrato, no se puede eliminar
+        END
+        ELSE
+        BEGIN
+            SELECT 0; -- Si no tiene registros asociados, se puede eliminar
+        END";
 
             using (SqlConnection connection = conexion.GetConnection())
             {
@@ -265,6 +265,16 @@ namespace PayrollWeb.Models
                         {
                             return false; // El puesto no puede ser eliminado porque tiene registros asociados en Contrato
                         }
+                    }
+
+                    // Consulta SQL para eliminar los complementos del puesto
+                    string queryEliminarComplementos = "DELETE FROM Complemento_puesto WHERE id_puesto = @idPuesto";
+
+                    // Eliminar los complementos del puesto
+                    using (SqlCommand commandEliminarComplementos = new SqlCommand(queryEliminarComplementos, connection))
+                    {
+                        commandEliminarComplementos.Parameters.AddWithValue("@idPuesto", idPuesto);
+                        commandEliminarComplementos.ExecuteNonQuery();
                     }
 
                     // Consulta SQL para eliminar el puesto si no tiene registros asociados
@@ -295,7 +305,7 @@ namespace PayrollWeb.Models
 
         public bool ExistePuesto()
         {
-            string query = "SELECT COUNT(*) FROM Puesto WHERE Puesto.Nombre_puesto = @NombrePuesto AND Puesto.id_categoria = @IdCategoria";
+            string query = "SELECT COUNT(*) FROM Puesto WHERE Puesto.Nombre_puesto = @NombrePuesto";
 
             using (SqlConnection con = conexion.GetConnection())
             {

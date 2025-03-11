@@ -39,7 +39,10 @@
                     <td>@complemento.NombreComplemento</td>
                     <td>@complemento.Monto.ToString("C")</td>
                     <td>
-                        <a asp-action="VerEditarComplemento" asp-route-id="@complemento.IdComplementoPuesto" class="btn btn-warning btn-sm">Actualizar</a>
+                        <!-- Botón para abrir el modal de edición -->
+                        <button class="btn btn-warning btn-sm" onclick="openEditModal(@complemento.IdComplementoPuesto, '@complemento.NombreComplemento', @complemento.Monto)">Actualizar</button>
+
+                        <!-- Botón para eliminar complemento -->
                         <a asp-action="EliminarComplemento" asp-route-id="@complemento.IdComplementoPuesto" asp-route-idPuesto="@ViewBag.Puesto.IdPuesto" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este complemento?');">Eliminar</a>
                     </td>
                 </tr>
@@ -54,16 +57,67 @@ else
     </div>
 }
 
-<a asp-action="VerAgregarComplementos" asp-route-idPuesto="@ViewBag.Puesto.IdPuesto" class="btn btn-primary">Agregar Complemento</a>
+<!-- Botón para abrir el modal de agregar complemento -->
+<button class="btn btn-primary" onclick="openAddModal(@ViewBag.Puesto.IdPuesto)">Agregar Complemento</button>
+
+<!-- Modal para Agregar y Editar Complemento -->
+<div class="modal fade" id="complementoModal" tabindex="-1" aria-labelledby="complementoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="complementoModalLabel">Agregar/Editar Complemento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="complementoForm" method="post">
+                    <input type="hidden" id="IdComplementoPuesto" name="IdComplementoPuesto" />
+                    <input type="hidden" id="IdPuesto" name="IdPuesto" />
+
+                    <div class="form-group">
+                        <label for="NombreComplemento">Nombre del Complemento:</label>
+                        <input type="text" class="form-control" id="NombreComplemento" name="NombreComplemento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Monto">Monto:</label>
+                        <input type="number" class="form-control" id="Monto" name="Monto" step="0.01" min="0" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
+        // Función para abrir el modal de agregar complemento
+        function openAddModal(idPuesto) {
+            document.getElementById("complementoForm").action = '@Url.Action("CrearComplemento", "Puesto")';
+            document.getElementById("IdPuesto").value = idPuesto;
+            document.getElementById("IdComplementoPuesto").value = "";
+            document.getElementById("NombreComplemento").value = "";
+            document.getElementById("Monto").value = "";
+            $('#complementoModal').modal('show');
+        }
+
+        // Función para abrir el modal de editar complemento
+        function openEditModal(idComplemento, nombre, monto) {
+            document.getElementById("complementoForm").action = '@Url.Action("ActualizarComplemento", "Puesto")';
+            document.getElementById("IdComplementoPuesto").value = idComplemento;
+            document.getElementById("IdPuesto").value = @ViewBag.Puesto.IdPuesto;
+            document.getElementById("NombreComplemento").value = nombre;
+            document.getElementById("Monto").value = monto;
+            $('#complementoModal').modal('show');
+        }
+
         setTimeout(function() {
-            // Seleccionamos todos los elementos con la clase 'alert-delete-later'
             var alertElements = document.querySelectorAll('.alert-delete-later');
             alertElements.forEach(function(alert) {
-                alert.remove();  // Eliminamos cada mensaje de la lista
+                alert.remove();
             });
-        }, 3000); // 3000 ms = 3 segundos
+        }, 3000);
     </script>
 }
