@@ -79,6 +79,14 @@
         <span asp-validation-for="TipoContrato" class="text-danger"></span>
     </div>
 
+    <!-- Motivo -->
+    <div class="form-group">
+        <label for="motivoInput">Motivo:</label>
+        <input type="text" id="motivoInput" name="Motivo" class="form-control" placeholder="Ingrese el motivo de la creación del contrato" />
+    </div>
+
+
+
     <button type="submit" class="btn btn-success">Guardar Contrato</button>
     <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = ViewBag.Empleado.IdEmpleado })" class="btn btn-secondary">Cancelar</a>
 </form>

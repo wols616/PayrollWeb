@@ -2,9 +2,6 @@
 
 <h2>Lista de Empleados</h2>
 
-<a href="@Url.Action("VerAgregarEmpleado", "Empleado")" class="btn custom-btn-info">
-    <i class="bi bi-plus-square-fill"></i>
-</a>
 
 @if (TempData["ErrorEliminar"] != null)
 {
@@ -26,9 +23,6 @@
             <th>DUI</th>
             <th>Nombre</th>
             <th>Apellidos</th>
-            <th>Teléfono</th>
-            <th>Correo</th>
-            <th>Estado</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -41,24 +35,9 @@
                     <td>@emp.Dui</td>
                     <td>@emp.Nombre</td>
                     <td>@emp.Apellidos</td>
-                    <td>@emp.Telefono</td>
-                    <td>@emp.Correo</td>
-                    <td>@emp.Estado</td>
 
                     <td>
-                        @if (ViewBag.ShowActions)
-                        {
-                            <a href="@Url.Action("VerEmpleado", "Empleado", new { id = @emp.IdEmpleado })" class="btn custom-btn-info"><i class="bi bi-eye-fill"></i></a>
-                            <a href="@Url.Action("VerEditarEmpleado", "Empleado", new { id = emp.IdEmpleado })" class="btn btn-primary"><i class="bi bi-pencil-square"></i></a>
-                            <a href="@Url.Action("EliminarEmpleado", "Empleado", new { id = emp.IdEmpleado })" class="btn btn-danger" title="Eliminar Empleado">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = emp.IdEmpleado })" class="btn btn-success">Contrato</a>
-                        }
-
+                        <a href="@Url.Action("VerDeducciones", "DeduccionesPersonales", new { IdEmpleado = @emp.IdEmpleado })" class="btn btn-success">Deducciones</a>
                     </td>
                 </tr>
             }

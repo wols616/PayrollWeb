@@ -46,6 +46,13 @@ namespace PayrollWeb.Controllers.Admin
         [Authorize]
         public IActionResult VerAgregarContrato(int idEmpleado)
         {
+            //Comprobar que no haya un contrato vigente
+            if (_contrato.ComprobarContratoVigente(idEmpleado))
+            {
+                TempData["Error"] = "El empleado ya tiene un contrato vigente.";
+                return RedirectToAction("VerContratosEmpleado", new { idEmpleado = idEmpleado });
+            }
+
             List<ContratoViewModel> contratos = _contrato.ObtenerContratosYPuestos(idEmpleado);
             Empleado empleado = _empleado.ObtenerEmpleado(idEmpleado);
             ViewBag.Contratos = contratos;
@@ -57,15 +64,33 @@ namespace PayrollWeb.Controllers.Admin
         [Authorize]
         public IActionResult VerEmpleados(bool showActions = false)
         {
-            List<Empleado> empleados = _empleado.MostrarEmpleados();
+            List<Empleado> empleados = _empleado.ObtenerEmpleados();
             ViewBag.ShowActions = showActions;
             return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
+        [Authorize]
+        public IActionResult VerEditarContrato(int idContrato, int idEmpleado)
+        {
+            ViewBag.Puestos = _puesto.ObtenerPuestosViewModel();
+            ViewBag.Empleado = _empleado.ObtenerEmpleado(idEmpleado);
+            ViewBag.Contratos = _contrato.ObtenerContratosYPuestos(idEmpleado);
+            return View("/Views/Admin/EditarContrato.cshtml", _contrato.ObtenerContratoYPuesto(idContrato));
+        }
+
+
+
         //_______________________________________________________________________________________________________________________
 
-        public IActionResult CrearContrato(ContratoViewModel _contrato)
+        public IActionResult CrearContrato(ContratoViewModel _contrato, string Motivo)
         {
+            int IdAdministrador = 0;
+            var AdminIdClaim = User.Claims.FirstOrDefault(c => c.Type == "IdAdministrador");
+            if (AdminIdClaim != null)
+            {
+                IdAdministrador = Int32.Parse(AdminIdClaim.Value);
+            }
+
             Contrato contrato = new Contrato
             {
                 IdEmpleado = _contrato.IdEmpleado,
@@ -79,18 +104,48 @@ namespace PayrollWeb.Controllers.Admin
             if (contrato.AgregarContrato())
             {
                 TempData["Success"] = "Contrato creado correctamente.";
+                Historial_Contrato historial_Contrato = new Historial_Contrato
+                {
+                    //Ese -1 está terriblemente mal, pero funciona
+                    IdContratoAnterior = contrato.IdContrato - 1,
+                    IdContratoNuevo = contrato.IdContrato,
+                    Fecha = DateTime.Now,
+                    Cambio = "Creación",
+                    Motivo = !string.IsNullOrEmpty(Motivo) ? Motivo : "Creación de contrato",
+                    IdAdministrador = IdAdministrador
+                };
+                historial_Contrato.AgregarHistorialContrato();
             }
 
             return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
         }
 
-        public IActionResult CancelarContrato(int idContrato)
+        [HttpPost]
+        public JsonResult CancelarContrato(int idContrato, string motivo)
         {
-            Contrato contrato = _contrato.ObtenerContrato(idContrato);
+            int IdAdministrador = 0;
+            var AdminIdClaim = User.Claims.FirstOrDefault(c => c.Type == "IdAdministrador");
+            if (AdminIdClaim != null)
+            {
+                IdAdministrador = Int32.Parse(AdminIdClaim.Value);
+            }
 
+            Contrato contrato = _contrato.ObtenerContrato(idContrato);
             contrato.ActualizarContrato("vigente", "N");
             contrato.ActualizarContrato("fecha_baja", DateTime.Now);
-            return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
+
+            //Genero el registro para el historial
+            Historial_Contrato historial_Contrato = new Historial_Contrato
+            {
+                IdContratoAnterior = idContrato - 1,
+                IdContratoNuevo = idContrato,
+                Fecha = DateTime.Now,
+                Cambio = "Cancelación",
+                Motivo = motivo,
+                IdAdministrador = IdAdministrador
+            };
+            historial_Contrato.AgregarHistorialContrato();
+            return Json(new { success = true });
         }
     }
 }

@@ -25,46 +25,70 @@ namespace PayrollWeb.Controllers.Admin
             return View("/Views/Admin/VerCategorias.cshtml", _categoria.ObtenerCategorias());
         }
 
-        [Authorize]
-        public IActionResult VerAgregarCategoria()
-        {
-            return View("/Views/Admin/AgregarCategoria.cshtml");
-        }
+        //[Authorize]
+        //public IActionResult VerAgregarCategoria()
+        //{
+        //    return View("/Views/Admin/AgregarCategoria.cshtml");
+        //}
 
-        [Authorize]
-        public IActionResult VerEditarCategoria(int id)
-        {
-            return View("/Views/Admin/EditarCategoria.cshtml", _categoria.ObtenerCategoria(id));
-        }
+        //[Authorize]
+        //public IActionResult VerEditarCategoria(int id)
+        //{
+        //    return View("/Views/Admin/EditarCategoria.cshtml", _categoria.ObtenerCategoria(id));
+        //}
 
         //__________________________________________________________________________________________________________________________________
         //CONTROLADORES PARA CONTROLAR LA LÓGICA
-        public IActionResult CrearCategoria(Categoria categoria)
+        [HttpPost]
+        public IActionResult CrearCategoria([FromBody] Categoria categoria)
         {
-            if (categoria.ExisteCategoria())
-            {
-                ModelState.AddModelError("NombreCategoria", "La categoría ya está registrada");
-            }
+            var errores = new Dictionary<string, string>();
 
-            if (!ModelState.IsValid)
+            // Validar nombre
+            if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
+                errores.Add("NombreCategoria", "El nombre de la categoría es obligatorio.");
+
+            // Validar sueldo base
+            if (categoria.SueldoBase <= 0)
+                errores.Add("SueldoBase", "El sueldo base debe ser mayor a 0.");
+
+            // Validar si la categoría ya existe
+            if (categoria.ExisteCategoria())
+                errores.Add("NombreCategoria", "La categoría ya está registrada.");
+
+            // Si hay errores, devolverlos en JSON
+            if (errores.Any())
+                return Json(new { success = false, errors = errores });
+
+            // Guardar en la base de datos
+            bool guardado = categoria.AgregarCategoria();
+            if (guardado)
             {
-                return View("/Views/Admin/AgregarCategoria.cshtml", categoria);
+                return Json(new { success = true, message = "Categoría agregada correctamente." });
             }
-            categoria.AgregarCategoria();
-            return RedirectToAction("VerCategorias");
+            else
+            {
+                return Json(new { success = false, message = "Error al agregar la categoría." });
+            }
         }
 
-        public IActionResult ActualizarCategoria(Categoria categoria)
+
+        [HttpPost]
+        public IActionResult ActualizarCategoria([FromBody] Categoria categoria)
         {
-            //if (categoria.ExisteCategoria())
-            //{
-            //    ModelState.AddModelError("NombreCategoria", "La categoría ya está registrada");
-            //}
-            //if (!ModelState.IsValid) { 
-            //    return View("/Views/Admin/EditarCategoria.cshtml", categoria); 
-            //}
+            var errores = new Dictionary<string, string>();
+
+            if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
+                errores.Add("NombreCategoria", "El nombre de la categoría es obligatorio.");
+
+            if (categoria.SueldoBase <= 0)
+                errores.Add("SueldoBase", "El sueldo base debe ser mayor a 0.");
+
+            if (errores.Any())
+                return Json(new { success = false, errors = errores });
+
             categoria.ActualizarCategoria();
-            return RedirectToAction("VerCategorias");
+            return Json(new { success = true, message = "Categoría actualizada correctamente." });
         }
 
         public IActionResult EliminarCategoria(int id)

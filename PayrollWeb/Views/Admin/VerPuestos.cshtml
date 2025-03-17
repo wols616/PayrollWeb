@@ -1,12 +1,19 @@
 ﻿@model List<Object>
 
 <h2>Lista de Puestos con Categoría</h2>
-<a href="@Url.Action("VerAgregarPuesto", "Puesto")" class="btn btn-primary">Agregar Nuevo Puesto</a>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarPuestoModal">Agregar Nuevo Puesto</button>
 
-@if (TempData["ErrorEliminar"] != null)
+@if (TempData["Error"] != null)
 {
     <div class="alert alert-danger alert-delete-later">
-        @TempData["ErrorEliminar"]
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
     </div>
 }
 
@@ -27,22 +34,103 @@
                 <td>@item.GetType().GetProperty("Categoria")?.GetValue(item)</td>
                 <td>@item.GetType().GetProperty("SueldoBase")?.GetValue(item)</td>
                 <td>
-                    <a href="@Url.Action("VerEditarPuesto", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-warning btn-sm">Editar</a>
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarPuestoModal" data-id="@item.GetType().GetProperty("IdPuesto")?.GetValue(item)" data-nombre="@item.GetType().GetProperty("NombrePuesto")?.GetValue(item)" data-categoria="@item.GetType().GetProperty("IdCategoria")?.GetValue(item)">Editar</button>
                     <a href="@Url.Action("EliminarPuesto", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este puesto?');">Eliminar</a>
+                    <a href="@Url.Action("VerComplementos", "Puesto", new { id = item.GetType().GetProperty("IdPuesto")?.GetValue(item) })" class="btn btn-success btn-sm">Complementos</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
+<!-- Modal Agregar Puesto -->
+<div class="modal fade" id="agregarPuestoModal" tabindex="-1" aria-labelledby="agregarPuestoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarPuestoModalLabel">Agregar Nuevo Puesto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("CrearPuesto", "Puesto")">
+                    <div class="mb-3">
+                        <label for="nombrePuesto" class="form-label">Nombre del Puesto</label>
+                        <input type="text" class="form-control" id="nombrePuesto" name="NombrePuesto" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="IdCategoria" class="form-label">Categoría:</label>
+                        <select id="IdCategoria" name="IdCategoria" class="form-control" required>
+                            <option value="">Seleccione una categoría</option>
+                            @foreach (var categoria in ViewBag.Categorias)
+                            {
+                                <option value="@categoria.IdCategoria">@categoria.NombreCategoria</option>
+                            }
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Puesto -->
+<div class="modal fade" id="editarPuestoModal" tabindex="-1" aria-labelledby="editarPuestoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarPuestoModalLabel">Editar Puesto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("ActualizarPuesto", "Puesto")">
+                    <input type="hidden" id="editarPuestoId" name="IdPuesto">
+                    <div class="mb-3">
+                        <label for="editarNombrePuesto" class="form-label">Nombre del Puesto</label>
+                        <input type="text" class="form-control" id="editarNombrePuesto" name="NombrePuesto" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editarIdCategoria" class="form-label">Categoría:</label>
+                        <select id="editarIdCategoria" name="IdCategoria" class="form-control" required>
+                            <option value="">Seleccione una categoría</option>
+                            @foreach (var categoria in ViewBag.Categorias)
+                            {
+                                <option value="@categoria.IdCategoria">@categoria.NombreCategoria</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-    setTimeout(function() {
-            // Seleccionamos todos los elementos con la clase 'alert-delete-later'
+        // Script para eliminar mensajes de alerta después de un tiempo
+        setTimeout(function() {
             var alertElements = document.querySelectorAll('.alert-delete-later');
             alertElements.forEach(function(alert) {
                 alert.remove();  // Eliminamos cada mensaje de la lista
             });
         }, 3000); // 3000 ms = 3 segundos
+
+        // Script para pasar datos al modal de edición
+        var editarPuestoModal = document.getElementById('editarPuestoModal');
+        editarPuestoModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var nombrePuesto = button.getAttribute('data-nombre');
+            var idCategoria = button.getAttribute('data-categoria');
+
+            var modal = this;
+            modal.querySelector('#editarPuestoId').value = id;
+            modal.querySelector('#editarNombrePuesto').value = nombrePuesto;
+            modal.querySelector('#editarIdCategoria').value = idCategoria;
+        });
     </script>
 }
+

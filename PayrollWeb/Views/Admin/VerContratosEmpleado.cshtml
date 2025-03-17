@@ -64,7 +64,7 @@ else
                         }
                         else
                         {
-                            <a href="@Url.Action("CancelarContrato", "Contrato", new { idContrato = contrato.IdContrato })" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar este contrato?');"><i class="bi bi-x-circle"></i></a>
+                            <a href="#" class="btn btn-danger" onclick="abrirModal(@contrato.IdContrato)"><i class="bi bi-x-circle"></i></a>
                         }
                     </td>
                 </tr>
@@ -77,6 +77,32 @@ else
     <p>No hay contratos disponibles.</p>
 }
 
+<!-- Modal para cancelar contrato -->
+<div class="modal fade" id="modalCancelarContrato" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Cancelar Contrato</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="contratoId" />
+                <div class="form-group">
+                    <label for="motivoCancelacion">Motivo de la cancelación:</label>
+                    <textarea class="form-control" id="motivoCancelacion" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="enviarMotivo()">Confirmar Cancelación</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <a href="@Url.Action("VerEmpleados", "Contrato")" class="btn btn-secondary">Volver</a>
 
 @section Scripts {
@@ -88,6 +114,32 @@ else
                 alert.remove();  // Eliminamos cada mensaje de la lista
             });
         }, 3000); // 3000 ms = 3 segundos
+
+        function abrirModal(idContrato) {
+            $('#contratoId').val(idContrato); // Asigna el ID del contrato al input oculto
+            $('#modalCancelarContrato').modal('show'); // Muestra el modal
+        }
+
+        function enviarMotivo() {
+            var idContrato = $('#contratoId').val();
+            var motivo = $('#motivoCancelacion').val();
+
+            if (motivo.trim() === '') {
+                alert('Por favor, ingresa un motivo para cancelar el contrato.');
+                return;
+            }
+
+            // Enviar el motivo al controlador mediante AJAX
+            $.post('/Contrato/CancelarContrato', { idContrato: idContrato, motivo: motivo }, function(response) {
+                if (response.success) {
+                    alert('Contrato cancelado con éxito.');
+                    location.reload(); // Recargar la página
+                } else {
+                    alert('Ocurrió un error al cancelar el contrato.');
+                }
+            });
+        }
+
     </script>
 }
 

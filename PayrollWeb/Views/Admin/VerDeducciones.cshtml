@@ -1,0 +1,154 @@
+﻿
+    @model List<PayrollWeb.Models.Deduccion>
+
+    <h2>Lista de Deducciones</h2>
+
+    <!-- Botón para abrir el modal de agregar deducción -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal">Agregar Nueva Deducción</button>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-delete-later">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-delete-later">
+            @TempData["Success"]
+        </div>
+    }
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Porcentaje</th>
+                <th>Fija</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var deduccion in Model)
+            {
+                <tr>
+                    <td>@deduccion.NombreDeduccion</td>
+                    <td>@deduccion.Porcentaje.ToString("0.00")%</td>
+                    <td>@(deduccion.Fija == "S" ? "Sí" : "No")</td>
+                    <td>
+                        <!-- Botón para abrir el modal de edición -->
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarDeduccionModal"
+                                data-id="@deduccion.IdDeduccion"
+                                data-nombre="@deduccion.NombreDeduccion"
+                                data-porcentaje="@deduccion.Porcentaje"
+                                data-fija="@deduccion.Fija">
+                            Editar
+                        </button>
+
+                        <!-- Botón para eliminar deducción -->
+                        <a href="@Url.Action("EliminarDeduccion", "Deduccion", new { id = deduccion.IdDeduccion })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta deducción?');">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal Agregar Deducción -->
+    <div class="modal fade" id="agregarDeduccionModal" tabindex="-1" aria-labelledby="agregarDeduccionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="agregarDeduccionModalLabel">Agregar Nueva Deducción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="@Url.Action("CrearDeduccion", "Deduccion")">
+                        <div class="mb-3">
+                            <label for="nombreDeduccion" class="form-label">Nombre de la Deducción</label>
+                            <input type="text" class="form-control" id="nombreDeduccion" name="NombreDeduccion" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="porcentaje" class="form-label">Porcentaje</label>
+                            <input type="number" class="form-control" id="porcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fija" class="form-label">¿Es fija?</label>
+                            <select class="form-control" id="fija" name="Fija" required>
+                                <option value="S">Sí</option>
+                                <option value="N">No</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal Editar Deducción -->
+<div class="modal fade" id="editarDeduccionModal" tabindex="-1" aria-labelledby="editarDeduccionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarDeduccionModalLabel">Editar Deducción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("ActualizarDeduccion", "Deduccion")">
+                    <input type="hidden" id="editarIdDeduccion" name="IdDeduccion">
+                    <div class="mb-3">
+                        <label for="editarNombreDeduccion" class="form-label">Nombre de la Deducción</label>
+                        <input type="text" class="form-control" id="editarNombreDeduccion" name="NombreDeduccion" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editarPorcentaje" class="form-label">Porcentaje</label>
+                        <input type="number" class="form-control" id="editarPorcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editarFija" class="form-label">¿Es fija?</label>
+                        <select class="form-control" id="editarFija" name="Fija" required>
+                            <option value="S">Sí</option>
+                            <option value="N">No</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Script para eliminar mensajes de alerta después de un tiempo
+        setTimeout(function() {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();  // Eliminamos cada mensaje de la lista
+            });
+        }, 3000); // 3000 ms = 3 segundos
+
+        // Script para pasar datos al modal de edición
+        var editarDeduccionModal = document.getElementById('editarDeduccionModal');
+        editarDeduccionModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var nombre = button.getAttribute('data-nombre');
+            var porcentaje = button.getAttribute('data-porcentaje');
+            var fija = button.getAttribute('data-fija');
+
+            var modal = this;
+            modal.querySelector('#editarIdDeduccion').value = id;
+            modal.querySelector('#editarNombreDeduccion').value = nombre;
+            modal.querySelector('#editarPorcentaje').value = parseFloat(porcentaje).toFixed(2);
+            modal.querySelector('#editarFija').value = fija;
+        });
+    </script>
+}
