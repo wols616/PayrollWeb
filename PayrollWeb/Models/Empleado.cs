@@ -128,7 +128,7 @@ namespace PayrollWeb.Models
 
 
         //Mostrar
-        public List<Empleado> MostrarEmpleados()
+        public List<Empleado> ObtenerEmpleados()
         {
 
             List<Empleado> empleados = new List<Empleado>();

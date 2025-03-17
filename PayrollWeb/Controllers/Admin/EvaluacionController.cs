@@ -25,7 +25,7 @@ namespace PayrollWeb.Controllers.Admin
         [Authorize]
         public IActionResult VerEmpleados()
         {
-            List<Empleado> empleados = _empleado.MostrarEmpleados();
+            List<Empleado> empleados = _empleado.ObtenerEmpleados();
             return View("/Views/Admin/VerEmpleadosEvaluacion.cshtml", empleados);
         }
 

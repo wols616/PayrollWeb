@@ -1,0 +1,116 @@
+﻿@model List<Deduccion_Personal>
+
+@{
+    ViewData["Title"] = "Deducciones Personales del Empleado";
+    var empleado = ViewBag.Empleado as Empleado;
+}
+
+<h2>Deducciones Personales de @empleado.Nombre @empleado.Apellidos</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Botón para abrir el modal de agregar deducción -->
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal">
+    Agregar Deducción
+</button>
+
+<!-- Tabla de deducciones personales -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre de la Deducción</th>
+            <th>Porcentaje</th>
+            <th>Porcentaje Personal</th>
+            <th>Fija</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var deduccion in Model)
+            {
+                <tr>
+                    <td>@deduccion.Deduccion.NombreDeduccion</td>
+                    <td>@deduccion.Deduccion.Porcentaje.ToString("0.00")%</td>
+                    <td>@deduccion.PorcentajePersonal.ToString("0.00")%</td>
+                    <td>@(deduccion.Deduccion.Fija == "S" ? "SÍ" : "No")</td>
+                    <td>
+                        @if (deduccion.Deduccion.Fija == "S")
+                        {
+                            <button class="btn btn-secondary btn-sm" disabled>Eliminar</button>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("EliminarDeduccionPersonal", "DeduccionesPersonales", new { IdDeduccion = deduccion.IdDeduccion, IdEmpleado = deduccion.IdEmpleado })"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('¿Estás seguro de eliminar esta deducción?');">
+                                Eliminar
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">No hay deducciones personales registradas.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar deducción -->
+<div class="modal fade" id="agregarDeduccionModal" tabindex="-1" aria-labelledby="agregarDeduccionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarDeduccionModalLabel">Agregar Deducción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("CrearDeduccionPersonal", "DeduccionesPersonales")">
+                    <input type="hidden" name="IdEmpleado" value="@empleado.IdEmpleado" />
+
+                    <div class="mb-3">
+                        <label for="IdDeduccion" class="form-label">Seleccionar Deducción</label>
+                        <select class="form-control" id="IdDeduccion" name="IdDeduccion" required>
+                            <option value="">Seleccione una deducción</option>
+                            @foreach (var deduccion in ViewBag.Deducciones as List<Deduccion>)
+                            {
+                                <option value="@deduccion.IdDeduccion">@deduccion.NombreDeduccion (@deduccion.Porcentaje.ToString("0.00")%)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Eliminar mensajes de alerta después de un tiempo
+        setTimeout(function() {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();
+            });
+        }, 3000); // 3000 ms = 3 segundos
+    </script>
+}

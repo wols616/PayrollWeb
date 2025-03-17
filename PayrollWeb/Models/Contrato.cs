@@ -62,6 +62,7 @@ namespace PayrollWeb.Models
                         if (filasAfectadas > 0)
                         {
                             System.Diagnostics.Debug.WriteLine("Contrato agregado correctamente", "Éxito");
+                            new Metodos().EjecutarActualizarPorcentajesDeducciones();
                             return true;
                         }
                         else

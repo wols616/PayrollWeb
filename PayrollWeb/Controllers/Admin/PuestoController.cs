@@ -82,11 +82,22 @@ namespace PayrollWeb.Controllers.Admin
         public IActionResult ActualizarPuesto(int IdPuesto, string NombrePuesto, int IdCategoria)
         {
             Puesto puesto = new Puesto { IdPuesto = IdPuesto, NombrePuesto = NombrePuesto, IdCategoria = IdCategoria };
-            if (puesto.ExistePuesto())
+            Puesto puestoExistente = _puesto.ObtenerPuesto(IdPuesto);
+
+            if (puestoExistente != null && puestoExistente.NombrePuesto == NombrePuesto && puestoExistente.IdCategoria == IdCategoria)
+            {
+                TempData["Error"] = "No se realizaron cambios en el puesto";
+                return RedirectToAction("VerPuestos");
+            }
+
+            if (puesto.ExistePuesto() && puestoExistente.NombrePuesto != NombrePuesto)
             {
                 TempData["Error"] = "El puesto ya está registrado";
+                return RedirectToAction("VerPuestos");
             }
+
             puesto.EditarPuesto();
+            TempData["Success"] = "Puesto actualizado correctamente";
             return RedirectToAction("VerPuestos");
         }
 
@@ -96,6 +107,7 @@ namespace PayrollWeb.Controllers.Admin
             if (!resultado)
             {
                 TempData["Error"] = "No se puede eliminar el puesto porque ya hay contratos asociados a este";
+                return RedirectToAction("VerPuestos");
             }
             TempData["Success"] = "Puesto eliminado correctamente";
             return RedirectToAction("VerPuestos");
