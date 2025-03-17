@@ -90,5 +90,18 @@ CREATE TABLE Evaluacion_Desempeno(
 	FOREIGN KEY (id_kpi) REFERENCES KPI(id_kpi)
 );
 
+CREATE TABLE Historial_Contrato(
+	id_historial_contrato INT IDENTITY(1,1) PRIMARY KEY,
+	id_contrato_anterior INT,
+	id_contrato_nuevo INT,
+	fecha DATETIME DEFAULT GETDATE(),
+	cambio VARCHAR(50),
+	motivo VARCHAR(300),
+	id_administrador INT,
+	FOREIGN KEY (id_administrador) REFERENCES Administrador(id_administrador),
+	FOREIGN KEY (id_contrato_anterior) REFERENCES Contrato(id_contrato),
+	FOREIGN KEY (id_contrato_nuevo) REFERENCES Contrato(id_contrato)
+);
+
 
 
