@@ -1,0 +1,128 @@
+﻿@model List<Cargo>
+
+@{
+    ViewData["Title"] = "Lista de Cargos";
+}
+
+<!-- Alertas para mensajes de éxito o error -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">@TempData["Error"]</div>
+}
+
+<h2>Lista de Cargos</h2>
+
+<!-- Botón para abrir el modal de creación -->
+<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#crearCargoModal">
+    + Agregar Cargo
+</button>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID Cargo</th>
+            <th>Nombre Cargo</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cargo in Model)
+        {
+            <tr>
+                <td>@cargo.IdCargo</td>
+                <td>@cargo.NombreCargo</td>
+                <td>@cargo.Descripcion</td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#editarCargoModal"
+                            onclick="cargarDatos(@cargo.IdCargo, '@cargo.NombreCargo', '@cargo.Descripcion')">
+                        Editar
+                    </button>
+                    <a href="@Url.Action("EliminarCargo", "Cargo", new { IdCargo = cargo.IdCargo })" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este cargo?')" title="Eliminar Cargo">
+                        <i class="bi bi-trash"></i>
+                    </a>
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar cargo -->
+<div class="modal fade" id="crearCargoModal" tabindex="-1" aria-labelledby="crearCargoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crearCargoModalLabel">Agregar Nuevo Cargo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="CrearCargo" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="NombreCargo" class="form-label">Nombre del Cargo</label>
+                        <input type="text" class="form-control" id="NombreCargo" name="NombreCargo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="Descripcion" name="Descripcion" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cargo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar cargo -->
+<div class="modal fade" id="editarCargoModal" tabindex="-1" aria-labelledby="editarCargoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarCargoModalLabel">Editar Cargo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="ActualizarCargo" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="IdCargo" name="IdCargo">
+                    <div class="mb-3">
+                        <label for="NombreCargoEditar" class="form-label">Nombre del Cargo</label>
+                        <input type="text" class="form-control" id="NombreCargoEditar" name="NombreCargo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="DescripcionEditar" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="DescripcionEditar" name="Descripcion" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar Cargo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Cerrar las alertas después de 3 segundos
+        setTimeout(function () {
+            $(".alert-delete-later").fadeOut();
+        }, 3000);
+
+        // Función para cargar los datos en el modal de edición
+        function cargarDatos(id, nombre, descripcion) {
+            document.getElementById('IdCargo').value = id;
+            document.getElementById('NombreCargoEditar').value = nombre;
+            document.getElementById('DescripcionEditar').value = descripcion;
+        }
+    </script>
+}
