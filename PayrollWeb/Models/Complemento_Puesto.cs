@@ -163,16 +163,23 @@ namespace PayrollWeb.Models
             {
                 using (SqlConnection con = conexion.GetConnection())
                 {
-                    string query = "SELECT * FROM Complemento_puesto WHERE nombre_complemento = @nombreComplemento";
+                    string query = @"
+                SELECT * 
+                FROM Complemento_puesto 
+                WHERE nombre_complemento = @nombreComplemento 
+                AND id_complemento_puesto != @idComplementoPuesto";
+
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@nombreComplemento", NombreComplemento);
+                        cmd.Parameters.AddWithValue("@idComplementoPuesto", IdComplementoPuesto);
+
                         con.Open();
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                return true;
+                                return true; // El nombre ya existe en otro registro
                             }
                         }
                     }
@@ -184,6 +191,7 @@ namespace PayrollWeb.Models
             }
             return false;
         }
+
 
     }
 }
