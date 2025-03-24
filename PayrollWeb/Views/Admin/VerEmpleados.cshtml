@@ -1,10 +1,31 @@
 ﻿@model List<Empleado>
 
-<h2>Lista de Empleados</h2>
+@if(ViewBag.ShowActions == "Contratos")
+{
+    <h1>Contratos de Empleados</h1>
+}
 
-<a href="@Url.Action("VerAgregarEmpleado", "Empleado")" class="btn custom-btn-info">
-    <i class="bi bi-plus-square-fill"></i>
-</a>
+@if(ViewBag.ShowActions == "Deducciones")
+{
+    <h1>Deducciones de Empleados</h1>
+}
+
+@if (ViewBag.ShowActions == "Evaluaciones")
+{
+    <h1>Evaluaciones de Empleados</h1>
+}
+
+@if (ViewBag.ShowActions == "Cargos")
+{
+    <h1>Cargos de Empleados</h1>
+}
+
+@if(ViewBag.ShowActions == "Empleados"){
+    <h1>Gestionar Empleados</h1>
+    <a href="@Url.Action("VerAgregarEmpleado", "Empleado")" class="btn custom-btn-info">
+        <i style="font-size: 2rem" class="bi bi-plus-square"></i>
+    </a>
+}
 
 @if (TempData["ErrorEliminar"] != null)
 {
@@ -46,7 +67,7 @@
                     <td>@emp.Estado</td>
 
                     <td>
-                        @if (ViewBag.ShowActions)
+                        @if (ViewBag.ShowActions == "Empleados")
                         {
                             <a href="@Url.Action("VerEmpleado", "Empleado", new { id = @emp.IdEmpleado })" class="btn custom-btn-info"><i class="bi bi-eye-fill"></i></a>
                             <a href="@Url.Action("VerEditarEmpleado", "Empleado", new { id = emp.IdEmpleado })" class="btn btn-primary"><i class="bi bi-pencil-square"></i></a>
@@ -54,11 +75,26 @@
                                 <i class="bi bi-trash"></i>
                             </a>
                         }
-                        else
+                        else if (ViewBag.ShowActions == "Contratos")
                         {
                             <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = emp.IdEmpleado })" class="btn btn-success">Contrato</a>
                         }
-
+                        else if (ViewBag.ShowActions == "Deducciones")
+                        {
+                            <a href="@Url.Action("VerDeducciones", "DeduccionesPersonales", new { IdEmpleado = @emp.IdEmpleado })" class="btn btn-success">Deducciones</a>
+                        }
+                        else if (ViewBag.ShowActions == "Evaluaciones")
+                        {
+                            <div class="d-flex justify-content-center align-items-center">                            
+                                <a href="@Url.Action("VerEvaluacionDesempeno", "Evaluacion", new { id = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.8rem" class="bi bi-clipboard2-plus"></i></a>
+                            </div>
+                        }
+                        else if (ViewBag.ShowActions == "Cargos")
+                        {
+                            <div class="d-flex justify-content-center align-items-center">
+                                <a href="@Url.Action("VerCargosEmpleado", "Cargo", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-calendar2-plus"></i></a>
+                            </div>
+                        }
                     </td>
                 </tr>
             }
