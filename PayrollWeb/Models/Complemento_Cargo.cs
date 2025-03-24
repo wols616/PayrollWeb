@@ -9,7 +9,7 @@ namespace PayrollWeb.Models
         public int IdEmpleado { get; set; }
         public DateTime FechaInicio { get; set; }
         public DateTime FechaFin { get; set; }
-        public Decimal MontoComplemento { get; set; }
+        public decimal MontoComplemento { get; set; }
         public Cargo Cargo { get; set; }
         public Empleado Empleado { get; set; }
 
@@ -110,7 +110,7 @@ namespace PayrollWeb.Models
         }
 
         //MÉTODO PARA AGREGAR UN COMPLEMENTO DE CARGO
-        public void AgregarComplementoCargo(Complemento_Cargo complementoCargo)
+        public bool AgregarComplementoCargo()
         {
             // Consulta SQL para agregar un complemento de cargo
             string query = "INSERT INTO Complemento_Cargo (id_cargo, id_empleado, fecha_inicio, fecha_fin, monto_complemento) VALUES (@IdCargo, @IdEmpleado, @FechaInicio, @FechaFin, @MontoComplemento)";
@@ -123,17 +123,19 @@ namespace PayrollWeb.Models
                     // Ejecutar la consulta
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@IdCargo", complementoCargo.IdCargo);
-                        command.Parameters.AddWithValue("@IdEmpleado", complementoCargo.IdEmpleado);
-                        command.Parameters.AddWithValue("@FechaInicio", complementoCargo.FechaInicio);
-                        command.Parameters.AddWithValue("@FechaFin", complementoCargo.FechaFin);
-                        command.Parameters.AddWithValue("@MontoComplemento", complementoCargo.MontoComplemento);
+                        command.Parameters.AddWithValue("@IdCargo", IdCargo);
+                        command.Parameters.AddWithValue("@IdEmpleado", IdEmpleado);
+                        command.Parameters.AddWithValue("@FechaInicio", FechaInicio);
+                        command.Parameters.AddWithValue("@FechaFin", FechaFin);
+                        command.Parameters.AddWithValue("@MontoComplemento", MontoComplemento);
                         command.ExecuteNonQuery();
+                        return true;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Error al agregar el complemento de cargo: " + ex.Message);
+                    return false;
                 }
             }
         }

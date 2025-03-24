@@ -443,6 +443,34 @@ namespace PayrollWeb.Models
             }
         }
 
+        public int? ObtenerContratoAnterior(int idEmpleado)
+        {
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT TOP 1 id_contrato FROM Contrato WHERE id_empleado = @id_empleado ORDER BY fecha_alta DESC";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+                        con.Open();
+
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el contrato anterior: " + ex.Message);
+            }
+            return null; // Retorna null si no hay contrato previo
+        }
+
+
         public bool ActualizarEstadoEmpleado(int idEmpleado)
         {
             try

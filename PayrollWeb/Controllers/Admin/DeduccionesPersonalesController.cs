@@ -16,7 +16,9 @@ namespace PayrollWeb.Controllers.Admin
 
         public IActionResult VerEmpleados()
         {
-            return View("/Views/Admin/VerEmpleadosDeducciones.cshtml", _empleado.ObtenerEmpleados());
+            List<Empleado> empleados = _empleado.ObtenerEmpleados();
+            ViewBag.ShowActions = "Deducciones";
+            return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
         public IActionResult VerDeducciones(int IdEmpleado)

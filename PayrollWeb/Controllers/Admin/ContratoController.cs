@@ -62,10 +62,10 @@ namespace PayrollWeb.Controllers.Admin
         }
 
         [Authorize]
-        public IActionResult VerEmpleados(bool showActions = false)
+        public IActionResult VerEmpleados()
         {
             List<Empleado> empleados = _empleado.ObtenerEmpleados();
-            ViewBag.ShowActions = showActions;
+            ViewBag.ShowActions = "Contratos";
             return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
@@ -91,6 +91,10 @@ namespace PayrollWeb.Controllers.Admin
                 IdAdministrador = Int32.Parse(AdminIdClaim.Value);
             }
 
+            // Obtener el contrato anterior
+            int? idContratoAnterior = new Contrato().ObtenerContratoAnterior(_contrato.IdEmpleado);
+
+
             Contrato contrato = new Contrato
             {
                 IdEmpleado = _contrato.IdEmpleado,
@@ -104,17 +108,35 @@ namespace PayrollWeb.Controllers.Admin
             if (contrato.AgregarContrato())
             {
                 TempData["Success"] = "Contrato creado correctamente.";
-                Historial_Contrato historial_Contrato = new Historial_Contrato
+
+                if (idContratoAnterior == null)
                 {
-                    //Ese -1 está terriblemente mal, pero funciona
-                    IdContratoAnterior = contrato.IdContrato - 1,
-                    IdContratoNuevo = contrato.IdContrato,
-                    Fecha = DateTime.Now,
-                    Cambio = "Creación",
-                    Motivo = !string.IsNullOrEmpty(Motivo) ? Motivo : "Creación de contrato",
-                    IdAdministrador = IdAdministrador
-                };
-                historial_Contrato.AgregarHistorialContrato();
+                    Historial_Contrato historial_Contrato = new Historial_Contrato
+                    {
+
+                        IdContratoAnterior = contrato.IdContrato,
+                        IdContratoNuevo = contrato.IdContrato,
+                        Fecha = DateTime.Now,
+                        Cambio = "Creación",
+                        Motivo = !string.IsNullOrEmpty(Motivo) ? Motivo : "Creación de contrato",
+                        IdAdministrador = IdAdministrador
+                    };
+                    historial_Contrato.AgregarHistorialContrato();
+                } else if (idContratoAnterior != null)
+                {
+                    Historial_Contrato historial_Contrato = new Historial_Contrato
+                    {
+                        IdContratoAnterior = idContratoAnterior,
+                        IdContratoNuevo = contrato.IdContrato,
+                        Fecha = DateTime.Now,
+                        Cambio = "Creación",
+                        Motivo = !string.IsNullOrEmpty(Motivo) ? Motivo : "Creación de contrato",
+                        IdAdministrador = IdAdministrador
+                    };
+                    historial_Contrato.AgregarHistorialContrato();
+                }
+
+                
             }
 
             return RedirectToAction("VerContratosEmpleado", "Contrato", new { idEmpleado = contrato.IdEmpleado });
@@ -137,7 +159,7 @@ namespace PayrollWeb.Controllers.Admin
             //Genero el registro para el historial
             Historial_Contrato historial_Contrato = new Historial_Contrato
             {
-                IdContratoAnterior = idContrato - 1,
+                IdContratoAnterior = idContrato,
                 IdContratoNuevo = idContrato,
                 Fecha = DateTime.Now,
                 Cambio = "Cancelación",
