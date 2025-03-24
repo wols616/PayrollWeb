@@ -1,0 +1,149 @@
+﻿@model List<Complemento_Cargo>
+
+@{
+    ViewData["Title"] = "Cargos desempeñados por el empleado Empleado";
+    var empleado = ViewBag.Empleado as Empleado;
+}
+
+<h2>Deducciones Personales de @empleado.Nombre @empleado.Apellidos</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Botón para abrir el modal de agregar cargo -->
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarCargoModal">
+    Agregar Cargo
+</button>
+
+<!-- Tabla de Cargos Desempeñados -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre del cargo</th>
+            <th>Descripción</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Monto Complemento</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var complementoCargo in Model)
+            {
+                <tr>
+                    <td>@complementoCargo.Cargo.NombreCargo</td>
+                    <td>@complementoCargo.Cargo.Descripcion</td>
+                    <td>@complementoCargo.FechaInicio</td>
+                    <td>@complementoCargo.FechaFin</td>
+                    <td>@(complementoCargo.MontoComplemento)</td>
+                    <td>
+                        <a href="@Url.Action("EliminarComplementoCargo", "Cargo", new { IdComplementoCargo = complementoCargo.IdComplementoCargo, IdEmpleado = empleado.IdEmpleado })"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('¿Estás seguro de eliminar este cargo?');">
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">No hay cargos desempeñados por este empleado.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar cargos -->
+<div class="modal fade" id="agregarCargoModal" tabindex="-1" aria-labelledby="agregarCargoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarCargoModalLabel">Agregar Cargo desempeñado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("CrearComplementoCargo", "Cargo")">
+                    <input type="hidden" name="IdEmpleado" value="@empleado.IdEmpleado" />
+
+                    <div class="mb-3">
+                        <label for="IdCargo" class="form-label">Seleccionar Cargo</label>
+                        <select class="form-control" id="IdCargo" name="IdCargo" required>
+                            <option value="">Seleccione un cargo</option>
+                            @foreach (var cargo in ViewBag.Cargos as List<Cargo>)
+                            {
+                                <option value="@cargo.IdCargo">@cargo.NombreCargo (@cargo.Descripcion))</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Fecha de inicio</label>
+                        <input type="date" class="form-control" name="FechaInicio" required />
+                    </div>                    
+                    <div class="mb-3">
+                        <label>Fecha de Finalización</label>
+                        <input type="date" class="form-control" name="FechaFin"  required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Monto Complemento:</label>
+                        <input type="number" class="form-control" name="MontoComplemento" min="0" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Eliminar mensajes de alerta después de un tiempo
+        setTimeout(function() {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();
+            });
+        }, 3000); // 3000 ms = 3 segundos
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var fechaInicioInput = document.querySelector("input[name='FechaInicio']");
+            var fechaFinInput = document.querySelector("input[name='FechaFin']");
+
+            fechaInicioInput.addEventListener("change", function () {
+                var fechaInicio = new Date(this.value);
+
+                if (!isNaN(fechaInicio.getTime())) {
+                    var fechaMinima = new Date(fechaInicio);
+                    fechaMinima.setDate(fechaMinima.getDate() + 1); // +1 día
+
+                    // Formatear la fecha en YYYY-MM-DD para el input tipo date
+                    var fechaMinimaStr = fechaMinima.toISOString().split("T")[0];
+
+                    // Actualizar el valor mínimo permitido en el campo FechaFin
+                    fechaFinInput.min = fechaMinimaStr;
+
+                    // Si la fecha fin es menor a la mínima permitida, resetearla
+                    if (fechaFinInput.value && fechaFinInput.value < fechaMinimaStr) {
+                        fechaFinInput.value = fechaMinimaStr;
+                    }
+                }
+            });
+        });
+    </script>
+}

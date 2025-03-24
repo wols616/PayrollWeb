@@ -62,10 +62,10 @@ namespace PayrollWeb.Controllers.Admin
         }
 
         [Authorize]
-        public IActionResult VerEmpleados(bool showActions = false)
+        public IActionResult VerEmpleados()
         {
             List<Empleado> empleados = _empleado.ObtenerEmpleados();
-            ViewBag.ShowActions = showActions;
+            ViewBag.ShowActions = "Contratos";
             return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
