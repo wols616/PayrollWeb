@@ -10,6 +10,7 @@ namespace PayrollWeb.Controllers.Admin
         Contrato _contrato = new Contrato();
         Puesto _puesto = new Puesto();
         Categoria _categoria = new Categoria();
+        Puesto_Historico _puestoHistorico = new Puesto_Historico();
 
         [Authorize]
         public IActionResult Index()
@@ -40,6 +41,20 @@ namespace PayrollWeb.Controllers.Admin
             }
 
             ViewBag.Empleado = empleado;
+            List<Puesto_Historico> puestosHistoricos = new List<Puesto_Historico>();
+            foreach (var contrato in contratos)
+            {
+                if (contrato.Vigente == "N")
+                {
+                    puestosHistoricos.Add(new Puesto_Historico().ObtenerPuestoHistorico(contrato.IdContrato));
+                    ViewBag.SueldoBase = new Puesto_Historico().ObtenerPuestoHistorico(contrato.IdContrato).SueldoBase;
+                } else
+                {
+                    puestosHistoricos.Add(null);
+                    ViewBag.SueldoBase = new Puesto().ObtenerSueldoBasePuesto(contrato.IdPuesto);
+                }
+            }
+            ViewBag.PuestosHistoricos = puestosHistoricos;
             return View("/Views/Admin/VerContratosEmpleado.cshtml", contratos);
         }
 
@@ -167,6 +182,8 @@ namespace PayrollWeb.Controllers.Admin
                 IdAdministrador = IdAdministrador
             };
             historial_Contrato.AgregarHistorialContrato();
+
+            _puestoHistorico.RegistrarPuestoHistorico(idContrato);
             return Json(new { success = true });
         }
     }

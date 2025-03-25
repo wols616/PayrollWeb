@@ -122,6 +122,15 @@ CREATE TABLE Complemento_Cargo(
 	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
 );
 
+CREATE TABLE Puesto_Historico(
+	id_puesto_historico INT IDENTITY(1,1) PRIMARY KEY,
+	nombre_puesto VARCHAR(50),
+	sueldo_base Decimal(10,2),
+	nombre_categoria VARCHAR(50),
+	id_contrato INT,
+	FOREIGN KEY (id_contrato) REFERENCES Contrato(id_contrato)
+);
+
 
 
 
