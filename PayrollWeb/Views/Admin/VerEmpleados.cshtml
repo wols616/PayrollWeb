@@ -19,6 +19,14 @@
 {
     <h1>Cargos de Empleados</h1>
 }
+@if (ViewBag.ShowActions == "Competencias")
+{
+    <h1>Competencias de Empleados</h1>
+}
+@if (ViewBag.ShowActions == "Habilidades")
+{
+    <h1>Habilidades de Empleados</h1>
+}
 
 @if(ViewBag.ShowActions == "Empleados"){
     <h1>Gestionar Empleados</h1>
@@ -105,6 +113,18 @@
                         {
                             <div class="d-flex justify-content-center align-items-center">
                                 <a href="@Url.Action("ReportesHistorialAscensos", "Reportes", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-calendar2-plus"></i></a>
+                            </div>
+                        }
+                        else if (ViewBag.ShowActions == "Competencias")
+                        {
+                            <div class="d-flex justify-content-center align-items-center">
+                                <a href="@Url.Action("VerCompetenciasEmpleado", "CompetenciasHabilidades", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-tools"></i></a>
+                            </div>
+                        }
+                        else if (ViewBag.ShowActions == "Habilidades")
+                        {
+                            <div class="d-flex justify-content-center align-items-center">
+                                <a href="@Url.Action("VerHabilidadesEmpleado", "CompetenciasHabilidades", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-flag-fill"></i></a>
                             </div>
                         }
                     </td>
