@@ -1,0 +1,120 @@
+﻿@model List<object>
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">
+        Distribución Salarial por Categoría y Complementos
+    </h2>
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container" style="position: relative; height:60vh; width: 100%;">
+                <canvas id="graficaPuestos"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var datos = @Html.Raw(Json.Serialize(Model));
+
+            // Preparar datos para la gráfica
+            var puestos = datos.map(item => item.nombrePuesto);
+            var sueldos = datos.map(item => item.sueldoBase);
+
+            var ctx = document.getElementById('graficaPuestos').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: puestos,
+                    datasets: [{
+                        label: 'Sueldo Total',
+                        data: sueldos,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Sueldo Total (Base + Complementos)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Puestos'
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                },
+                                afterLabel: function(context) {
+                                    const dataIndex = context.dataIndex;
+                                    const complementos = datos[dataIndex].complementos;
+                                    const sueldoTotal = datos[dataIndex].sueldoBase;
+                                    let totalComplementosMonto = 0;
+
+                                    if (complementos && complementos.length > 0) {
+                                        complementos.forEach(comp => {
+                                            totalComplementosMonto += parseFloat(comp.monto || 0);
+                                        });
+                                    }
+
+                                    const sueldoBase = sueldoTotal - totalComplementosMonto;
+
+                                    let tooltipText = '\nDesglose:\n';
+                                    tooltipText += `• Sueldo Base: $${sueldoBase.toFixed(2)}\n`;
+
+                                    if (complementos && complementos.length > 0) {
+                                        tooltipText += '  Complementos:\n';
+                                        complementos.forEach(comp => {
+                                            const nombre = comp.nombre || comp.nombre_complemento;
+                                            const monto = comp.monto || '0.00';
+                                            tooltipText += `    • ${nombre}: $${parseFloat(monto).toFixed(2)}\n`;
+                                        });
+                                    } else {
+                                        tooltipText += '  Sin complementos\n';
+                                    }
+
+                                    tooltipText += `• Sueldo Total: $${sueldoTotal.toFixed(2)}\n`;
+                                    return tooltipText;
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución de Sueldos por Puesto'
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

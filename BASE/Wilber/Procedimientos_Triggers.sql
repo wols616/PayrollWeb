@@ -230,3 +230,46 @@ BEGIN
     DEALLOCATE EmpleadoCursor;
 END;
 --__________________________________________________________________________________________________________
+--PROCEDIMIENTO PARA CREAR UN PUESTO HISTORICO CADA QUE SE CANCELA UN CONTRATO
+CREATE OR ALTER PROCEDURE sp_RegistrarPuestoHistorico
+    @id_contrato INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @vigente CHAR(1);
+    
+    -- Verificar si el contrato está marcado como no vigente
+    SELECT @vigente = vigente 
+    FROM Contrato 
+    WHERE id_contrato = @id_contrato;
+    
+    -- Solo proceder si el contrato es no vigente
+    IF @vigente = 'N'
+    BEGIN
+        -- Insertar en Puesto_Historico con los datos del puesto asociado
+        INSERT INTO Puesto_Historico (
+            nombre_puesto,
+            sueldo_base,
+            nombre_categoria,
+            id_contrato
+        )
+        SELECT 
+            p.nombre_puesto,
+            p.sueldo_base,
+            c.nombre_categoria,
+            @id_contrato
+        FROM Puesto p
+        INNER JOIN Categoria c ON p.id_categoria = c.id_categoria
+        INNER JOIN Contrato ct ON p.id_puesto = ct.id_puesto
+        WHERE ct.id_contrato = @id_contrato;
+        
+        PRINT 'Registro histórico creado para el puesto asociado al contrato: ' + CAST(@id_contrato AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        PRINT 'El contrato aún está vigente, no se creará registro histórico';
+    END
+END;
+--_________________________________________________________________________________________________________
+

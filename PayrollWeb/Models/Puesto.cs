@@ -362,6 +362,35 @@ namespace PayrollWeb.Models
             return listaPuestosViewModel;
         }
 
+        public decimal ObtenerSueldoBasePuesto(int idPuesto)
+        {
+            decimal sueldoBase = 0;
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT sueldo_base FROM Puesto  WHERE id_puesto = @idPuesto";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@idPuesto", idPuesto);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                sueldoBase = Convert.ToDecimal(reader["sueldo_base"]);
+                            }
+                        }
+                    }
+                }
+                return sueldoBase;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el sueldo base del puesto: " + ex.Message, "Error");
+                return 0;
+            }
+        }
 
     }
 
