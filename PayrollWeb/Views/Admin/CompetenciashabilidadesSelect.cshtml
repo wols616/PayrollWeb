@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Gestión de Competencias y habilidades";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <a href="@Url.Action("VerCompetencias", "CompetenciasHabilidades")" class="btn btn-primary btn-block">Registrar Competencias</a>
+        </div>
+        <div class="col-md-6">
+            <a href="@Url.Action("VerEmpleados", "CompetenciasHabilidades", new { ShowActions = "Competencias" })" class="btn btn-primary btn-block">Asignar Competencias</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <a href="@Url.Action("VerHabilidades", "CompetenciasHabilidades")" class="btn btn-primary btn-block">Registrar Habilidades</a>
+        </div>
+        <div class="col-md-6">
+            <a href="@Url.Action("VerEmpleados", "CompetenciasHabilidades", new { ShowActions = "Habilidades" })" class="btn btn-primary btn-block">Asignar Habilidades</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        text-align: center;
+    }
+
+    .btn-block {
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+    }
+
+    .mt-5 {
+        margin-top: 3rem;
+    }
+</style>
