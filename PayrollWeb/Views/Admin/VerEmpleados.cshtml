@@ -101,6 +101,12 @@
                                 <a href="@Url.Action("VerAscensosEmpleados", "Graficos", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-calendar2-plus"></i></a>
                             </div>
                         }
+                        else if (ViewBag.ShowActions == "HistorialAscensosReportes")
+                        {
+                            <div class="d-flex justify-content-center align-items-center">
+                                <a href="@Url.Action("ReportesHistorialAscensos", "Reportes", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-calendar2-plus"></i></a>
+                            </div>
+                        }
                     </td>
                 </tr>
             }

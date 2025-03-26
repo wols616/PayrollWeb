@@ -31,7 +31,6 @@ namespace PayrollWeb.Controllers.Graficos
             ViewBag.Empleado = _Empleado.ObtenerEmpleado(IdEmpleado);
             return View("/Views/Graficos/HistorialAscensos.cshtml");
         }
-
         //-------------------------------------------------------------------------------------------------------------
 
         public IActionResult ObtenerSalarioPorCategoria()
