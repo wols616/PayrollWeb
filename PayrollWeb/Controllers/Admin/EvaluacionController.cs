@@ -9,6 +9,7 @@ namespace PayrollWeb.Controllers.Admin
         EvaluacionDesempeno _evaluacionDesempeno = new EvaluacionDesempeno();
         Empleado _empleado = new Empleado();
         KPI _kpi = new KPI();
+        Meta _meta = new Meta();
         public IActionResult Index()
         {
             return View();
@@ -19,6 +20,7 @@ namespace PayrollWeb.Controllers.Admin
             List<EvaluacionDesempenoViewModel> listaEvaluacionesDesempeno = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(id);
             ViewBag.Empleado = _empleado.ObtenerEmpleado(id);
             ViewBag.KPIs = _kpi.ObtenerKPI();
+            ViewBag.Metas = _meta.ObtenerMetasDeEmpleado(id);
             return View("/Views/Admin/VerEvaluacionDesempeno.cshtml", listaEvaluacionesDesempeno);
         }
 
@@ -66,6 +68,45 @@ namespace PayrollWeb.Controllers.Admin
                 return RedirectToAction("VerEvaluacionDesempeno", new { id = IdEmpleado });
             }
             TempData["Success"] = "Evaluación de desempeño actualizada correctamente";
+            return RedirectToAction("VerEvaluacionDesempeno", new { id = IdEmpleado });
+        }
+
+        public IActionResult CrearMeta(string MetaDescripcion, string Estado, int IdEmpleado)
+        {
+            Meta meta = new Meta
+            {
+                IdEmpleado = IdEmpleado,
+                MetaDescripcion = MetaDescripcion,
+                Estado = Estado
+            };
+            if (meta.AgregarMeta())
+            {
+                TempData["Success"] = "Meta agregada correctamente";
+            }
+            else
+            {
+                TempData["Error"] = "Error al agregar la meta";
+            }
+            return RedirectToAction("VerEvaluacionDesempeno", new { id = IdEmpleado });
+        }
+
+        public IActionResult ActualizarMeta(string MetaDescripcion, string Estado, int IdEmpleado, int IdMeta)
+        {
+            Meta meta = new Meta
+            {
+                IdMeta = IdMeta,
+                MetaDescripcion = MetaDescripcion,
+                Estado = Estado
+            };
+
+            if (meta.ActualizarMeta())
+            {
+                TempData["Success"] = "Meta actualizada correctamente";
+            }
+            else
+            {
+                TempData["Error"] = "Error al actualizar la meta";
+            }
             return RedirectToAction("VerEvaluacionDesempeno", new { id = IdEmpleado });
         }
 
