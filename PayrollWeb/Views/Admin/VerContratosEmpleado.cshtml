@@ -52,7 +52,9 @@ else
                     <td>@contrato.IdContrato</td>
                     <td>@contrato.Puesto</td>
                     <td>@contrato.Categoria</td>
-                    <td>@contrato.SueldoBase</td>
+                    
+                    <td>@ViewBag.SueldoBase</td>
+
                     <td>@contrato.FechaAlta.ToString("dd/MM/yyyy")</td>
                     <td>@(contrato.FechaBaja.HasValue ? contrato.FechaBaja.Value.ToString("dd/MM/yyyy") : "N/A")</td>
                     <td>@contrato.TipoContrato</td>

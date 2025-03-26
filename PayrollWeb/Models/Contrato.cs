@@ -536,6 +536,7 @@ namespace PayrollWeb.Models
                 return false;
             }
         }
+
     }
     public class ContratoViewModel
     {
