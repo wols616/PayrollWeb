@@ -31,6 +31,11 @@ namespace PayrollWeb.Controllers.Graficos
             ViewBag.Empleado = _Empleado.ObtenerEmpleado(IdEmpleado);
             return View("/Views/Graficos/HistorialAscensos.cshtml");
         }
+
+        public IActionResult VerAscensosGlobal()
+        {
+            return View("/Views/Graficos/HistorialAscensosGlobal.cshtml");
+        }
         //-------------------------------------------------------------------------------------------------------------
 
         public IActionResult ObtenerSalarioPorCategoria()
@@ -47,6 +52,11 @@ namespace PayrollWeb.Controllers.Graficos
         public IActionResult ObtenerHistorialAscensos(int IdEmpleado)
         {
             return Json(Grafico.ObtenerHistorialAscensos(IdEmpleado));
+        }
+
+        public IActionResult ObtenerHistorialAscensosGlobal()
+        {
+            return Json(Grafico.ObtenerHistorialAscensosGlobal());
         }
 
     }

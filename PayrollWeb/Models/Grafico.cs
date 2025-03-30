@@ -180,5 +180,98 @@ namespace PayrollWeb.Models
             return data;
         }
 
+        public List <Object> ObtenerHistorialAscensosGlobal()
+        {
+            var data = new List<object>();
+
+            using (SqlConnection conn = conexion.GetConnection())
+            {
+                conn.Open();
+                string query = @"
+                        WITH SueldosConsecutivos AS (
+                        SELECT
+                            e.nombre,
+                            e.apellidos,
+                            h.fecha, 
+                            p.sueldo_base AS sueldo_actual,
+                            p.nombre_puesto AS puesto_actual,
+                            ph.sueldo_base AS sueldo_historico,
+                            ph.nombre_puesto AS puesto_historico,
+                            h.motivo, 
+                            c.vigente,
+                            -- Identificar cambios de sueldo
+                            LAG(CASE WHEN c.vigente = 'S' THEN p.sueldo_base ELSE ph.sueldo_base END) 
+                                OVER (PARTITION BY e.id_empleado ORDER BY h.fecha) AS sueldo_anterior,
+                            -- Identificar cambios de puesto
+                            LAG(CASE WHEN c.vigente = 'S' THEN p.nombre_puesto ELSE ph.nombre_puesto END) 
+                                OVER (PARTITION BY e.id_empleado ORDER BY h.fecha) AS puesto_anterior,
+                            -- Numerar los contratos por empleado para identificar el primero
+                            ROW_NUMBER() OVER (PARTITION BY e.id_empleado ORDER BY h.fecha) AS num_contrato
+                        FROM Historial_Contrato h
+                        JOIN Contrato c ON h.id_contrato_nuevo = c.id_contrato
+                        JOIN Puesto p ON c.id_puesto = p.id_puesto
+                        LEFT JOIN Puesto_Historico ph ON c.id_contrato = ph.id_contrato
+                        JOIN Empleado e ON e.id_empleado = c.id_empleado
+                        WHERE h.cambio = 'Creación'
+                    ),
+                    SueldosFiltrados AS (
+                        SELECT
+                            nombre,
+                            apellidos,
+                            fecha,
+                            CASE WHEN vigente = 'S' THEN sueldo_actual ELSE sueldo_historico END AS sueldo_base,
+                            CASE WHEN vigente = 'S' THEN puesto_actual ELSE puesto_historico END AS nombre_puesto,
+                            motivo,
+                            vigente,
+                            sueldo_anterior,
+                            puesto_anterior,
+                            num_contrato
+                        FROM SueldosConsecutivos
+                        WHERE 
+                            -- Excluir el primer contrato de cada empleado
+                            num_contrato > 1
+                            -- O incluir cuando hay un cambio de sueldo o de puesto
+                            AND (
+                                sueldo_anterior IS NULL 
+                                OR (CASE WHEN vigente = 'S' THEN sueldo_actual ELSE sueldo_historico END) != sueldo_anterior
+                                OR (CASE WHEN vigente = 'S' THEN puesto_actual ELSE puesto_historico END) != puesto_anterior
+                            )
+                    )
+                    SELECT
+                        nombre,
+                        apellidos,
+                        fecha,
+                        sueldo_base,
+                        nombre_puesto,
+                        motivo,
+                        vigente
+                    FROM SueldosFiltrados
+                    ORDER BY fecha ASC;";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            data.Add(new
+                            {
+                                nombre = reader["nombre"],
+                                apellidos = reader["apellidos"],
+                                fecha = reader["fecha"],
+                                sueldoBase = reader["sueldo_base"],
+                                nombrePuesto = reader["nombre_puesto"],
+                                motivo = reader["motivo"],
+                                vigente = reader["vigente"]
+                            });
+                        }
+                    }
+                }
+            }
+
+            return data;
+
+        }
+
     }
 }
