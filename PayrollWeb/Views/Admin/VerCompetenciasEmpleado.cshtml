@@ -1,6 +1,85 @@
-﻿@{
+﻿@model List<Competencia_Empleado>
+
+@{
     ViewData["Title"] = "Competencias del Empleado";
     var empleado = ViewBag.Empleado as Empleado;
 }
 
-<h2>Compentencias de @empleado.Nombre @empleado.Apellidos</h2>
+<h2>Competencias de @empleado.Nombre @empleado.Apellidos</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+<!-- Tabla de competencias personales -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre de la Competencia</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var competencia in Model)
+            {
+                <tr>
+                    <td>@competencia.Competencia.Nombre</td>
+                    <td>
+                        <a href="@Url.Action("EliminarCompetenciaEmpleado", "CompetenciasEmpleados", new { IdCompetenciaEmpleado = competencia.IdCompetenciaEmpleado })"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('¿Estás seguro de eliminar esta competencia?');">
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" class="text-center">No hay competencias registradas.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar competencia -->
+<form method="post" action="@Url.Action("CrearCompetenciaEmpleado", "CompetenciasEmpleados")">
+    <input type="hidden" name="IdEmpleado" value="@empleado.IdEmpleado" />
+
+    <div class="mb-3">
+        <label for="IdCompetencia" class="form-label">Seleccionar Competencia</label>
+        <select class="form-control" id="IdCompetencia" name="IdCompetencia" required>
+            <option value="">Seleccione una competencia</option>
+            @foreach (var competencia in ViewBag.Competencias as List<Competencia>)
+            {
+                <option value="@competencia.IdCompetencia">@competencia.Nombre</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+@section Scripts {
+    <script>
+        // Eliminar mensajes de alerta después de un tiempo
+        setTimeout(function() {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();
+            });
+        }, 3000); // 3 segundos
+    </script>
+}

@@ -1,5 +1,120 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model List<PayrollWeb.Models.Habilidad>
+
+<h2>Lista de Habilidades</h2>
+
+<!-- Botón para abrir el modal de agregar habilidad -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarHabilidadModal">Agregar Nueva Habilidad</button>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var habilidad in Model)
+        {
+            <tr>
+                <td>@habilidad.Nombre</td>
+                <td>
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarHabilidadModal"
+                            data-id="@habilidad.IdHabilidad"
+                            data-nombre="@habilidad.Nombre">
+                        Editar
+                    </button>
+
+                    <a href="@Url.Action("EliminarHabilidad", "Habilidad", new { IdHabilidad = habilidad.IdHabilidad })"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Estás seguro de eliminar esta habilidad?');">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<!-- Modal Agregar Habilidad -->
+<div class="modal fade" id="agregarHabilidadModal" tabindex="-1" aria-labelledby="agregarHabilidadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarHabilidadModalLabel">Agregar Nueva Habilidad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("CrearHabilidad", "Habilidad")">
+                    <div class="mb-3">
+                        <label for="nombreHabilidad" class="form-label">Nombre de la Habilidad</label>
+                        <input type="text" class="form-control" id="nombreHabilidad" name="Nombre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Editar Habilidad -->
+<div class="modal fade" id="editarHabilidadModal" tabindex="-1" aria-labelledby="editarHabilidadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarHabilidadModalLabel">Editar Habilidad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("ActualizarHabilidad", "Habilidad")">
+                    <input type="hidden" id="editarIdHabilidad" name="IdHabilidad">
+                    <div class="mb-3">
+                        <label for="editarNombreHabilidad" class="form-label">Nombre de la Habilidad</label>
+                        <input type="text" class="form-control" id="editarNombreHabilidad" name="Nombre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // Script para eliminar mensajes de alerta después de un tiempo
+        setTimeout(function () {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function (alert) {
+                alert.remove();
+            });
+        }, 3000);
+        // Script para pasar datos al modal de edición
+        var editarHabilidadModal = document.getElementById('editarHabilidadModal');
+        editarHabilidadModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var nombre = button.getAttribute('data-nombre');
+
+            var modal = this;
+            modal.querySelector('#editarIdHabilidad').value = id;
+            modal.querySelector('#editarNombreHabilidad').value = nombre;
+        });
+
+
+
+    </script>
 }
