@@ -1,0 +1,125 @@
+﻿@model List<Asistencia>
+
+@{
+    ViewData["Title"] = "Agregar Hora de Entrada";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Formulario para agregar hora de entrada -->
+<form id="formAgregarAsistencia" method="post" action="@Url.Action("AgregarAsistenciaEntrada", "Asistencia")">
+    <div class="form-group">
+        <label for="fecha">Fecha</label>
+        <input type="date" class="form-control" id="fecha" name="fecha" required
+               min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <div class="form-group">
+        <label for="empleado">Empleado</label>
+        <select class="form-control" id="empleado" name="id" required>
+            <option value="">Seleccione un empleado</option>
+        </select>
+        <div id="spinnerEmpleados" style="display: none; margin-top: 5px;">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Cargando empleados...
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="horaEntrada">Hora de Entrada</label>
+        <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" />
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Asistencia</button>
+</form>
+
+<hr />
+<!-- Mensaje de éxito -->
+<div id="mensajeExito" class="alert alert-success" style="display: none;">
+    Asistencia agregada con éxito.
+</div>
+
+<!-- Mensaje de error -->
+<div id="mensajeError" class="alert alert-danger" style="display: none;">
+    No se pudo agregar la asistencia.
+</div>
+
+@section Scripts {
+    <script>
+        // Función que se ejecuta cuando cambia la fecha
+        $('#fecha').on('change', function() {
+            var fechaSeleccionada = $(this).val();
+
+            if (fechaSeleccionada) {
+                $('#spinnerEmpleados').show();
+
+                $.ajax({
+                    url: '@Url.Action("ObtenerEmpleadosSinAsistencia", "Asistencia")',
+                    type: 'GET',
+                    data: { fecha: fechaSeleccionada },
+                    success: function(data) {
+                        $('#empleado').empty();
+                        $('#empleado').append('<option value="">Seleccione un empleado</option>');
+                        data.forEach(function(empleado) {
+                            var partes = empleado.split('|');
+                            var idEmpleado = partes[0];
+                            var nombreCompleto = partes[1];
+                            $('#empleado').append('<option value="' + idEmpleado + '">' + nombreCompleto + '</option>');
+                        });
+                        $('#spinnerEmpleados').hide();
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error al cargar los empleados');
+                        $('#spinnerEmpleados').hide();
+                    }
+                });
+            }
+        });
+
+        // Capturar el envío del formulario
+        $('#formAgregarAsistencia').on('submit', function(event) {
+            event.preventDefault();
+
+            $.ajax({
+                url: '@Url.Action("AgregarAsistenciaEntrada", "Asistencia")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#mensajeExito').show();
+                        $('#mensajeError').hide();
+                        $('#horaEntrada').val('');
+
+                        var fechaSeleccionada = $('#fecha').val();
+                        $.ajax({
+                            url: '@Url.Action("ObtenerEmpleadosSinAsistencia", "Asistencia")',
+                            type: 'GET',
+                            data: { fecha: fechaSeleccionada },
+                            success: function(data) {
+                                $('#empleado').empty();
+                                $('#empleado').append('<option value="">Seleccione un empleado</option>');
+                                data.forEach(function(empleado) {
+                                    var partes = empleado.split('|');
+                                    var idEmpleado = partes[0];
+                                    var nombreCompleto = partes[1];
+                                    $('#empleado').append('<option value="' + idEmpleado + '">' + nombreCompleto + '</option>');
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.log('Error al cargar los empleados');
+                            }
+                        });
+                    } else {
+                        $('#mensajeExito').hide();
+                        $('#mensajeError').text(response.message).show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error: ' + error);
+                    $('#mensajeError').text('Error al registrar la asistencia.').show();
+                    $('#mensajeExito').hide();
+                }
+            });
+        });
+    </script>
+}

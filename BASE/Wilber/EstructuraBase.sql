@@ -132,5 +132,15 @@ CREATE TABLE Puesto_Historico(
 );
 
 
+SELECT * FROM empleado
+
+INSERT INTO Empleado (dui, nombre, apellidos, telefono, direccion, cuenta_corriente, estado, correo, contrasena)  
+VALUES  
+('01234567-8', 'Juan', 'López', '7777-1234', 'San Salvador, El Salvador', '1234567890123456', 'Activo', 'juan.perez@email.com', 'Pass1234'),  
+('02345678-9', 'Petronila', 'Martínez', '7777-5678', 'Santa Tecla, La Libertad', '2345678901234567', 'Activo', 'maria.gomez@email.com', 'SecurePass1'),  
+('03456789-0', 'Carlos', 'Ramírez Torres', '7777-9876', 'Soyapango, San Salvador', '3456789012345678', 'Activo', 'carlos.ramirez@email.com', 'MyPass2024');  
+
+
+
 
 
