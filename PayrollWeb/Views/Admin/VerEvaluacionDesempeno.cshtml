@@ -53,6 +53,32 @@
     </tbody>
 </table>
 
+<!-- Botón para agregar una nueva meta usando JavaScript -->
+<a href="#" class="btn btn-primary mb-3 mt-5" onclick="abrirAgregarModalMetas(@ViewBag.Empleado.IdEmpleado)">Agregar Nueva Meta</a>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Meta</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var meta in ViewBag.Metas)
+        {
+            <tr>
+                <td>@meta.MetaDescripcion</td>
+                <td>@meta.Estado</td>
+                <td>
+@*                     <button class="btn btn-warning btn-sm" onclick="editarMeta(@meta.IdMeta, @meta.MetaDescripcion, @meta.Estado)">Editar</button> *@
+                    <button class="btn btn-warning btn-sm" onclick="editarMeta(@meta.IdMeta, '@meta.MetaDescripcion.Replace("'", "\\'")', '@meta.Estado')">Editar</button>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 <!-- Modal para agregar o editar evaluación -->
 <div class="modal fade" id="evaluacionModal" tabindex="-1" aria-labelledby="evaluacionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -89,6 +115,37 @@
     </div>
 </div>
 
+<!-- Modal para agregar o editar Meta -->
+<div class="modal fade" id="metaModal" tabindex="-1" aria-labelledby="metaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="metaModalLabel">Agregar Meta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="metaForm" method="post">
+                    <input type="hidden" id="metaId" name="IdMeta">
+                    <input type="hidden" id="idEmpleado" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción de la Meta</label>
+                        <input type="text" class="form-control" id="descripcion" name="MetaDescripcion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-control" id="estado" name="Estado" required>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Completada">Completada</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     function abrirAgregarModal(idEmpleado) {
         document.getElementById("evaluacionForm").action = "/Evaluacion/CrearEvaluacion";
@@ -101,6 +158,16 @@
         modal.show();
     }
 
+    function abrirAgregarModalMetas(idEmpleado) {
+        document.getElementById("metaForm").action = "/Evaluacion/CrearMeta";
+        document.getElementById("metaModalLabel").innerText = "Agregar Meta";
+        document.getElementById("metaId").value = "";
+        document.getElementById("descripcion").value = "";
+        document.getElementById("estado").value = "";
+        var modal = new bootstrap.Modal(document.getElementById('metaModal'));
+        modal.show();
+    } 
+
     function editarEvaluacion(id, fecha, idKpi, puntuacion) {
         document.getElementById("evaluacionForm").action = "/Evaluacion/ActualizarEvaluacion";
         document.getElementById("evaluacionModalLabel").innerText = "Editar Evaluación";
@@ -109,6 +176,16 @@
         document.getElementById("idKpi").value = idKpi;
         document.getElementById("puntuacion").value = puntuacion;
         var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
+        modal.show();
+    }
+
+    function editarMeta(id, descripcion, estado) {
+        document.getElementById("metaForm").action = "/Evaluacion/ActualizarMeta";
+        document.getElementById("metaModalLabel").innerText = "Editar Meta";
+        document.getElementById("metaId").value = id;
+        document.getElementById("descripcion").value = descripcion;
+        document.getElementById("estado").value = estado;
+        var modal = new bootstrap.Modal(document.getElementById('metaModal'));
         modal.show();
     }
 
