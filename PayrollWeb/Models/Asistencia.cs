@@ -379,7 +379,6 @@ namespace PayrollWeb.Models
 
 
 
-
         public List<string> EmpleadosSinAsistencia(DateTime fecha)
         {
             List<string> listado = new List<string>();
@@ -388,14 +387,16 @@ namespace PayrollWeb.Models
             {
                 connection.Open();
 
-                // Consulta corregida: Obtiene empleados que NO tienen asistencia en la fecha
+                // Consulta corregida: Obtiene empleados que NO tienen hora de entrada, hora de salida ni ausencia en la fecha
                 string query = @"
 SELECT Empleado.id_empleado, Empleado.nombre, Empleado.apellidos 
 FROM Empleado
 LEFT JOIN Asistencia ON Asistencia.id_empleado = Empleado.id_empleado 
     AND Asistencia.fecha = @fecha
-WHERE Asistencia.id_empleado IS NULL OR Asistencia.ausencia IS NOT NULL;";
-
+WHERE Asistencia.id_empleado IS NULL 
+    OR (Asistencia.hora_entrada IS NULL 
+    AND Asistencia.hora_salida IS NULL 
+    AND Asistencia.ausencia IS NULL);";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -418,6 +419,7 @@ WHERE Asistencia.id_empleado IS NULL OR Asistencia.ausencia IS NOT NULL;";
 
             return listado;
         }
+
 
 
         public List<string> EmpleadosSinSalida(DateTime fecha)
@@ -512,7 +514,9 @@ WHERE Asistencia.id_empleado IS NULL OR Asistencia.ausencia IS NOT NULL;";
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         // Agregar los parámetros a la consulta
-                        command.Parameters.AddWithValue("@ausencia", ausencia);
+                        //command.Parameters.AddWithValue("@ausencia", ausencia);
+                        command.Parameters.AddWithValue("@ausencia", ausencia ?? (object)DBNull.Value);
+
                         command.Parameters.AddWithValue("@fecha", fecha);
                         command.Parameters.AddWithValue("@id", id);
 
@@ -531,6 +535,88 @@ WHERE Asistencia.id_empleado IS NULL OR Asistencia.ausencia IS NOT NULL;";
             }
 
             return exito;
+        }
+
+
+
+        public bool InsertarAusencia(int id, string fecha, string ausencia)
+        {
+            bool exito = false; // Valor por defecto (false) si no se insertó correctamente
+            string query = "INSERT INTO Asistencia (id_empleado, fecha, hora_entrada, hora_salida, ausencia) " +
+                           "VALUES (@id, @fecha, @hora_entrada, @hora_salida, @ausencia)";
+
+            using (SqlConnection connection = conexion.GetConnection())
+            {
+                try
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        // Agregar los parámetros a la consulta
+                        command.Parameters.AddWithValue("@ausencia", ausencia ?? (object)DBNull.Value);
+                        command.Parameters.AddWithValue("@fecha", fecha);
+                        command.Parameters.AddWithValue("@id", id);
+
+                        // Definir hora de entrada y salida como 00:00
+                        command.Parameters.AddWithValue("@hora_entrada", "00:00");
+                        command.Parameters.AddWithValue("@hora_salida", "00:00");
+
+                        int rowsAffected = command.ExecuteNonQuery();
+                        // Si se insertó al menos una fila, la operación fue exitosa
+                        if (rowsAffected > 0)
+                        {
+                            exito = true;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    exito = false; // Si ocurre algún error, la operación no fue exitosa
+                }
+            }
+
+            return exito;
+        }
+
+
+
+        public List<string> ObtenerEmpleadosSinAsistenciaNiAusencia(DateTime fecha)
+        {
+            List<string> listado = new List<string>();
+
+            using (SqlConnection connection = conexion.GetConnection())
+            {
+                connection.Open();
+
+                // Consulta para obtener empleados sin asistencia ni ausencia en la fecha
+                string query = @"
+        SELECT Empleado.id_empleado, Empleado.nombre, Empleado.apellidos 
+        FROM Empleado
+        LEFT JOIN Asistencia ON Asistencia.id_empleado = Empleado.id_empleado 
+            AND Asistencia.fecha = @fecha
+        WHERE Asistencia.id_empleado IS NULL 
+        AND Asistencia.ausencia IS NULL;";  // Sin ausencia registrada
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@fecha", fecha);
+
+                    using (var dataAdapter = new SqlDataAdapter(command))
+                    {
+                        var dataTable = new DataTable();
+                        dataAdapter.Fill(dataTable);
+
+                        foreach (DataRow row in dataTable.Rows)
+                        {
+                            // Concatenar id_empleado, nombre y apellidos
+                            string empleado = $"{row["id_empleado"]}|{row["nombre"]} {row["apellidos"]}";
+                            listado.Add(empleado);
+                        }
+                    }
+                }
+            }
+
+            return listado;
         }
 
 

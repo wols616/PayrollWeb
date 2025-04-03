@@ -192,8 +192,25 @@ namespace PayrollWeb.Controllers.Admin
 
         }
 
+        public IActionResult AsistenciaAusencia()
+        {
+            return View("/Views/Admin/AsistenciaAusencia.cshtml");
+        }
 
+        [HttpPost]
+        public JsonResult RegistrarAusencia(int idEmpleado, string fecha, string ausencia)
+        {
+            var resultado = _asistencia.InsertarAusencia(idEmpleado, fecha, ausencia);
 
+            return Json(new { success = true, message = "Ausencia Ingresada" });
+
+        }
+
+        public JsonResult ObtenerEmpleadosSinAsistenciaNiAusencia(DateTime fecha)
+        {
+            var empleados = _asistencia.ObtenerEmpleadosSinAsistenciaNiAusencia(fecha);
+            return Json(empleados);  // Empleados es una lista de strings con el formato "nombre apellidos"
+        }
 
 
     }

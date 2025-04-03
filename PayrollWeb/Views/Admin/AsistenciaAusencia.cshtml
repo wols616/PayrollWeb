@@ -1,13 +1,11 @@
-﻿@model List<Asistencia>
-
-@{
-    ViewData["Title"] = "Agregar Hora de Entrada";
+﻿@{
+    ViewData["Title"] = "Registrar Ausencia";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<!-- Formulario para agregar hora de entrada -->
-<form id="formAgregarAsistencia" method="post" action="@Url.Action("AgregarAsistenciaEntrada", "Asistencia")">
+<!-- Formulario para registrar ausencia -->
+<form id="formRegistrarAusencia" method="post" action="@Url.Action("RegistrarAusencia", "Asistencia")">
     <div class="form-group">
         <label for="fecha">Fecha</label>
         <input type="date" class="form-control" id="fecha" name="fecha" required
@@ -16,7 +14,7 @@
 
     <div class="form-group">
         <label for="empleado">Empleado</label>
-        <select class="form-control" id="empleado" name="id" required>
+        <select class="form-control" id="empleado" name="idEmpleado" required>
             <option value="">Seleccione un empleado</option>
         </select>
         <div id="spinnerEmpleados" style="display: none; margin-top: 5px;">
@@ -27,19 +25,113 @@
 
     <div class="form-group">
         <label for="horaEntrada">Hora de Entrada</label>
-        <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" />
+        <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" value="00:00" readonly />
     </div>
 
-    <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Asistencia</button>
+    <div class="form-group">
+        <label for="horaSalida">Hora de Salida</label>
+        <input type="time" class="form-control" id="horaSalida" name="horaSalida" value="00:00" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="ausencia">Motivo de la Ausencia</label>
+        <textarea class="form-control" id="ausencia" name="ausencia" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Ausencia</button>
 </form>
 
 <hr />
 <!-- Mensaje de éxito -->
 <div id="mensajeExito" class="alert alert-success" style="display: none;">
-    Asistencia agregada con éxito.
+    Ausencia registrada con éxito.
 </div>
 
 <!-- Mensaje de error -->
 <div id="mensajeError" class="alert alert-danger" style="display: none;">
-    No se pudo agregar la asistencia.
+    No se pudo registrar la ausencia.
 </div>
+
+@section Scripts {
+    <script>
+               // Función que se ejecuta cuando cambia la fecha
+        $('#fecha').on('change', function() {
+            var fechaSeleccionada = $(this).val();
+
+            if (fechaSeleccionada) {
+                $('#spinnerEmpleados').show();
+
+                $.ajax({
+                    url: '@Url.Action("ObtenerEmpleadosSinAsistenciaNiAusencia", "Asistencia")',
+                    type: 'GET',
+                    data: { fecha: fechaSeleccionada },
+                    success: function(data) {
+                        $('#empleado').empty();
+                        $('#empleado').append('<option value="">Seleccione un empleado</option>');
+
+                        // Procesamos los datos que vienen con el formato "nombre apellidos"
+                        data.forEach(function(empleado) {
+                            // Separar id_empleado y el nombre completo (esto se hace solo en frontend)
+                            var partes = empleado.split('|');
+                            var idEmpleado = partes[0]; // El primer elemento es el id_empleado
+                            var nombreCompleto = partes[1]; // El segundo elemento es el nombre completo
+
+                            // Agregar opción al select con solo el nombre completo
+                            $('#empleado').append('<option value="' + idEmpleado + '">' + nombreCompleto + '</option>');
+                        });
+
+                        $('#spinnerEmpleados').hide();
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error al cargar los empleados');
+                        $('#spinnerEmpleados').hide();
+                    }
+                });
+            }
+        });
+
+
+        // Capturar el envío del formulario
+        $('#formRegistrarAusencia').on('submit', function(event) {
+            event.preventDefault();
+
+            var idEmpleado = $('#empleado').val();
+            var fecha = $('#fecha').val();
+            var ausencia = $('#ausencia').val();
+
+            if (!idEmpleado || !fecha || !ausencia) {
+                $('#mensajeError').text('Todos los campos son obligatorios').show();
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("RegistrarAusencia", "Asistencia")',
+                type: 'POST',
+                data: {
+                    idEmpleado: idEmpleado,
+                    fecha: fecha,
+                    ausencia: ausencia
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#mensajeExito').show();
+                        $('#mensajeError').hide();
+
+                        // Limpiar los campos
+                        $('#empleado').val('');
+                        $('#fecha').val('');
+                        $('#ausencia').val('');
+                    } else {
+                        $('#mensajeExito').hide();
+                        $('#mensajeError').text(response.message).show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error: ' + error);
+                    $('#mensajeError').text('Error al registrar la ausencia.').show();
+                    $('#mensajeExito').hide();
+                }
+            });
+        });
+    </script>
+}

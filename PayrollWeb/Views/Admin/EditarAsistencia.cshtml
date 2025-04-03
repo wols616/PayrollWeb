@@ -25,7 +25,7 @@
 
             <div class="form-group">
                 <label for="fecha">Fecha:</label>
-                <input type="text" class="form-control" value="@fechaAsistencia" disabled />
+                <input type="text" class="form-control" name="fechaAsistencia" value="@fechaAsistencia" disabled />
             </div>
 
             <div class="form-group">
@@ -45,14 +45,14 @@
                 <br />
             </div>
 
-          @*   <!-- Motivo de la ausencia (solo visible si está marcado el checkbox de ausente) -->
+            <!-- Motivo de la ausencia (solo visible si está marcado el checkbox de ausente) -->
             <div class="form-group" id="motivoContainer" style="display:none;">
                 <label for="motivoAusencia1">Motivo de la Ausencia:</label>
                 <textarea id="motivoAusencia" name="motivoAusencia" class="form-control" rows="3" placeholder="Ingrese el motivo de la ausencia..."></textarea>
             </div>
 
             <input type="hidden" name="idEmpleado" value="@idEmpleado" />
-            <input type="hidden" name="fechaAsistencia" value="@fechaAsistencia" /> *@
+            <input type="hidden" name="fechaAsistencia" value="@fechaAsistencia" />
 
             <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         </form>
@@ -70,92 +70,114 @@ else
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function () {
+
         $(".formAsistencia").submit(function (e) {
-            e.preventDefault(); // Evita la recarga de la página
+        e.preventDefault(); // Evita la recarga de la página
 
-            var form = $(this);
-            var idEmpleado = $("input[name='idEmpleado']").val();
-            var fechaAsistencia = $("input[name='fechaAsistencia']").val();
-            var ausencia = $("textarea[name='motivoAusencia']").val();
+        var form = $(this);
+        var idEmpleado = $("input[name='idEmpleado']").val();
+        var fechaAsistencia = $("input[name='fechaAsistencia']").val();
+        var ausencia = $("textarea[name='motivoAusencia']").val();
 
-            // Si el checkbox de ausente está marcado, cambiar las horas a 00:00
-            if ($("#ausente").prop("checked")) {
-                $("input[name='horaEntrada']").val("00:00");
-                $("input[name='horaSalida']").val("00:00");
+        // Verificar si las horas de entrada o salida son diferentes de 00:00
+        var horaEntrada = $("input[name='horaEntrada']").val();
+        var horaSalida = $("input[name='horaSalida']").val();
+
+        if (horaEntrada !== "00:00" || horaSalida !== "00:00") {
+            // Si alguna hora es diferente de 00:00, establecer ausencia como null
+            ausencia = null;
+        }
+
+        // Si el checkbox de ausente está marcado, cambiar las horas a 00:00
+        if ($("#ausente").prop("checked")) {
+            $("input[name='horaEntrada']").val("00:00");
+            $("input[name='horaSalida']").val("00:00");
+            // Mostrar el campo para ingresar el motivo de la ausencia
+            $("#motivoContainer").show();
+
+            // Validar que el motivo de ausencia no esté vacío
+            if ($("#motivoAusencia").val().trim() === "") {
+                alert("Por favor, ingrese el motivo de la ausencia.");
+                return false;
+            }
+        } else {
+            // Si el checkbox no está marcado, setear la ausencia como null y ocultar el campo
+            ausencia = null;
+            $("#motivoContainer").hide();
+            $("textarea[name='motivoAusencia']").val(''); // Limpiar el campo de texto
+
+            // Validar que al menos una hora no sea 00:00
+            if (horaEntrada === "00:00" && horaSalida === "00:00") {
+                alert("Por favor, ingrese al menos una hora diferente de 00:00.");
+                return false;
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("GuardarEdicion", "Asistencia")",
+            data: form.serialize(),
+            success: function (response) {
+                var mensajeDiv = $("#mensaje");
+                if (response.success) {
+                    mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
+                } else {
+                    mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+
+                // Desvanecer mensaje después de 3 segundos
+                setTimeout(function () {
+                    $(".alert").fadeOut("slow");
+                }, 3000);
+            },
+            error: function () {
+                $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
+            }
+        });
+
+           // Enviar la actualización de la ausencia
+    $.ajax({
+        type: "POST",
+        url: "@Url.Action("ActualizarAusencia", "Asistencia")",
+        data: {
+            idEmpleado: idEmpleado,
+            fecha: fechaAsistencia,
+            ausencia: (horaEntrada !== "00:00" || horaSalida !== "00:00") ? null : ausencia // Si alguna hora es diferente de 00:00, enviar null
+        },
+        success: function (response) {
+            var mensajeDiv = $("#mensaje");
+            if (response.success) {
+                mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
             } else {
-                // Si el checkbox no está marcado, setear la ausencia como null
-                ausencia = null;
+                mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
             }
 
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("GuardarEdicion", "Asistencia")",
-                data: form.serialize(),
-                success: function (response) {
-                    var mensajeDiv = $("#mensaje");
-                    if (response.success) {
-                        mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
-                    } else {
-                        mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
-                    }
+            // Desvanecer mensaje después de 3 segundos
+            setTimeout(function () {
+                $(".alert").fadeOut("slow");
+            }, 3000);
+        },
+        error: function () {
+            $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
+        }
+    });
 
-                    // Desvanecer mensaje después de 3 segundos
-                    setTimeout(function () {
-                        $(".alert").fadeOut("slow");
-                    }, 3000);
-                },
-                error: function () {
-                    $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
-                }
-            });
+    });
 
-            // Enviar la actualización de la ausencia
-            $.ajax({
-                type: "POST",
-                url: "@Url.Action("ActualizarAusencia", "Asistencia")",
-                data: {
-                    idEmpleado: idEmpleado,
-                    fecha: fechaAsistencia,
-                    ausencia: ausencia // Enviar null si no hay motivo de ausencia
-                },
-                success: function (response) {
-                    var mensajeDiv = $("#mensaje");
-                    if (response.success) {
-                        mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
-                    } else {
-                        mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
-                    }
-
-                    // Desvanecer mensaje después de 3 segundos
-                    setTimeout(function () {
-                        $(".alert").fadeOut("slow");
-                    }, 3000);
-                },
-                error: function () {
-                    $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
-                }
-            });
-        });
-
-        // Si el checkbox de "ausente" está marcado, cambiar las horas a 00:00 automáticamente
-        $("#ausente").change(function () {
-            if ($(this).prop("checked")) {
-                $("#horaEntrada").val("00:00");
-                $("#horaSalida").val("00:00");
-                // Mostrar el campo para ingresar el motivo
-                $("#motivoContainer").show();
-            } 
-            if(!$(this).prop("checked")){
-                $("#motivoContainer").hide();
-                $("#motivoAusencia").val('');
-            }
-
-            
-        });
-
-
-        // Obtener motivo de la ausencia al cargar la página
+    // Si el checkbox de "ausente" está marcado, cambiar las horas a 00:00 automáticamente
+    $("#ausente").change(function () {
+        if ($(this).prop("checked")) {
+            $("#horaEntrada").val("00:00");
+            $("#horaSalida").val("00:00");
+            // Mostrar el campo para ingresar el motivo
+            $("#motivoContainer").show();
+        } else {
+            // Si el checkbox no está marcado, ocultar el campo de motivo y limpiar el texto
+            $("#motivoContainer").hide();
+            $("#motivoAusencia").val('');
+        }
+    });
+     // Obtener motivo de la ausencia al cargar la página
         function obtenerMotivoAusencia(idEmpleado, fecha) {
             $.ajax({
                 type: "GET",
@@ -192,5 +214,36 @@ else
             $("#ausente").prop("checked", true);
             $("#motivoContainer").show();
         }
-    });
+
+
+            // Si el checkbox de "ausente" no está marcado, actualizar la ausencia a null
+    if (!$("#ausente").prop("checked")) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ActualizarAusencia", "Asistencia")",
+            data: {
+                idEmpleado: idEmpleado,
+                fecha: fechaAsistencia,
+                ausencia: null // Enviar null para la ausencia si el checkbox no está marcado
+            },
+            success: function (response) {
+                var mensajeDiv = $("#mensaje");
+                if (response.success) {
+                    mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
+                } else {
+                    mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+
+                // Desvanecer mensaje después de 3 segundos
+                setTimeout(function () {
+                    $(".alert").fadeOut("slow");
+                }, 3000);
+            },
+            error: function () {
+                $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
+            }
+        });
+    }
+
+
 </script>

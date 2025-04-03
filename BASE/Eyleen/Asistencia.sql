@@ -48,6 +48,8 @@ INSERT INTO Asistencia (id_empleado, fecha, hora_entrada, hora_salida, ausencia)
 (5, '2024-03-29', '08:15:00', '17:20:00', NULL);
 
 
+DROP TABLE Asistencia
+
 SELECT fecha, hora_entrada, hora_entrada FROM Asistencia where id_empleado = 1
 
 select * from Empleado
@@ -80,9 +82,8 @@ WHERE Empleado.nombre LIKE '%ju%'
  WHERE Asistencia.fecha = '2024-03-25' and Empleado.dui = '22334455-6'
 
 
- SELECT Asistencia.fecha, Empleado.nombre, Asistencia.hora_entrada, Asistencia.hora_salida from Asistencia
- JOIN Empleado ON Asistencia.id_empleado = Empleado.id_empleado
- WHERE Asistencia.fecha = '2024-03-25'
+ SELECT Asistencia.hora_entrada, Asistencia.hora_salida from Asistencia
+ WHERE Asistencia.fecha = '2024-03-25' and asistencia.id_empleado = 1
 
  SELECT * FROM Asistencia
 
@@ -103,3 +104,30 @@ WHERE Asistencia.id_empleado IS NULL;
 
 
  
+
+
+
+
+SELECT Empleado.id_empleado, Empleado.nombre, Empleado.apellidos 
+FROM Empleado
+INNER JOIN Asistencia ON Asistencia.id_empleado = Empleado.id_empleado 
+WHERE Asistencia.fecha = '2025-04-02' 
+AND Asistencia.hora_entrada <> '00:00'
+AND Asistencia.hora_salida = '00:00'
+AND Asistencia.ausencia IS NULL;
+
+
+ UPDATE Asistencia SET hora_salida = '22:22' WHERE id_empleado = 1 AND fecha = '2025-04-03'
+
+ select * from asistencia
+
+
+ 
+INSERT INTO Asistencia (id_empleado, fecha, hora_entrada, hora_salida, ausencia) VALUES
+-- Empleado 1
+(2, '2025-03-2', '00:00:00', '0:00:00', 'Ha cometido ciertos delitos');
+
+
+
+UPDATE Asistencia SET ausencia = 'ejemplo1'
+WHERE id_empleado = 1 AND fecha = '2025-04-03'
