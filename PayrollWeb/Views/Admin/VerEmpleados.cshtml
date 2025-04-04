@@ -35,6 +35,14 @@
     </a>
 }
 
+@if (ViewBag.ShowActions == "HistorialAscensos")
+{
+    <a href="@Url.Action("VerAscensosGlobal", "Graficos")" class="btn btn-primary">
+        <i class="fas fa-chart-line"></i> Todos los ascensos
+    </a>
+
+}
+
 @if (TempData["ErrorEliminar"] != null)
 {
     <div id="errorEliminar" class="alert alert-danger alert-delete-later">
@@ -118,13 +126,13 @@
                         else if (ViewBag.ShowActions == "Competencias")
                         {
                             <div class="d-flex justify-content-center align-items-center">
-                                <a href="@Url.Action("VerCompetenciasEmpleado", "CompetenciasHabilidades", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-tools"></i></a>
+                                <a href="@Url.Action("VerCompetenciasEmpleado", "CompetenciasEmpleados", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-tools"></i></a>
                             </div>
                         }
                         else if (ViewBag.ShowActions == "Habilidades")
                         {
                             <div class="d-flex justify-content-center align-items-center">
-                                <a href="@Url.Action("VerHabilidadesEmpleado", "CompetenciasHabilidades", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-flag-fill"></i></a>
+                                <a href="@Url.Action("VerHabilidadesEmpleado", "HabilidadesEmpleados", new { IdEmpleado = emp.IdEmpleado })" class="btn custom-btn-info"><i style="font-size: 1.5rem" class="bi bi-flag-fill"></i></a>
                             </div>
                         }
                     </td>

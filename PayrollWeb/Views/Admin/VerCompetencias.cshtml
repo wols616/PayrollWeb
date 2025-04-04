@@ -1,5 +1,119 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model List<PayrollWeb.Models.Competencia>
+
+<h2>Lista de Competencias</h2>
+
+<!-- Botón para abrir el modal de agregar competencia -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarCompetenciaModal">Agregar Nueva Competencia</button>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var competencias in Model)
+        {
+            <tr>
+                <td>@competencias.Nombre</td>
+                <td>
+                    <!-- Botón para abrir el modal de edición -->
+                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarCompetenciaModal"
+                            data-id="@competencias.IdCompetencia"
+                            data-nombre="@competencias.Nombre"
+                            }>
+                        Editar
+                    </button>
+
+                    <!-- Botón para eliminar competencia -->
+                    <a href="@Url.Action("EliminarCompetencia", "Competencia", new { id = competencias.IdCompetencia })"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Estás seguro de eliminar esta competencia?');">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<!-- Modal Agregar Competencia -->
+<div class="modal fade" id="agregarCompetenciaModal" tabindex="-1" aria-labelledby="agregarCompetenciaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarCompetenciaModalLabel">Agregar Nueva Competencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("CrearCompetencia", "Competencia")">
+                    <div class="mb-3">
+                        <label for="nombreCompetencia" class="form-label">Nombre de la Competencia</label>
+                        <input type="text" class="form-control" id="nombreCompetencia" name="Nombre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Competencia -->
+<div class="modal fade" id="editarCompetenciaModal" tabindex="-1" aria-labelledby="editarCompetenciaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarCompetenciaModalLabel">Editar Competencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("ActualizarCompetencia", "Competencia")">
+                    <input type="hidden" id="editarIdCompetencia" name="IdCompetencia">
+                    <div class="mb-3">
+                        <label for="editarNombreCompetencia" class="form-label">Nombre de la Competencia</label>
+                        <input type="text" class="form-control" id="editarNombreCompetencia" name="Nombre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Script para eliminar mensajes de alerta después de un tiempo
+        setTimeout(function () {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function (alert) {
+                alert.remove();
+            });
+        }, 3000);
+        // Script para pasar datos al modal de edición
+        var editarCompetenciaModal = document.getElementById('editarCompetenciaModal');
+        editarCompetenciaModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var nombre = button.getAttribute('data-nombre');
+
+            var modal = this;
+            modal.querySelector('#editarIdCompetencia').value = id;
+            modal.querySelector('#editarNombreCompetencia').value = nombre;
+        });
+
+    </script>
 }

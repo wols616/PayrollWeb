@@ -131,6 +131,14 @@ CREATE TABLE Puesto_Historico(
 	FOREIGN KEY (id_contrato) REFERENCES Contrato(id_contrato)
 );
 
+CREATE TABLE Meta(
+	id_meta INT IDENTITY(1,1) PRIMARY KEY,
+	id_empleado INT,
+	meta_descripcion VARCHAR(200),
+	estado VARCHAR(50),
+	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
+);
+
 
 SELECT * FROM empleado
 

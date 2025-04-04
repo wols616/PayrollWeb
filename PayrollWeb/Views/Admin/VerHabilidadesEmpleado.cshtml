@@ -1,6 +1,85 @@
-﻿@{
+﻿@model List<Habilidad_Empleado>
+
+@{
     ViewData["Title"] = "Habilidades del Empleado";
     var empleado = ViewBag.Empleado as Empleado;
 }
 
 <h2>Habilidades de @empleado.Nombre @empleado.Apellidos</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+<!-- Tabla de habilidades personales -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre de la Habilidad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var habilidad in Model)
+            {
+                <tr>
+                    <td>@habilidad.Habilidad.Nombre</td>
+                    <td>
+                        <a href="@Url.Action("EliminarHabilidadEmpleado", "HabilidadesEmpleados", new { IdHabilidadEmpleado = habilidad.IdHabilidadEmpleado })"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('¿Estás seguro de eliminar esta habilidad?');">
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" class="text-center">No hay habilidades registradas.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para agregar habilidad -->
+<form method="post" action="@Url.Action("CrearHabilidadEmpleado", "HabilidadesEmpleados")">
+    <input type="hidden" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado" />
+
+    <div class="mb-3">
+        <label for="IdHabilidad" class="form-label">Seleccionar Habilidad</label>
+        <select class="form-control" id="IdHabilidad" name="IdHabilidad" required>
+            <option value="">Seleccione una habilidad</option>
+            @foreach (var habilidad in ViewBag.Habilidades as List<PayrollWeb.Models.Habilidad>)
+            {
+                <option value="@habilidad.IdHabilidad">@habilidad.Nombre</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+@section Scripts {
+    <script>
+        // Eliminar mensajes de alerta después de un tiempo
+        setTimeout(function() {
+            var alertElements = document.querySelectorAll('.alert-delete-later');
+            alertElements.forEach(function(alert) {
+                alert.remove();
+            });
+        }, 3000); // 3 segundos
+    </script>
+}
