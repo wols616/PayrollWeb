@@ -5,9 +5,8 @@ namespace PayrollWeb
 {
     public class Conexion
     {
-        // Cadena de conexión definida dentro de la clase
-        private readonly string connectionString = "Server=LOCALHOST;Database=payroll_pruebas;User Id=brenda;Password=Beds123;Encrypt=False;";
-
+        private readonly string connectionString = "Server=LOCALHOST;Database=payroll_pruebas;User Id=wil;Password=123456;Encrypt=False;";
+      
         // Método para obtener la conexión
         public SqlConnection GetConnection()
         {
