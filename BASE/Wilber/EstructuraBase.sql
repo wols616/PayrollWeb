@@ -1,6 +1,6 @@
-create database payroll_pruebas
+create database payroll_web1
 
-use payroll_pruebas
+use payroll_web1
 
 CREATE TABLE Empleado (
     id_empleado INT IDENTITY(1,1) PRIMARY KEY,
@@ -13,7 +13,7 @@ CREATE TABLE Empleado (
 	estado VARCHAR(20) NOT NULL,
 	correo VARCHAR(50) NOT NULL UNIQUE,
 	contrasena VARCHAR(50) NOT NULL
-);
+); 
 
 CREATE TABLE Administrador (
     id_administrador INT IDENTITY(1,1) PRIMARY KEY,
@@ -57,7 +57,7 @@ CREATE TABLE Contrato (
 	vigente VARCHAR(1) NOT NULL,
     FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado) ON DELETE CASCADE,
     FOREIGN KEY (id_puesto) REFERENCES Puesto(id_puesto) ON DELETE CASCADE
-);
+);  
 
 CREATE TABLE Deduccion (
     id_deduccion INT IDENTITY(1,1) PRIMARY KEY,
@@ -101,7 +101,7 @@ CREATE TABLE Historial_Contrato(
 	FOREIGN KEY (id_administrador) REFERENCES Administrador(id_administrador),
 	FOREIGN KEY (id_contrato_anterior) REFERENCES Contrato(id_contrato),
 	FOREIGN KEY (id_contrato_nuevo) REFERENCES Contrato(id_contrato)
-);
+); 
 --ALTER TABLE Historial_Contrato
 --ALTER COLUMN id_contrato_anterior INT NULL;
 
@@ -137,8 +137,52 @@ CREATE TABLE Meta(
 	meta_descripcion VARCHAR(200),
 	estado VARCHAR(50),
 	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
+); 
+
+CREATE TABLE Habilidad(
+	id_habilidad INT IDENTITY(1,1) PRIMARY KEY,
+	nombre VARCHAR(100)
+);
+ALTER TABLE Habilidad ADD activo BIT DEFAULT 1;
+
+CREATE TABLE Competencia(
+	id_competencia INT IDENTITY(1,1) PRIMARY KEY,
+	nombre VARCHAR(100)
+); 
+ALTER TABLE Competencia ADD activo BIT DEFAULT 1;
+
+CREATE TABLE Habilidad_Empleado(
+	id_habilidad_empleado INT IDENTITY(1,1) PRIMARY KEY,
+	id_empleado INT,
+	id_habilidad INT,
+	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado),
+	FOREIGN KEY (id_habilidad) REFERENCES Habilidad(id_habilidad)
 );
 
+CREATE TABLE Competencia_Empleado(
+	id_competencia_empleado INT IDENTITY(1,1) PRIMARY KEY,
+	id_empleado INT,
+	id_competencia INT,
+	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado),
+	FOREIGN KEY (id_competencia) REFERENCES Competencia(id_competencia)
+);
 
+CREATE TABLE Asistencia(
+	id_asistencia INT IDENTITY(1,1) PRIMARY KEY,
+	id_empleado INT NOT NULL,
+	fecha DATE DEFAULT GETDATE() NOT NULL,
+	hora_entrada TIME DEFAULT CAST(GETDATE() AS TIME) NOT NULL,
+	hora_salida TIME DEFAULT CAST(GETDATE() AS TIME) NOT NULL,
+	ausencia VARCHAR(200),
+	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado),
+);
 
+CREATE TABLE Trienios(
+	id_trienio INT IDENTITY(1,1) PRIMARY KEY,
+	id_empleado INT,
+	fecha_inicio DATETIME,
+	fecha_fin DATETIME,
+	monto DECIMAL,
+	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
+);
 
