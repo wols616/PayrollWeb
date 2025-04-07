@@ -1,9 +1,142 @@
-use payroll_pruebas
---PROCEDIMIENTOS/TRIGGERS
+use payroll_web1
+
+--PROCEDIMIENTO PARA ACTUALIZAR EL PORCENTAJE PERSONAL DEL AFP, ISSS Y EL ISR
+CREATE PROCEDURE ActualizarPorcentajesDeducciones 
+AS
+BEGIN
+    -- Variables para almacenar valores temporales
+    DECLARE @IdEmpleado INT;
+    DECLARE @IdDeduccion INT;
+    DECLARE @SueldoBase DECIMAL(10, 2);
+    DECLARE @PorcentajePersonal DECIMAL(5, 2);
+    DECLARE @PorcentajeDeduccion DECIMAL(5, 2);
+
+    -- Cursor para recorrer los empleados y sus deducciones
+    DECLARE EmpleadoCursor CURSOR FOR
+    SELECT 
+        DP.id_empleado, 
+        DP.id_deduccion, 
+        P.sueldo_base,
+        D.porcentaje
+    FROM 
+        Deduccion_Personal DP
+    INNER JOIN 
+        Contrato C ON DP.id_empleado = C.id_empleado
+    INNER JOIN 
+        Puesto P ON C.id_puesto = P.id_puesto
+    INNER JOIN 
+        Deduccion D ON DP.id_deduccion = D.id_deduccion
+    WHERE 
+        C.vigente = 'S';  -- Solo contratos vigentes
+
+    -- Abrir el cursor
+    OPEN EmpleadoCursor;
+
+    -- Recorrer el cursor
+    FETCH NEXT FROM EmpleadoCursor INTO @IdEmpleado, @IdDeduccion, @SueldoBase, @PorcentajeDeduccion;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Calcular el porcentaje_personal según la deducción
+        IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'AFP'
+        BEGIN
+            -- AFP: 7.25% del sueldo base
+            SET @PorcentajePersonal = 7.25;
+        END
+        ELSE IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISSS'
+        BEGIN
+            -- ISSS: 3% del sueldo base (hasta un máximo de $1000)
+            SET @PorcentajePersonal = 3.00;
+        END
+        ELSE IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISR'
+        BEGIN
+            -- ISR: Aplicar escala progresiva (ejemplo simplificado)
+            IF @SueldoBase <= 472.00
+            BEGIN
+                SET @PorcentajePersonal = 0.00;
+            END
+            ELSE IF @SueldoBase <= 895.24
+            BEGIN
+                SET @PorcentajePersonal = 10.00;
+            END
+            ELSE IF @SueldoBase <= 2038.10
+            BEGIN
+                SET @PorcentajePersonal = 20.00;
+            END
+            ELSE
+            BEGIN
+                SET @PorcentajePersonal = 30.00;
+            END
+        END
+        ELSE
+        BEGIN
+            -- Para otras deducciones, usar el porcentaje de la deducción
+            SET @PorcentajePersonal = @PorcentajeDeduccion;
+        END
+
+        -- Actualizar el porcentaje_personal en Deduccion_Personal
+        UPDATE Deduccion_Personal
+        SET porcentaje_personal = @PorcentajePersonal
+        WHERE id_empleado = @IdEmpleado
+          AND id_deduccion = @IdDeduccion;
+
+        -- Obtener el siguiente registro
+        FETCH NEXT FROM EmpleadoCursor INTO @IdEmpleado, @IdDeduccion, @SueldoBase, @PorcentajeDeduccion;
+    END
+
+    -- Cerrar y liberar el cursor
+    CLOSE EmpleadoCursor;
+    DEALLOCATE EmpleadoCursor;
+END; 
+
+--__________________________________________________________________________________________________________
+--PROCEDIMIENTO PARA CREAR UN PUESTO HISTORICO CADA QUE SE CANCELA UN CONTRATO
+CREATE OR ALTER PROCEDURE sp_RegistrarPuestoHistorico
+    @id_contrato INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @vigente CHAR(1);
+    
+    -- Verificar si el contrato está marcado como no vigente
+    SELECT @vigente = vigente 
+    FROM Contrato 
+    WHERE id_contrato = @id_contrato;
+    
+    -- Solo proceder si el contrato es no vigente
+    IF @vigente = 'N'
+    BEGIN
+        -- Insertar en Puesto_Historico con los datos del puesto asociado
+        INSERT INTO Puesto_Historico (
+            nombre_puesto,
+            sueldo_base,
+            nombre_categoria,
+            id_contrato
+        )
+        SELECT 
+            p.nombre_puesto,
+            p.sueldo_base,
+            c.nombre_categoria,
+            @id_contrato
+        FROM Puesto p
+        INNER JOIN Categoria c ON p.id_categoria = c.id_categoria
+        INNER JOIN Contrato ct ON p.id_puesto = ct.id_puesto
+        WHERE ct.id_contrato = @id_contrato;
+        
+        PRINT 'Registro histórico creado para el puesto asociado al contrato: ' + CAST(@id_contrato AS VARCHAR);
+    END
+    ELSE
+    BEGIN
+        PRINT 'El contrato aún está vigente, no se creará registro histórico';
+    END
+END;
+--_________________________________________________________________________________________________________
+--TRIGGERS
 
 --_________________________________________________________________________________________________________
 --Trigger para actualizar el sueldo base cada que se agregue un puesto
-CREATE TRIGGER trg_SetSueldoBasePuesto 
+CREATE TRIGGER trg_SetSueldoBasePuesto  
 ON Puesto
 AFTER INSERT
 AS
@@ -140,136 +273,5 @@ BEGIN
         AND dp.id_empleado = e.id_empleado
     );
 END;
---__________________________________________________________________________________________________________
---PROCEDIMIENTO PARA ACTUALIZAR EL PORCENTAJE PERSONAL DEL AFP, ISSS Y EL ISR
-CREATE PROCEDURE ActualizarPorcentajesDeducciones 
-AS
-BEGIN
-    -- Variables para almacenar valores temporales
-    DECLARE @IdEmpleado INT;
-    DECLARE @IdDeduccion INT;
-    DECLARE @SueldoBase DECIMAL(10, 2);
-    DECLARE @PorcentajePersonal DECIMAL(5, 2);
-    DECLARE @PorcentajeDeduccion DECIMAL(5, 2);
 
-    -- Cursor para recorrer los empleados y sus deducciones
-    DECLARE EmpleadoCursor CURSOR FOR
-    SELECT 
-        DP.id_empleado, 
-        DP.id_deduccion, 
-        P.sueldo_base,
-        D.porcentaje
-    FROM 
-        Deduccion_Personal DP
-    INNER JOIN 
-        Contrato C ON DP.id_empleado = C.id_empleado
-    INNER JOIN 
-        Puesto P ON C.id_puesto = P.id_puesto
-    INNER JOIN 
-        Deduccion D ON DP.id_deduccion = D.id_deduccion
-    WHERE 
-        C.vigente = 'S';  -- Solo contratos vigentes
-
-    -- Abrir el cursor
-    OPEN EmpleadoCursor;
-
-    -- Recorrer el cursor
-    FETCH NEXT FROM EmpleadoCursor INTO @IdEmpleado, @IdDeduccion, @SueldoBase, @PorcentajeDeduccion;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        -- Calcular el porcentaje_personal según la deducción
-        IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'AFP'
-        BEGIN
-            -- AFP: 7.25% del sueldo base
-            SET @PorcentajePersonal = 7.25;
-        END
-        ELSE IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISSS'
-        BEGIN
-            -- ISSS: 3% del sueldo base (hasta un máximo de $1000)
-            SET @PorcentajePersonal = 3.00;
-        END
-        ELSE IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISR'
-        BEGIN
-            -- ISR: Aplicar escala progresiva (ejemplo simplificado)
-            IF @SueldoBase <= 472.00
-            BEGIN
-                SET @PorcentajePersonal = 0.00;
-            END
-            ELSE IF @SueldoBase <= 895.24
-            BEGIN
-                SET @PorcentajePersonal = 10.00;
-            END
-            ELSE IF @SueldoBase <= 2038.10
-            BEGIN
-                SET @PorcentajePersonal = 20.00;
-            END
-            ELSE
-            BEGIN
-                SET @PorcentajePersonal = 30.00;
-            END
-        END
-        ELSE
-        BEGIN
-            -- Para otras deducciones, usar el porcentaje de la deducción
-            SET @PorcentajePersonal = @PorcentajeDeduccion;
-        END
-
-        -- Actualizar el porcentaje_personal en Deduccion_Personal
-        UPDATE Deduccion_Personal
-        SET porcentaje_personal = @PorcentajePersonal
-        WHERE id_empleado = @IdEmpleado
-          AND id_deduccion = @IdDeduccion;
-
-        -- Obtener el siguiente registro
-        FETCH NEXT FROM EmpleadoCursor INTO @IdEmpleado, @IdDeduccion, @SueldoBase, @PorcentajeDeduccion;
-    END
-
-    -- Cerrar y liberar el cursor
-    CLOSE EmpleadoCursor;
-    DEALLOCATE EmpleadoCursor;
-END;
---__________________________________________________________________________________________________________
---PROCEDIMIENTO PARA CREAR UN PUESTO HISTORICO CADA QUE SE CANCELA UN CONTRATO
-CREATE OR ALTER PROCEDURE sp_RegistrarPuestoHistorico
-    @id_contrato INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @vigente CHAR(1);
-    
-    -- Verificar si el contrato está marcado como no vigente
-    SELECT @vigente = vigente 
-    FROM Contrato 
-    WHERE id_contrato = @id_contrato;
-    
-    -- Solo proceder si el contrato es no vigente
-    IF @vigente = 'N'
-    BEGIN
-        -- Insertar en Puesto_Historico con los datos del puesto asociado
-        INSERT INTO Puesto_Historico (
-            nombre_puesto,
-            sueldo_base,
-            nombre_categoria,
-            id_contrato
-        )
-        SELECT 
-            p.nombre_puesto,
-            p.sueldo_base,
-            c.nombre_categoria,
-            @id_contrato
-        FROM Puesto p
-        INNER JOIN Categoria c ON p.id_categoria = c.id_categoria
-        INNER JOIN Contrato ct ON p.id_puesto = ct.id_puesto
-        WHERE ct.id_contrato = @id_contrato;
-        
-        PRINT 'Registro histórico creado para el puesto asociado al contrato: ' + CAST(@id_contrato AS VARCHAR);
-    END
-    ELSE
-    BEGIN
-        PRINT 'El contrato aún está vigente, no se creará registro histórico';
-    END
-END;
---_________________________________________________________________________________________________________
 

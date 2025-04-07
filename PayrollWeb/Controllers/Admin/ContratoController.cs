@@ -122,6 +122,7 @@ namespace PayrollWeb.Controllers.Admin
 
             if (contrato.AgregarContrato())
             {
+                _empleado.ActualizarCampoEmpleado(contrato.IdEmpleado, "estado", "Activo");
                 TempData["Success"] = "Contrato creado correctamente.";
 
                 if (idContratoAnterior == null)
@@ -184,6 +185,8 @@ namespace PayrollWeb.Controllers.Admin
             historial_Contrato.AgregarHistorialContrato();
 
             _puestoHistorico.RegistrarPuestoHistorico(idContrato);
+
+            _empleado.ActualizarCampoEmpleado(contrato.IdEmpleado, "estado", "Inactivo");
             return Json(new { success = true });
         }
     }
