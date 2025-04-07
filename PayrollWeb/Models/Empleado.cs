@@ -399,6 +399,37 @@ namespace PayrollWeb.Models
             }
         }
 
+        //Método para actualizar un campo en especifico del empleado
+        public void ActualizarCampoEmpleado(int idEmpleado, string campo, string nuevoValor)
+        {
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = $"UPDATE Empleado SET {campo} = @nuevoValor WHERE id_empleado = @idEmpleado";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@idEmpleado", SqlDbType.Int).Value = idEmpleado;
+                        cmd.Parameters.Add("@nuevoValor", SqlDbType.VarChar).Value = nuevoValor;
+                        con.Open();
+                        int filasAfectadas = cmd.ExecuteNonQuery();
+                        if (filasAfectadas > 0)
+                        {
+                            Console.WriteLine($"Campo {campo} actualizado correctamente", "Éxito");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No se pudo actualizar el campo {campo}", "Error");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al actualizar el campo: " + ex.Message, "Error");
+            }
+        }
+
         public void ActualizarDatosSensibles(int idEmpleado, string correo, string cuentaCorriente, string nuevaContrasena)
         {
             try

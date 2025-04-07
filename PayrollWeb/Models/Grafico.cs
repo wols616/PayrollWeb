@@ -273,5 +273,38 @@ namespace PayrollWeb.Models
 
         }
 
+        public List<object> ObtenerEvaluaciones(int idEmpleado)
+        {
+            var data = new List<object>();
+
+            using (SqlConnection conn = conexion.GetConnection())
+            {
+                conn.Open();
+                string query = @"
+                SELECT KPI.nombre, puntuacion 
+                FROM Evaluacion_Desempeno 
+                JOIN KPI ON KPI.id_kpi = Evaluacion_Desempeno.id_kpi
+                WHERE id_empleado = @IdEmpleado";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@IdEmpleado", idEmpleado);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            data.Add(new
+                            {
+                                nombre = reader["nombre"].ToString(),
+                                puntuacion = Convert.ToInt32(reader["puntuacion"])
+                            });
+                        }
+                    }
+                }
+            }
+
+            return data;
+        }
+
     }
 }
