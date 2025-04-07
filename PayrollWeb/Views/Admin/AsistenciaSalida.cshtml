@@ -1,0 +1,157 @@
+﻿@model List<Asistencia>
+
+@{
+    ViewData["Title"] = "Agregar Hora de Salida";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Formulario para agregar hora de salida -->
+<form id="formAgregarSalida" method="post" action="@Url.Action("AgregarAsistenciaSalida", "Asistencia")">
+    <div class="form-group">
+        <label for="fecha">Fecha</label>
+        <input type="date" class="form-control" id="fecha" name="fecha" required
+               min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <div class="form-group">
+        <label for="empleado">Empleado</label>
+        <select class="form-control" id="empleado" name="id" required>
+            <option value="">Seleccione un empleado</option>
+        </select>
+        <div id="spinnerEmpleados" style="display: none; margin-top: 5px;">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Cargando empleados...
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="horaEntrada">Hora de Entrada</label>
+        <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="horaSalida">Hora de Salida</label>
+        <input type="time" class="form-control" id="nuevaHoraSalida" name="nuevaHoraSalida" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Registrar Salida</button>
+</form>
+
+<hr />
+<!-- Mensaje de éxito -->
+<div id="mensajeExito" class="alert alert-success" style="display: none;">
+    Hora de salida agregada con éxito.
+</div>
+
+<!-- Mensaje de error -->
+<div id="mensajeError" class="alert alert-danger" style="display: none;">
+    No se pudo agregar la hora de salida.
+</div>
+
+@section Scripts {
+    <script>
+        // Función que se ejecuta cuando cambia la fecha
+        $('#fecha').on('change', function() {
+            var fechaSeleccionada = $(this).val();
+
+            if (fechaSeleccionada) {
+                // Mostrar el spinner mientras se cargan los empleados
+                $('#spinnerEmpleados').show();
+
+                // Hacer la llamada AJAX para obtener los empleados con asistencia registrada
+                $.ajax({
+                    url: '@Url.Action("ObtenerEmpleadosSinSalida", "Asistencia")',
+                    type: 'GET',
+                    data: { fecha: fechaSeleccionada },
+                    success: function(data) {
+                        // Limpiar el select antes de agregar los nuevos empleados
+                        $('#empleado').empty();
+                        $('#empleado').append('<option value="">Seleccione un empleado</option>');
+
+                        // Llenar el select con los empleados obtenidos
+                        data.forEach(function(empleado) {
+                            var partes = empleado.split('|');
+                            var idEmpleado = partes[0];
+                            var nombreCompleto = partes[1];
+                            var horaEntrada = partes[2];
+                            $('#empleado').append('<option value="' + idEmpleado + '" data-horaentrada="' + horaEntrada + '">' + nombreCompleto + '</option>');
+                        });
+
+                        // Ocultar el spinner
+                        $('#spinnerEmpleados').hide();
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error al cargar los empleados');
+                        $('#spinnerEmpleados').hide();
+                    }
+                });
+            }
+        });
+
+                // Cargar la hora de entrada al seleccionar un empleado
+        $('#empleado').on('change', function() {
+            var idEmpleado = $(this).val();
+            var fechaSeleccionada = $('#fecha').val();
+
+            if (idEmpleado && fechaSeleccionada) {
+                $.ajax({
+                    url: '@Url.Action("ObtenerHoraEntrada", "Asistencia")',
+                    type: 'GET',
+                    data: { id: idEmpleado, fecha: fechaSeleccionada },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#horaEntrada').val(response.horaEntrada);
+                        } else {
+                            $('#horaEntrada').val('');
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        $('#horaEntrada').val('');
+                        alert("Error al obtener la hora de entrada.");
+                    }
+                });
+            }
+        });
+
+
+
+
+              // Capturar el envío del formulario
+        $('#formAgregarSalida').on('submit', function(event) {
+            event.preventDefault(); // Prevenir el envío tradicional del formulario
+
+            var empleadoSeleccionado = $('#empleado').val(); // Obtener el empleado seleccionado
+
+            $.ajax({
+                url: '@Url.Action("AgregarAsistenciaSalida", "Asistencia")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#mensajeExito').show();
+                        $('#mensajeError').hide();
+
+                        // Limpiar los campos de hora y empleado
+                        $('#horaEntrada').val('');
+                        $('#nuevaHoraSalida').val('');
+                        $('#empleado').val('');
+
+                        // Eliminar la opción del empleado seleccionado
+                        $('#empleado option[value="' + empleadoSeleccionado + '"]').remove();
+                    } else {
+                        $('#mensajeExito').hide();
+                        $('#mensajeError').text(response.message).show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#mensajeError').text('Error al registrar la salida.').show();
+                    $('#mensajeExito').hide();
+                }
+            });
+        });
+
+
+    </script>
+}
