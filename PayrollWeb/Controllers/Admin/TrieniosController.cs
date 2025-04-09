@@ -11,6 +11,9 @@ namespace PayrollWeb.Controllers.Admin
             // Crear una instancia de la clase Trienios
             Trienios trienios = new Trienios();
             List<Trienios> listaTrienios = trienios.MostrarTrienios();
+            var valoresDispersos = new List<int> { 7, 10, 9, 10, 8, 10, 10, 6, 10, 9 };
+
+            ViewBag.ValoresDispersos = valoresDispersos;
 
             // Pasar la lista de trienios a la vista
             return View("/Views/Admin/VerTrienios.cshtml", listaTrienios);
