@@ -1,0 +1,124 @@
+﻿
+ @model List<IGrouping<string, string>>
+
+@{
+    ViewBag.Title = "Asistencia de Empleados";
+}
+
+<h2>Asistencia de Empleados</h2>
+
+<br />
+<!-- Contenedor de búsqueda -->
+<div class="d-flex mb-3 row">
+    <!-- Input para buscar por fecha -->
+    <div class="col-12 col-md-6 mb-2 mb-md-0 pr-md-2">
+        <label for="fechaBusqueda">Buscar por Fecha</label>
+        <input type="date" class="form-control" id="fechaBusqueda"
+               min="2015-01-01"
+               max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <!-- Input para buscar por nombre del empleado -->
+    <div class="col-12 col-md-6 pl-md-2">
+        <label for="empleadoBusqueda">Buscar por Empleado</label>
+        <input type="text" class="form-control" id="empleadoBusqueda" placeholder="Nombre o Apellido" />
+    </div>
+</div>
+
+
+<br />
+<!-- Nuevo botón para agregar asistencias -->
+<a href="@Url.Action("AgregarAsistencia", "Asistencia")" class="btn btn-success mb-3">
+    <i class="bi bi-plus-circle"></i> Registrar Asistencias
+</a>
+
+<!-- Contenedor para mostrar la asistencia filtrada -->
+<div id="asistenciaFiltrada">
+    @foreach (var grupoFecha in Model.OrderByDescending(g => DateTime.Parse(g.Key))) // Ordena de la más reciente a la más antigua
+    {
+        <br />
+        <div class="fecha-asistencia" data-fecha="@grupoFecha.Key">
+            <h3>@grupoFecha.Key</h3> <!-- Mostrar la fecha como título -->
+
+            <table class="table table-bordered table-responsive">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Hora Entrada</th>
+                        <th>Hora Salida</th>
+                        <th>Acción</th> <!-- Nueva columna para el botón -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var asistencia in grupoFecha)
+                    {
+                        // Dividimos la cadena de la asistencia para obtener los datos individuales
+                        var datos = asistencia.Split('|');
+                        var nombreEmpleado = datos[2] + " " + datos[3];
+                        var horaEntrada = datos[4];
+                        var horaSalida = datos[5];
+
+                        <tr class="empleado" data-empleado="@nombreEmpleado">
+                            <td>@nombreEmpleado</td>
+                            <td>@horaEntrada</td>
+                            <td>@horaSalida</td>
+                            <td>
+                                <!-- Botón de edición con ícono de lápiz -->
+                                <a href="@Url.Action("EditarAsistencia", "Asistencia", new { fecha = grupoFecha.Key, id = datos[1] })" class="btn btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> <!-- Ícono de lápiz -->
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+
+<script>
+    // Filtrar por fecha y por nombre del empleado
+    document.getElementById("fechaBusqueda").addEventListener("change", function () {
+        var fechaSeleccionada = this.value;
+        var empleados = document.querySelectorAll(".fecha-asistencia");
+
+        empleados.forEach(function (grupoFecha) {
+            // Mostrar solo el grupo de asistencia que coincide con la fecha seleccionada
+            if (grupoFecha.getAttribute("data-fecha") === fechaSeleccionada || fechaSeleccionada === "") {
+                grupoFecha.style.display = "block";
+            } else {
+                grupoFecha.style.display = "none";
+            }
+        });
+
+        // Limpiar el campo de búsqueda por empleado cuando se cambie la fecha
+        document.getElementById("empleadoBusqueda").value = "";
+        filtrarEmpleados(); // Aplicar filtro para empleado vacío cuando se cambia la fecha
+    });
+
+    document.getElementById("empleadoBusqueda").addEventListener("input", filtrarEmpleados);
+
+    function filtrarEmpleados() {
+        var fechaSeleccionada = document.getElementById("fechaBusqueda").value;
+        var nombreEmpleado = document.getElementById("empleadoBusqueda").value.toLowerCase();
+
+        var empleadosFiltrados = document.querySelectorAll(".empleado");
+
+        empleadosFiltrados.forEach(function (empleado) {
+            var grupoFecha = empleado.closest(".fecha-asistencia");
+            var nombre = empleado.getAttribute("data-empleado").toLowerCase();
+
+            // Filtrar empleados por nombre y por la fecha seleccionada
+            if ((nombre.includes(nombreEmpleado) || nombreEmpleado === "") &&
+                (grupoFecha.style.display !== "none")) {
+                empleado.style.display = "table-row";
+            } else {
+                empleado.style.display = "none";
+            }
+        });
+    }
+</script>
+
+
+
