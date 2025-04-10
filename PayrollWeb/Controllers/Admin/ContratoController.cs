@@ -34,6 +34,7 @@ namespace PayrollWeb.Controllers.Admin
             }
 
             List<ContratoViewModel> contratos = _contrato.ObtenerContratosYPuestos(idEmpleado);
+            List<Contrato> contratos2 = _contrato.ObtenerContratos(idEmpleado);
 
             if (contratos == null || !contratos.Any())
             {
@@ -46,15 +47,15 @@ namespace PayrollWeb.Controllers.Admin
             {
                 if (contrato.Vigente == "N")
                 {
-                    puestosHistoricos.Add(new Puesto_Historico().ObtenerPuestoHistorico(contrato.IdContrato));
-                    ViewBag.SueldoBase = new Puesto_Historico().ObtenerPuestoHistorico(contrato.IdContrato).SueldoBase;
+                    //puestosHistoricos.Add(new Puesto_Historico().ObtenerPuestoHistorico(contrato.IdContrato));
+                    contrato.SueldoBase = _puestoHistorico.ObtenerPuestoHistorico(contrato.IdContrato).SueldoBase;
                 } else
                 {
-                    puestosHistoricos.Add(null);
-                    ViewBag.SueldoBase = new Puesto().ObtenerSueldoBasePuesto(contrato.IdPuesto);
+                    //puestosHistoricos.Add(null);
+                    contrato.SueldoBase = new Puesto().ObtenerSueldoBasePuesto(contrato.IdPuesto);
                 }
             }
-            ViewBag.PuestosHistoricos = puestosHistoricos;
+            //ViewBag.PuestosHistoricos = puestosHistoricos;
             return View("/Views/Admin/VerContratosEmpleado.cshtml", contratos);
         }
 
@@ -137,6 +138,10 @@ namespace PayrollWeb.Controllers.Admin
                         Motivo = !string.IsNullOrEmpty(Motivo) ? Motivo : "Creación de contrato",
                         IdAdministrador = IdAdministrador
                     };
+                    if (contrato.FechaAlta < DateTime.Now)
+                    {
+                        historial_Contrato.Fecha = contrato.FechaAlta;
+                    }
                     historial_Contrato.AgregarHistorialContrato();
                 } else if (idContratoAnterior != null)
                 {
@@ -149,6 +154,10 @@ namespace PayrollWeb.Controllers.Admin
                         Motivo = !string.IsNullOrEmpty(Motivo) ? Motivo : "Creación de contrato",
                         IdAdministrador = IdAdministrador
                     };
+                    if (contrato.FechaAlta < DateTime.Now)
+                    {
+                        historial_Contrato.Fecha = contrato.FechaAlta;
+                    }
                     historial_Contrato.AgregarHistorialContrato();
                 }
 
@@ -169,15 +178,20 @@ namespace PayrollWeb.Controllers.Admin
             }
 
             Contrato contrato = _contrato.ObtenerContrato(idContrato);
-            contrato.ActualizarContrato("vigente", "N");
-            contrato.ActualizarContrato("fecha_baja", DateTime.Now);
+            DateTime? fechaCancelacion = DateTime.Now;
+            if (contrato.FechaBaja < DateTime.Now)
+            {
+                fechaCancelacion = contrato.FechaBaja;
+            }
+                contrato.ActualizarContrato("vigente", "N");
+            contrato.ActualizarContrato("fecha_baja", fechaCancelacion);
 
             //Genero el registro para el historial
             Historial_Contrato historial_Contrato = new Historial_Contrato
             {
                 IdContratoAnterior = idContrato,
                 IdContratoNuevo = idContrato,
-                Fecha = DateTime.Now,
+                Fecha = fechaCancelacion,
                 Cambio = "Cancelación",
                 Motivo = motivo,
                 IdAdministrador = IdAdministrador

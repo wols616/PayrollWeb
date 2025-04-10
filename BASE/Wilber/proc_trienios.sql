@@ -10,23 +10,23 @@
 
 
 --COMANDOS DE PRUEBA
-EXEC CalcularTrienios;
-Select * from trienios
-select * from puesto;
-select * from Contrato where id_empleado = 2
-select * from contrato where id_empleado = 1
-delete from contrato where id_empleado = 1
-delete puesto_historico
-delete Historial_Contrato
-DELETE trienios
-DELETE Contrato
+--EXEC CalcularTrienios;
+--Select * from trienios
+--select * from puesto;
+--select * from Contrato where id_empleado = 2
+--select * from contrato where id_empleado = 1
+--delete from contrato where id_empleado = 1
+--delete puesto_historico
+--delete Historial_Contrato
+--DELETE trienios
+--DELETE Contrato
 
 --Datos de prueba:
 --Contratos para empleado 1(sueldo base $4500)
 INSERT INTO Contrato (id_empleado, fecha_alta, fecha_baja, id_puesto, tipo_contrato, vigente)
-VALUES (1, '2022-01-03', NULL, 1, 'Indefinido', 'N');
+VALUES (33, '2022-01-03', NULL, 1, 'Indefinido', 'N');
 INSERT INTO Contrato (id_empleado, fecha_alta, fecha_baja, id_puesto, tipo_contrato, vigente)
-VALUES (1, '2018-01-03', '2022-01-03', 1, 'Indefinido', 'N');
+VALUES (33, '2018-01-03', '2022-01-03', 1, 'Indefinido', 'N');
 INSERT INTO Contrato (id_empleado, fecha_alta, fecha_baja, id_puesto, tipo_contrato, vigente)
 VALUES (1, '2014-01-03', '2018-01-03', 1, 'Indefinido', 'N');
 
@@ -37,7 +37,10 @@ VALUES
 (2, '2014-04-01', '2019-04-01', 2, 'Indefinido', 'N'),
 (2, '2019-04-01', NULL,          4, 'Indefinido', 'S');
 
+select * from Contrato
+WHERE Contrato.id_empleado = 35
 
+select * from Trienios
 
 --PROCEDIMIENTO
 DROP PROCEDURE IF EXISTS CalcularTrienios;

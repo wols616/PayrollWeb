@@ -7,7 +7,7 @@ namespace PayrollWeb.Models
         public int IdHistorialContrato { get; set; }
         public int? IdContratoAnterior { get; set; }
         public int IdContratoNuevo { get; set; }
-        public DateTime Fecha { get; set; }
+        public DateTime? Fecha { get; set; }
         public string Cambio { get; set; }
         public string Motivo { get; set; }
         public int IdAdministrador { get; set; }

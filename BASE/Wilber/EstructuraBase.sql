@@ -29,7 +29,7 @@ CREATE TABLE Categoria (
     id_categoria INT IDENTITY(1,1) PRIMARY KEY,
     nombre_categoria VARCHAR(50) NOT NULL,
     sueldo_base DECIMAL(10,2) NOT NULL
-);
+); 
 
 CREATE TABLE Puesto (
     id_puesto INT IDENTITY(1,1) PRIMARY KEY,
@@ -183,6 +183,7 @@ CREATE TABLE Trienios(
 	fecha_inicio DATETIME,
 	fecha_fin DATETIME,
 	monto DECIMAL,
+	estado VARCHAR(1)
 	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
 );
 
