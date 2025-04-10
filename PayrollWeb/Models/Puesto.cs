@@ -102,7 +102,7 @@ namespace PayrollWeb.Models
             {
                 using (SqlConnection con = conexion.GetConnection())
                 {
-                    string query = "SELECT Puesto.id_puesto, Puesto.nombre_puesto, Categoria.nombre_categoria, Categoria.sueldo_base, Categoria.id_categoria FROM Puesto " +
+                    string query = "SELECT Puesto.id_puesto, Puesto.nombre_puesto, Categoria.nombre_categoria, Puesto.sueldo_base, Categoria.id_categoria FROM Puesto " +
                         "JOIN Categoria ON Categoria.id_categoria = Puesto.id_categoria";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
@@ -329,9 +329,9 @@ namespace PayrollWeb.Models
                 using (SqlConnection con = conexion.GetConnection())
                 {
                     string query = @"
-                SELECT p.id_puesto, p.nombre_puesto, c.id_categoria, c.nombre_categoria, c.sueldo_base
+                SELECT p.id_puesto, p.nombre_puesto, c.id_categoria, c.nombre_categoria, p.sueldo_base
                 FROM Puesto p
-                JOIN Categoria c ON p.id_categoria = c.id_categoria";
+                JOIN Categoria c ON p.id_categoria = c.id_categoria Order BY p.sueldo_base";
 
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {

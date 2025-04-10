@@ -53,7 +53,7 @@ else
                     <td>@contrato.Puesto</td>
                     <td>@contrato.Categoria</td>
                     
-                    <td>@ViewBag.SueldoBase</td>
+                    <td>@contrato.SueldoBase</td>
 
                     <td>@contrato.FechaAlta.ToString("dd/MM/yyyy")</td>
                     <td>@(contrato.FechaBaja.HasValue ? contrato.FechaBaja.Value.ToString("dd/MM/yyyy") : "N/A")</td>
@@ -125,14 +125,13 @@ else
         function enviarMotivo() {
             var idContrato = $('#contratoId').val();
             var motivo = $('#motivoCancelacion').val();
-
             if (motivo.trim() === '') {
                 alert('Por favor, ingresa un motivo para cancelar el contrato.');
                 return;
             }
 
             // Enviar el motivo al controlador mediante AJAX
-            $.post('/Contrato/CancelarContrato', { idContrato: idContrato, motivo: motivo }, function(response) {
+                    $.post('/Contrato/CancelarContrato', { idContrato: idContrato, motivo: motivo }, function(response) {
                 if (response.success) {
                     alert('Contrato cancelado con éxito.');
                     location.reload(); // Recargar la página
