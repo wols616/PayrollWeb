@@ -67,6 +67,10 @@
     <div>
         <label for="CuentaCorriente">Cuenta Corriente:</label>
         <input value="@Model.CuentaCorriente" type="text" id="CuentaCorriente" name="CuentaCorriente" required maxlength="12" oninput="formatearCuentaCorriente(this)" pattern="[0-9]{12}" />
+        @if (ViewData.ModelState["CuentaCorriente"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["CuentaCorriente"]?.Errors[0]?.ErrorMessage</span>
+        }
     </div>
 
     <div>
