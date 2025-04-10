@@ -20,84 +20,190 @@
     </div>
 }
 
-<!-- Botón para agregar una nueva evaluación usando JavaScript -->
-<a href="#" class="btn btn-primary mb-3" onclick="abrirAgregarModal(@ViewBag.Empleado.IdEmpleado)">Agregar Nueva Evaluación</a>
-
-<!-- Botón para redirigir a la vista de agregar KPI -->
-<a href="@Url.Action("VerKpi", "KPI")" class="btn btn-primary mb-3">Indicadores clave de desempeño</a>
-
-
-
-<!-- Tabla de Evaluaciones de Desempeño -->
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Fecha</th>
-            <th>KPI Evaluado</th>
-            <th>Puntuación</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var evaluacion in Model)
+<!-- Filtro por fecha única -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Filtrar Evaluaciones por Fecha</h5>
+        @if (!Context.Request.Query.ContainsKey("fechaInicio"))
         {
-            <tr>
-                <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
-                <td>@evaluacion.KPI.Nombre</td>
-                <td>@evaluacion.puntuacion</td>
-                <td>
-                    <button class="btn btn-warning btn-sm" onclick="editarEvaluacion(@evaluacion.IdEvaluacionDesempeno, '@evaluacion.fecha.ToString("yyyy-MM-dd")', @evaluacion.id_kpi, @evaluacion.puntuacion)">Editar</button>
-                </td>
-            </tr>
+            <span class="badge bg-info">Mostrando promedio de todas las evaluaciones</span>
         }
-    </tbody>
-</table>
+    </div>
+    <div class="card-body">
+        <form id="filtroForm" method="get" asp-action="VerEvaluacionDesempeno" asp-route-id="@ViewBag.Empleado.IdEmpleado">
+            <div class="row align-items-end">
+                <div class="col-md-8">
+                    <label for="fechaEvaluacion" class="form-label">Seleccione una fecha</label>
+                    <input type="date" class="form-control" id="fechaEvaluacion" name="fechaInicio"
+                           value="@Context.Request.Query["fechaInicio"]">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="@Url.Action("VerEvaluacionDesempeno", new { id = ViewBag.Empleado.IdEmpleado })"
+                       class="btn btn-outline-secondary">Mostrar todas</a>
+                </div>
+            </div>
+            <input type="hidden" name="fechaFin" value="@Context.Request.Query["fechaInicio"]">
+        </form>
+    </div>
+</div>
 
-<!-- Botón para agregar una nueva meta usando JavaScript -->
-<a href="#" class="btn btn-primary mb-3 mt-5" onclick="abrirAgregarModalMetas(@ViewBag.Empleado.IdEmpleado)">Agregar Nueva Meta</a>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Meta</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var meta in ViewBag.Metas)
+<!-- Tabla de Evaluaciones de Desempeño existentes -->
+@if (Model.Any())
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Evaluaciones Registradas</h3>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarEvaluacionModal">
+                <i class="bi bi-plus-circle"></i> Agregar Evaluación
+            </button>
+        </div>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>KPI Evaluado</th>
+                <th>Puntuación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evaluacion in Model)
+            {
+                <tr>
+                    <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
+                    <td>@evaluacion.KPI.Nombre</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            @evaluacion.puntuacion
+                            <div class="ms-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="@(i <= evaluacion.puntuacion ? "text-warning" : "text-secondary")">★</span>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarEvaluacion(@evaluacion.IdEvaluacionDesempeno, '@evaluacion.fecha.ToString("yyyy-MM-dd")', @evaluacion.id_kpi, @evaluacion.puntuacion)">Editar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        @if (Context.Request.Query.ContainsKey("fechaInicio"))
         {
-            <tr>
-                <td>@meta.MetaDescripcion</td>
-                <td>@meta.Estado</td>
-                <td>
-@*                     <button class="btn btn-warning btn-sm" onclick="editarMeta(@meta.IdMeta, @meta.MetaDescripcion, @meta.Estado)">Editar</button> *@
-                    <button class="btn btn-warning btn-sm" onclick="editarMeta(@meta.IdMeta, '@meta.MetaDescripcion.Replace("'", "\\'")', '@meta.Estado')">Editar</button>
-
-                </td>
-            </tr>
+            <span>No se encontraron evaluaciones para la fecha especificada.</span>
         }
-    </tbody>
-</table>
+        else
+        {
+            <span>No hay evaluaciones registradas para este empleado.</span>
+        }
+        <button class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#agregarEvaluacionModal">
+            <i class="bi bi-plus-circle"></i> Agregar Evaluación
+        </button>
+    </div>
+}
 
-<!-- Modal para agregar o editar evaluación -->
+<!-- Gráfica comparativa -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Comparación de Desempeño</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="desempenoChart" height="300"></canvas>
+    </div>
+    <div class="card-footer text-muted">
+        <small>Línea azul: @(Context.Request.Query.ContainsKey("fechaInicio") ? "Puntuación actual" : "Puntuación promedio") | Línea verde: Puntuación ideal (5 en todos los KPIs)</small>
+    </div>
+</div>
+
+<!-- Modal para agregar evaluación -->
+<div class="modal fade" id="agregarEvaluacionModal" tabindex="-1" aria-labelledby="agregarEvaluacionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarEvaluacionModalLabel">Agregar Nueva Evaluación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluacionForm" method="post" action="/Evaluacion/CrearEvaluaciones">
+                    <input type="hidden" id="idEmpleado" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
+                    <div class="mb-3">
+                        <label for="fecha" class="form-label">Fecha de Evaluación</label>
+                        <input type="date" class="form-control" id="fecha" name="Fecha" required
+                               onchange="validarFechaUnica(this.value)">
+                        <div id="fechaError" class="invalid-feedback" style="display:none;">
+                            Ya existe una evaluación para esta fecha. Por favor seleccione otra.
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Evaluación de Competencias y Habilidades</h5>
+                            <p class="text-muted">Califique cada aspecto del desempeño del empleado según la siguiente escala:</p>
+                            <ul>
+                                <li><strong>1 - Insatisfactorio</strong>: No cumple con las expectativas básicas</li>
+                                <li><strong>2 - En desarrollo</strong>: Cumple parcialmente, necesita mejorar</li>
+                                <li><strong>3 - Satisfactorio</strong>: Cumple con lo esperado</li>
+                                <li><strong>4 - Bueno</strong>: Supera las expectativas</li>
+                                <li><strong>5 - Excelente</strong>: Desempeño excepcional</li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var kpi in ViewBag.KPIs)
+                            {
+                                <div class="mb-4">
+                                    <h6>@kpi.Nombre</h6>
+                                    <div class="btn-group" role="group" aria-label="Puntuación para @kpi.Nombre">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <input type="radio" class="btn-check" name="Puntuaciones[@kpi.IdKpi]" id="kpi-@kpi.IdKpi-@i" value="@i" autocomplete="off" required>
+                                            <label class="btn btn-outline-primary" for="kpi-@kpi.IdKpi-@i">@i</label>
+                                        }
+                                    </div>
+                                </div>
+                                <hr>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="submitButton" disabled>Guardar Evaluaciones</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar evaluación -->
 <div class="modal fade" id="evaluacionModal" tabindex="-1" aria-labelledby="evaluacionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="evaluacionModalLabel">Agregar Evaluación</h5>
+                <h5 class="modal-title" id="evaluacionModalLabel">Editar Evaluación</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form id="evaluacionForm" method="post">
+                <form id="editarEvaluacionForm" method="post">
                     <input type="hidden" id="evaluacionId" name="IdEvaluacionDesempeno">
-                    <input type="hidden" id="idEmpleado" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
+                    <input type="hidden" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
+                    <input type="hidden" id="editFecha" name="Fecha">
                     <div class="mb-3">
-                        <label for="fecha" class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="fecha" name="Fecha" required>
+                        <label class="form-label">Fecha</label>
+                        <input type="text" class="form-control-plaintext" id="fechaMostrada" readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="idKpi" class="form-label">KPI Evaluado</label>
-                        <select class="form-control" id="idKpi" name="IdKpi" required>
+                        <label for="editIdKpi" class="form-label">KPI Evaluado</label>
+                        <select class="form-control" id="editIdKpi" name="IdKpi" required>
                             @foreach (var kpi in ViewBag.KPIs)
                             {
                                 <option value="@kpi.IdKpi">@kpi.Nombre</option>
@@ -105,95 +211,163 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="puntuacion" class="form-label">Puntuación</label>
-                        <input type="number" class="form-control" id="puntuacion" name="Puntuacion" min="0" max="100" required>
+                        <label class="form-label">Puntuación</label>
+                        <div class="btn-group" role="group">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <input type="radio" class="btn-check" name="Puntuacion" id="editPuntuacion-@i" value="@i" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="editPuntuacion-@i">@i</label>
+                            }
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal para agregar o editar Meta -->
-<div class="modal fade" id="metaModal" tabindex="-1" aria-labelledby="metaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="metaModalLabel">Agregar Meta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <form id="metaForm" method="post">
-                    <input type="hidden" id="metaId" name="IdMeta">
-                    <input type="hidden" id="idEmpleado" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
-                    <div class="mb-3">
-                        <label for="descripcion" class="form-label">Descripción de la Meta</label>
-                        <input type="text" class="form-control" id="descripcion" name="MetaDescripcion" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="estado" class="form-label">Estado</label>
-                        <select class="form-control" id="estado" name="Estado" required>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Completada">Completada</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Datos para la gráfica
+        const kpiNames = [
+        @foreach (var kpi in ViewBag.KPIs)
+        {
+            @Html.Raw($"'{kpi.Nombre}',")
+        }
+        ];
 
+        const puntuaciones = [
+        @foreach (var dato in ViewBag.DatosGrafica)
+        {
+            @Html.Raw($"{dato},")
+        }
+        ];
 
-<script>
-    function abrirAgregarModal(idEmpleado) {
-        document.getElementById("evaluacionForm").action = "/Evaluacion/CrearEvaluacion";
-        document.getElementById("evaluacionModalLabel").innerText = "Agregar Evaluación";
-        document.getElementById("evaluacionId").value = "";
-        document.getElementById("fecha").value = "";
-        document.getElementById("idKpi").value = "";
-        document.getElementById("puntuacion").value = "";
-        var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
-        modal.show();
-    }
+        const tieneFiltroFecha = @(Context.Request.Query.ContainsKey("fechaInicio") ? "true" : "false");
+        const tituloGrafica = tieneFiltroFecha ? 'Comparación de Desempeño (Fecha específica)' : 'Comparación de Desempeño (Promedio general)';
+        const etiquetaDataset = tieneFiltroFecha ? 'Puntuación Actual' : 'Puntuación Promedio';
 
-    function abrirAgregarModalMetas(idEmpleado) {
-        document.getElementById("metaForm").action = "/Evaluacion/CrearMeta";
-        document.getElementById("metaModalLabel").innerText = "Agregar Meta";
-        document.getElementById("metaId").value = "";
-        document.getElementById("descripcion").value = "";
-        document.getElementById("estado").value = "";
-        var modal = new bootstrap.Modal(document.getElementById('metaModal'));
-        modal.show();
-    } 
-
-    function editarEvaluacion(id, fecha, idKpi, puntuacion) {
-        document.getElementById("evaluacionForm").action = "/Evaluacion/ActualizarEvaluacion";
-        document.getElementById("evaluacionModalLabel").innerText = "Editar Evaluación";
-        document.getElementById("evaluacionId").value = id;
-        document.getElementById("fecha").value = fecha;
-        document.getElementById("idKpi").value = idKpi;
-        document.getElementById("puntuacion").value = puntuacion;
-        var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
-        modal.show();
-    }
-
-    function editarMeta(id, descripcion, estado) {
-        document.getElementById("metaForm").action = "/Evaluacion/ActualizarMeta";
-        document.getElementById("metaModalLabel").innerText = "Editar Meta";
-        document.getElementById("metaId").value = id;
-        document.getElementById("descripcion").value = descripcion;
-        document.getElementById("estado").value = estado;
-        var modal = new bootstrap.Modal(document.getElementById('metaModal'));
-        modal.show();
-    }
-
-    setTimeout(function() {
-        // Seleccionamos todos los elementos con la clase 'alert-delete-later'
-        var alertElements = document.querySelectorAll('.alert-delete-later');
-        alertElements.forEach(function(alert) {
-            alert.remove();  // Eliminamos cada mensaje de la lista
+        // Configuración de la gráfica
+        const ctx = document.getElementById('desempenoChart').getContext('2d');
+        const desempenoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: kpiNames,
+                datasets: [
+                    {
+                        label: etiquetaDataset,
+                        data: puntuaciones,
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        tension: 0.1,
+                        fill: false
+                    },
+                    {
+                        label: 'Puntuación Ideal',
+                        data: Array(kpiNames.length).fill(5),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        tension: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: tituloGrafica
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    // Mostrar con 1 decimal si es promedio
+                                    const value = tieneFiltroFecha ? context.parsed.y : context.parsed.y.toFixed(1);
+                                    label += value;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
         });
-    }, 3000); // 3000 ms = 3 segundos
-</script>
+
+        // Función para validar fecha única
+        function validarFechaUnica(fechaSeleccionada) {
+            const fechaInput = document.getElementById('fecha');
+            const fechaError = document.getElementById('fechaError');
+            const submitButton = document.getElementById('submitButton');
+
+            // Obtener todas las fechas existentes del empleado
+            const fechasExistentes = [
+        @{
+            var todasEvaluaciones = ViewBag.Evaluaciones;
+            foreach (var eval in todasEvaluaciones)
+            {
+                @Html.Raw($"'{eval.fecha.ToString("yyyy-MM-dd")}',")
+            }
+        }
+            ].filter(Boolean);
+
+            // Verificar si la fecha ya existe en cualquier evaluación
+            if (fechasExistentes.includes(fechaSeleccionada)) {
+                fechaInput.classList.add('is-invalid');
+                fechaError.style.display = 'block';
+                fechaError.textContent = 'Ya existe una evaluación para esta fecha. No se pueden agregar evaluaciones a fechas ya evaluadas.';
+                submitButton.disabled = true;
+            } else {
+                fechaInput.classList.remove('is-invalid');
+                fechaError.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        }
+
+        // Función para editar evaluación
+        function editarEvaluacion(idEvaluacion, fecha, idKpi, puntuacion) {
+            document.getElementById('evaluacionId').value = idEvaluacion;
+            document.getElementById('editFecha').value = fecha;
+            document.getElementById('fechaMostrada').value = fecha;
+            document.getElementById('editIdKpi').value = idKpi;
+
+            // Seleccionar el radio button correspondiente a la puntuación
+            document.querySelector(`input[name="Puntuacion"][value="${puntuacion}"]`).checked = true;
+
+            // Configurar el formulario para enviar a la acción de actualización
+            document.getElementById('editarEvaluacionForm').action = '/Evaluacion/ActualizarEvaluacion';
+
+            // Mostrar el modal
+            var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
+            modal.show();
+        }
+
+        // Habilitar el botón de submit cuando se seleccione al menos un radio button
+        document.querySelectorAll('input[type="radio"][name^="Puntuaciones"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const submitButton = document.getElementById('submitButton');
+                const checkedRadios = document.querySelectorAll('input[type="radio"][name^="Puntuaciones"]:checked');
+                submitButton.disabled = checkedRadios.length === 0;
+            });
+        });
+    </script>
+}

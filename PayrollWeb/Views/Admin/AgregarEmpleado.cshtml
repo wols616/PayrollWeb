@@ -22,7 +22,7 @@
 
 <form action="/Empleado/CrearEmpleado" method="post" id="formAgregarEmpleado">
     
-    <input type="hidden" name="Estado" value="Activo"/>
+    <input type="hidden" name="Estado" value="Inactivo"/>
     <div>
         <label for="Dui">DUI:</label>
         <input value="@Model.Dui" type="text" id="Dui" name="Dui" required maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" />

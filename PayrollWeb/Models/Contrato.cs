@@ -131,7 +131,7 @@ namespace PayrollWeb.Models
                 {
                     string query = @"
                 SELECT c.id_contrato, p.id_puesto, cat.id_categoria, c.fecha_alta, c.fecha_baja, c.tipo_contrato, c.vigente, 
-                       p.nombre_puesto, cat.nombre_categoria, cat.sueldo_base
+                       p.nombre_puesto, cat.nombre_categoria, p.sueldo_base
                 FROM Contrato c
                 JOIN Puesto p ON c.id_puesto = p.id_puesto
                 JOIN Categoria cat ON p.id_categoria = cat.id_categoria

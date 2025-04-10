@@ -1,11 +1,11 @@
 ﻿@model List<Complemento_Cargo>
 
 @{
-    ViewData["Title"] = "Cargos desempeñados por el empleado Empleado";
+    ViewData["Title"] = "Cargos desempeñados";
     var empleado = ViewBag.Empleado as Empleado;
 }
 
-<h2>Deducciones Personales de @empleado.Nombre @empleado.Apellidos</h2>
+<h2>Cargos desempeñados por @empleado.Nombre @empleado.Apellidos</h2>
 
 @if (TempData["Success"] != null)
 {

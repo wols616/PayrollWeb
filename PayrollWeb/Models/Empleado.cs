@@ -399,6 +399,37 @@ namespace PayrollWeb.Models
             }
         }
 
+        //Método para actualizar un campo en especifico del empleado
+        public void ActualizarCampoEmpleado(int idEmpleado, string campo, string nuevoValor)
+        {
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = $"UPDATE Empleado SET {campo} = @nuevoValor WHERE id_empleado = @idEmpleado";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@idEmpleado", SqlDbType.Int).Value = idEmpleado;
+                        cmd.Parameters.Add("@nuevoValor", SqlDbType.VarChar).Value = nuevoValor;
+                        con.Open();
+                        int filasAfectadas = cmd.ExecuteNonQuery();
+                        if (filasAfectadas > 0)
+                        {
+                            Console.WriteLine($"Campo {campo} actualizado correctamente", "Éxito");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No se pudo actualizar el campo {campo}", "Error");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al actualizar el campo: " + ex.Message, "Error");
+            }
+        }
+
         public void ActualizarDatosSensibles(int idEmpleado, string correo, string cuentaCorriente, string nuevaContrasena)
         {
             try
@@ -672,35 +703,41 @@ namespace PayrollWeb.Models
 
         public string GenerarContrasena()
         {
-            const int longitud = 8;
-            const string caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+            // Configuración básica
+            const int longitudMinima = 8;
+            const int longitudMaxima = 15; // Puedes ajustar este valor según necesites
+            const string mayusculas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string minusculas = "abcdefghijklmnopqrstuvwxyz";
+            const string numeros = "0123456789";
+            const string especiales = "!@#$%^&*()";
+
             var random = new Random();
-            var contrasena = new char[longitud];
+            var longitud = random.Next(longitudMinima, longitudMaxima + 1);
+            var contrasena = new List<char>(longitud);
 
-            bool tieneMayuscula = false;
-            bool tieneMinuscula = false;
-            bool tieneNumero = false;
-            bool tieneCaracterEspecial = false;
+            // Asegurar al menos un carácter de cada tipo
+            contrasena.Add(mayusculas[random.Next(mayusculas.Length)]);
+            contrasena.Add(minusculas[random.Next(minusculas.Length)]);
+            contrasena.Add(numeros[random.Next(numeros.Length)]);
+            contrasena.Add(especiales[random.Next(especiales.Length)]);
 
-            do
+            // Rellenar el resto de la contraseña con caracteres aleatorios de todos los tipos
+            var todosCaracteres = mayusculas + minusculas + numeros + especiales;
+            while (contrasena.Count < longitud)
             {
-                for (int i = 0; i < longitud; i++)
-                {
-                    contrasena[i] = caracteres[random.Next(caracteres.Length)];
-
-                    if (Char.IsUpper(contrasena[i]))
-                        tieneMayuscula = true;
-                    if (Char.IsLower(contrasena[i]))
-                        tieneMinuscula = true;
-                    if (Char.IsDigit(contrasena[i]))
-                        tieneNumero = true;
-                    if ("!@#$%^&*()".Contains(contrasena[i]))
-                        tieneCaracterEspecial = true;
-                }
+                contrasena.Add(todosCaracteres[random.Next(todosCaracteres.Length)]);
             }
-            while (!(tieneMayuscula && tieneMinuscula && tieneNumero && tieneCaracterEspecial)); // Continúa generando hasta que cumpla todos los requisitos
 
-            return new string(contrasena);
+            // Mezclar los caracteres para mayor aleatoriedad
+            for (int i = contrasena.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                var temp = contrasena[i];
+                contrasena[i] = contrasena[j];
+                contrasena[j] = temp;
+            }
+
+            return new string(contrasena.ToArray());
         }
 
         //Método para validar si una contraseña cumple con los requisitos de seguridad
