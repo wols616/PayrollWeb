@@ -22,7 +22,7 @@
 
 <form action="/Empleado/CrearEmpleado" method="post" id="formAgregarEmpleado">
     
-    <input type="hidden" name="Estado" value="Activo"/>
+    <input type="hidden" name="Estado" value="Inactivo"/>
     <div>
         <label for="Dui">DUI:</label>
         <input value="@Model.Dui" type="text" id="Dui" name="Dui" required maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" />
@@ -67,6 +67,10 @@
     <div>
         <label for="CuentaCorriente">Cuenta Corriente:</label>
         <input value="@Model.CuentaCorriente" type="text" id="CuentaCorriente" name="CuentaCorriente" required maxlength="12" oninput="formatearCuentaCorriente(this)" pattern="[0-9]{12}" />
+        @if (ViewData.ModelState["CuentaCorriente"]?.Errors.Count > 0)
+        {
+            <span style="color:red;">@ViewData.ModelState["CuentaCorriente"]?.Errors[0]?.ErrorMessage</span>
+        }
     </div>
 
     <div>

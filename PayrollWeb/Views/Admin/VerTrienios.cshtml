@@ -1,0 +1,35 @@
+﻿@model List<PayrollWeb.Models.Trienios>
+
+@{
+    ViewData["Title"] = "Ver Trienios";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Botón para calcular trienios -->
+<form method="post" asp-action="CalcularTrienios">
+    <button type="submit" class="btn btn-primary mb-3">Calcular Trienios</button>
+</form>
+
+<!-- Tabla de trienios -->
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Nombre Completo</th>
+            <th>Fecha de Inicio</th>
+            <th>Años Trabajando</th>
+            <th>Monto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var trienio in Model)
+        {
+            <tr>
+                <td>@trienio.NombreCompleto</td>
+                <td>@trienio.FechaInicio.ToString("dd/MM/yyyy")</td>
+                <td>@trienio.AnosTrabajando</td>
+                <td>@trienio.Monto.ToString("C2")</td>
+            </tr>
+        }
+    </tbody>
+</table>

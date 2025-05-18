@@ -88,6 +88,95 @@ BEGIN
     CLOSE EmpleadoCursor;
     DEALLOCATE EmpleadoCursor;
 END; 
+--Calcular trienios
+CREATE PROCEDURE CalcularTrienios
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Se usa un CTE para ordenar los contratos y detectar interrupciones
+    ;WITH ContratosOrdenados AS (
+        SELECT 
+            id_empleado,
+            fecha_alta,
+            fecha_baja,
+            vigente,
+            id_puesto,
+            ROW_NUMBER() OVER(PARTITION BY id_empleado ORDER BY fecha_alta) AS rn,
+            LAG(fecha_baja) OVER(PARTITION BY id_empleado ORDER BY fecha_alta) AS fecha_baja_prev
+        FROM Contrato
+    ),
+    -- Este CTE agrupa por empleado y verifica si hay interrupciones (más de un día de diferencia)
+    EmpleadoContinuo AS (
+        SELECT 
+            id_empleado,
+            MIN(fecha_alta) AS fecha_inicio,
+            MAX(CASE 
+                    WHEN fecha_baja IS NULL THEN GETDATE() 
+                    ELSE fecha_baja 
+                END) AS fecha_fin,
+            SUM(CASE 
+                    WHEN rn > 1 AND DATEDIFF(DAY, fecha_baja_prev, fecha_alta) > 1 THEN 1 
+                    ELSE 0 
+                END) AS interrupciones,
+            -- Se determina si tiene algún contrato vigente
+            MAX(CASE WHEN vigente = 'S' THEN 1 ELSE 0 END) AS activo,
+            -- Se asume que el puesto del contrato actual es el del contrato con mayor fecha_alta
+            MAX(id_puesto) AS id_puesto
+        FROM ContratosOrdenados
+        GROUP BY id_empleado
+    )
+    -- Se crea una tabla temporal para trabajar solo con empleados que cumplen la continuidad
+    SELECT 
+        e.id_empleado,
+        DATEDIFF(YEAR, e.fecha_inicio, e.fecha_fin) AS anios_trabajados,
+        e.fecha_inicio,
+        e.fecha_fin,
+        e.activo,
+        p.sueldo_base
+    INTO #EmpleadosTrienios
+    FROM EmpleadoContinuo e
+    INNER JOIN Puesto p ON e.id_puesto = p.id_puesto
+    WHERE e.interrupciones = 0;
+
+    -- Se usa MERGE para actualizar o insertar en la tabla de trienios
+    MERGE trienios AS t
+    USING #EmpleadosTrienios AS e
+    ON t.id_empleado = e.id_empleado
+    WHEN MATCHED THEN
+        UPDATE SET
+            t.monto = 
+                CASE 
+                    WHEN e.anios_trabajados >= 15 THEN 0.25 * e.sueldo_base
+                    WHEN e.anios_trabajados >= 12 THEN 0.20 * e.sueldo_base
+                    WHEN e.anios_trabajados >= 9  THEN 0.15 * e.sueldo_base
+                    WHEN e.anios_trabajados >= 6  THEN 0.10 * e.sueldo_base
+                    WHEN e.anios_trabajados >= 3  THEN 0.05 * e.sueldo_base
+                    ELSE 0
+                END,
+            -- El estado se marca 'S' si el empleado tiene contrato vigente, 'N' en caso contrario
+            t.estado = CASE WHEN e.activo = 1 THEN 'S' ELSE 'N' END,
+            t.fecha_inicio = e.fecha_inicio,
+            t.fecha_fin = CASE WHEN e.activo = 1 THEN NULL ELSE e.fecha_fin END
+    WHEN NOT MATCHED AND e.anios_trabajados >= 3 THEN
+        INSERT (id_empleado, fecha_inicio, fecha_fin, monto, estado)
+        VALUES (
+            e.id_empleado, 
+            e.fecha_inicio, 
+            CASE WHEN e.activo = 1 THEN NULL ELSE e.fecha_fin END,
+            CASE 
+                WHEN e.anios_trabajados >= 15 THEN 0.25 * e.sueldo_base
+                WHEN e.anios_trabajados >= 12 THEN 0.20 * e.sueldo_base
+                WHEN e.anios_trabajados >= 9  THEN 0.15 * e.sueldo_base
+                WHEN e.anios_trabajados >= 6  THEN 0.10 * e.sueldo_base
+                WHEN e.anios_trabajados >= 3  THEN 0.05 * e.sueldo_base
+                ELSE 0
+            END,
+            CASE WHEN e.activo = 1 THEN 'S' ELSE 'N' END
+        );
+
+    DROP TABLE #EmpleadosTrienios;
+END;
 
 --__________________________________________________________________________________________________________
 --PROCEDIMIENTO PARA CREAR UN PUESTO HISTORICO CADA QUE SE CANCELA UN CONTRATO
@@ -273,5 +362,7 @@ BEGIN
         AND dp.id_empleado = e.id_empleado
     );
 END;
+
+
 
 
