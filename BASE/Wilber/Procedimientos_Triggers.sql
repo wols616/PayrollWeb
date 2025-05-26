@@ -1,7 +1,7 @@
 use payroll_web1
 
 --PROCEDIMIENTO PARA ACTUALIZAR EL PORCENTAJE PERSONAL DEL AFP, ISSS Y EL ISR
-CREATE PROCEDURE ActualizarPorcentajesDeducciones 
+/*CREATE PROCEDURE ActualizarPorcentajesDeducciones 
 AS
 BEGIN
     -- Variables para almacenar valores temporales
@@ -10,6 +10,8 @@ BEGIN
     DECLARE @SueldoBase DECIMAL(10, 2);
     DECLARE @PorcentajePersonal DECIMAL(5, 2);
     DECLARE @PorcentajeDeduccion DECIMAL(5, 2);
+    DECLARE @MontoTrienios DECIMAL(10, 2) = 0;
+    DECLARE @SueldoParaISR DECIMAL(10, 2);
 
     -- Cursor para recorrer los empleados y sus deducciones
     DECLARE EmpleadoCursor CURSOR FOR
@@ -19,7 +21,7 @@ BEGIN
         P.sueldo_base,
         D.porcentaje
     FROM 
-        Deduccion_Personal DP
+        Deduccion_Personal DP 
     INNER JOIN 
         Contrato C ON DP.id_empleado = C.id_empleado
     INNER JOIN 
@@ -37,29 +39,45 @@ BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        -- Inicializar variables para cada empleado
+        SET @MontoTrienios = 0;
+        SET @SueldoParaISR = @SueldoBase;
+
+        -- Verificar si el empleado tiene trienios vigentes
+        SELECT @MontoTrienios = ISNULL(SUM(monto), 0)
+        FROM Trienios
+        WHERE id_empleado = @IdEmpleado 
+          AND estado = 'S';
+
+        -- Calcular el sueldo base + trienios para el ISR
+        IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISR'
+        BEGIN
+            SET @SueldoParaISR = @SueldoBase + @MontoTrienios;
+        END
+
         -- Calcular el porcentaje_personal según la deducción
         IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'AFP'
         BEGIN
-            -- AFP: 7.25% del sueldo base
+            -- AFP: 7.25% del sueldo base (no incluye trienios)
             SET @PorcentajePersonal = 7.25;
         END
         ELSE IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISSS'
         BEGIN
-            -- ISSS: 3% del sueldo base (hasta un máximo de $1000)
+            -- ISSS: 3% del sueldo base (hasta un máximo de $1000, no incluye trienios)
             SET @PorcentajePersonal = 3.00;
         END
         ELSE IF (SELECT nombre_deduccion FROM Deduccion WHERE id_deduccion = @IdDeduccion) = 'ISR'
         BEGIN
-            -- ISR: Aplicar escala progresiva (ejemplo simplificado)
-            IF @SueldoBase <= 472.00
+            -- ISR: Aplicar escala progresiva sobre sueldo base + trienios
+            IF @SueldoParaISR <= 472.00
             BEGIN
                 SET @PorcentajePersonal = 0.00;
             END
-            ELSE IF @SueldoBase <= 895.24
+            ELSE IF @SueldoParaISR <= 895.24
             BEGIN
                 SET @PorcentajePersonal = 10.00;
             END
-            ELSE IF @SueldoBase <= 2038.10
+            ELSE IF @SueldoParaISR <= 2038.10
             BEGIN
                 SET @PorcentajePersonal = 20.00;
             END
@@ -83,12 +101,105 @@ BEGIN
         -- Obtener el siguiente registro
         FETCH NEXT FROM EmpleadoCursor INTO @IdEmpleado, @IdDeduccion, @SueldoBase, @PorcentajeDeduccion;
     END
-
     -- Cerrar y liberar el cursor
     CLOSE EmpleadoCursor;
     DEALLOCATE EmpleadoCursor;
-END; 
---Calcular trienios
+END;*/
+
+
+--------------------------------------------------------------------------------------
+--PROCEDIMIENTO PARA ACTUALIZAR EL PORCENTAJE PERSONAL DEL AFP, ISSS Y EL ISR 2.0
+CREATE PROCEDURE ActualizarPorcentajesDeducciones 
+AS
+BEGIN
+    -- Variables para almacenar valores temporales
+    DECLARE @TopeISSS DECIMAL(10, 2) = 30.00;
+    DECLARE @BaseISSS DECIMAL(10, 2) = 1000.00;
+    
+    -- Tabla temporal para almacenar los montos de AFP e ISSS por empleado
+    CREATE TABLE #DeduccionesEmpleado (
+        IdEmpleado INT PRIMARY KEY,
+        SueldoBase DECIMAL(10, 2),
+        MontoAFP DECIMAL(10, 2),
+        MontoISSS DECIMAL(10, 2),
+        MontoTrienios DECIMAL(10, 2),
+        BaseISR DECIMAL(10, 2) -- Añadimos esta columna
+    );
+
+    -- Primero: Calcular y guardar AFP e ISSS para cada empleado
+    INSERT INTO #DeduccionesEmpleado (IdEmpleado, SueldoBase, MontoAFP, MontoISSS, MontoTrienios)
+    SELECT 
+        C.id_empleado,
+        P.sueldo_base,
+        -- Cálculo AFP (7.25% del sueldo base)
+        P.sueldo_base * 0.0725,
+        -- Cálculo ISSS (3% del sueldo base con tope de $30)
+        CASE 
+            WHEN P.sueldo_base > @BaseISSS THEN @BaseISSS * 0.03
+            ELSE P.sueldo_base * 0.03
+        END,
+        -- Suma de trienios
+        ISNULL((SELECT SUM(monto) FROM Trienios WHERE id_empleado = C.id_empleado AND estado = 'S'), 0)
+    FROM 
+        Contrato C
+    INNER JOIN 
+        Puesto P ON C.id_puesto = P.id_puesto
+    WHERE 
+        C.vigente = 'S';
+
+    -- Aplicar tope máximo al ISSS
+    UPDATE #DeduccionesEmpleado
+    SET MontoISSS = CASE WHEN MontoISSS > @TopeISSS THEN @TopeISSS ELSE MontoISSS END;
+
+    -- Calcular base para ISR (Sueldo + Trienios - AFP - ISSS)
+    UPDATE #DeduccionesEmpleado
+    SET BaseISR = SueldoBase + MontoTrienios - MontoAFP - MontoISSS;
+
+    -- Segundo: Actualizar los porcentajes personales en Deduccion_Personal
+    -- AFP (7.25%)
+    UPDATE DP
+    SET DP.porcentaje_personal = 7.25
+    FROM Deduccion_Personal DP
+    INNER JOIN #DeduccionesEmpleado DE ON DP.id_empleado = DE.IdEmpleado
+    INNER JOIN Deduccion D ON DP.id_deduccion = D.id_deduccion
+    WHERE D.nombre_deduccion = 'AFP';
+
+    -- ISSS (Porcentaje equivalente al monto calculado)
+    UPDATE DP
+    SET DP.porcentaje_personal = CASE 
+                                    WHEN DE.SueldoBase > 0 THEN (DE.MontoISSS / DE.SueldoBase) * 100 
+                                    ELSE 0 
+                                 END
+    FROM Deduccion_Personal DP
+    INNER JOIN #DeduccionesEmpleado DE ON DP.id_empleado = DE.IdEmpleado
+    INNER JOIN Deduccion D ON DP.id_deduccion = D.id_deduccion
+    WHERE D.nombre_deduccion = 'ISSS';
+
+    -- ISR (Según escala progresiva)
+    UPDATE DP
+    SET DP.porcentaje_personal = CASE
+                                    WHEN DE.BaseISR <= 472.00 THEN 0.00
+                                    WHEN DE.BaseISR <= 895.24 THEN 10.00
+                                    WHEN DE.BaseISR <= 2038.10 THEN 20.00
+                                    ELSE 30.00
+                                 END
+    FROM Deduccion_Personal DP
+    INNER JOIN #DeduccionesEmpleado DE ON DP.id_empleado = DE.IdEmpleado
+    INNER JOIN Deduccion D ON DP.id_deduccion = D.id_deduccion
+    WHERE D.nombre_deduccion = 'ISR';
+
+    -- Otras deducciones (mantener su porcentaje original)
+    --UPDATE DP
+    --SET DP.porcentaje_personal = D.porcentaje
+    --FROM Deduccion_Personal DP
+    --INNER JOIN Deduccion D ON DP.id_deduccion = D.id_deduccion
+    --WHERE D.nombre_deduccion NOT IN ('AFP', 'ISSS', 'ISR');
+
+    -- Eliminar tabla temporal
+    DROP TABLE #DeduccionesEmpleado;
+END;
+--------------------------------------------------------------------------------Calcular trienios
+-----------------------------------------------------------------------------------------------
 CREATE PROCEDURE CalcularTrienios
 AS
 BEGIN

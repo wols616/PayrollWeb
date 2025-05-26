@@ -112,12 +112,12 @@ namespace PayrollWeb.Models
             return deduccionesList;
         }
 
-        public bool AgregarDeduccionPersonal()
+        public bool AgregarDeduccionPersonal(decimal porcentajePersonal)
         {
             bool exito = false;
 
             // Consulta SQL para insertar una nueva deducción
-            string query = "INSERT INTO Deduccion_Personal (id_deduccion, id_empleado) VALUES (@IdDeduccion, @IdEmpleado)";
+            string query = "INSERT INTO Deduccion_Personal (id_deduccion, id_empleado, porcentaje_personal) VALUES (@IdDeduccion, @IdEmpleado, @PorcentajePersonal)";
 
             Conexion conexion = new Conexion();
             using (SqlConnection connection = conexion.GetConnection())
@@ -132,6 +132,7 @@ namespace PayrollWeb.Models
                     {
                         command.Parameters.AddWithValue("@IdDeduccion", IdDeduccion);
                         command.Parameters.AddWithValue("@IdEmpleado", IdEmpleado);
+                        command.Parameters.AddWithValue("@PorcentajePersonal", porcentajePersonal);
 
                         // Ejecutar la consulta
                         int rowsAffected = command.ExecuteNonQuery();
@@ -189,6 +190,43 @@ namespace PayrollWeb.Models
                 }
             }
 
+            return exito;
+        }
+
+        //Editar deducción personal
+        public bool EditarDeduccionPersonal()
+        {
+            bool exito = false;
+            // Consulta SQL para actualizar una deducción personal
+            string query = "UPDATE Deduccion_Personal SET id_deduccion = @IdDeduccion, id_empleado = @IdEmpleado, porcentaje_personal = @PorcentajePersonal WHERE id_deduccion_personal = @IdDeduccionPersonal";
+            Conexion conexion = new Conexion();
+            using (SqlConnection connection = conexion.GetConnection())
+            {
+                try
+                {
+                    // Abrir la conexión
+                    connection.Open();
+                    // Crear el comando SQL y agregar los parámetros
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@IdDeduccion", IdDeduccion);
+                        command.Parameters.AddWithValue("@IdEmpleado", IdEmpleado);
+                        command.Parameters.AddWithValue("@PorcentajePersonal", PorcentajePersonal);
+                        command.Parameters.AddWithValue("@IdDeduccionPersonal", IdDeduccionPersonal);
+                        // Ejecutar la consulta
+                        int rowsAffected = command.ExecuteNonQuery();
+                        // Si se afectaron filas, la actualización fue exitosa
+                        if (rowsAffected > 0)
+                        {
+                            exito = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al editar la deducción personal: " + ex.Message);
+                }
+            }
             return exito;
         }
     }
