@@ -33,7 +33,7 @@ namespace PayrollWeb.Controllers.Admin
         public IActionResult CrearDeduccionPersonal(int IdDeduccion, int IdEmpleado)
         {
             Deduccion_Personal deduccionp = new Deduccion_Personal { IdDeduccion = IdDeduccion,IdEmpleado = IdEmpleado};
-            deduccionp.AgregarDeduccionPersonal();
+            deduccionp.AgregarDeduccionPersonal(_deduccion.ObtenerDeduccion(IdDeduccion).Porcentaje);
             TempData["Success"] = "Deducción personal creada correctamente";
             return RedirectToAction("VerDeducciones", new { IdEmpleado = IdEmpleado });
         }
@@ -43,7 +43,20 @@ namespace PayrollWeb.Controllers.Admin
             _deduccion_Personal.EliminarDeduccionPersonal(IdDeduccion, IdEmpleado);
             TempData["Success"] = "Deducción personal eliminada correctamente";
             return RedirectToAction("VerDeducciones", new { IdEmpleado = IdEmpleado });
-        }   
+        }
+        
+        public IActionResult EditarDeduccionPersonal(int IdDeduccionPersonal, int IdDeduccion, int IdEmpleado, decimal PorcentajePersonal)
+        {
+            Deduccion_Personal deduccion = new Deduccion_Personal
+            {
+                IdDeduccionPersonal = IdDeduccionPersonal,
+                IdDeduccion = IdDeduccion,
+                IdEmpleado = IdEmpleado,
+                PorcentajePersonal = PorcentajePersonal
+            };
+            deduccion.EditarDeduccionPersonal();
+            return RedirectToAction("VerDeducciones", new { IdEmpleado = IdEmpleado });
+        }
 
     }
 }

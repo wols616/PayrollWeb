@@ -16,7 +16,6 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-
         if (User.IsInRole("Admin"))
         {
             var AdminIdClaim = User.Claims.FirstOrDefault(c => c.Type == "IdAdministrador");
