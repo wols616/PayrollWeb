@@ -1,11 +1,11 @@
 ﻿@model List<Empleado>
 
-@if (ViewBag.ShowActions == "Contratos")
+@if(ViewBag.ShowActions == "Contratos")
 {
     <h1>Contratos de Empleados</h1>
 }
 
-@if (ViewBag.ShowActions == "Deducciones")
+@if(ViewBag.ShowActions == "Deducciones")
 {
     <h1>Deducciones de Empleados</h1>
 }
@@ -28,8 +28,7 @@
     <h1>Habilidades de Empleados</h1>
 }
 
-@if (ViewBag.ShowActions == "Empleados")
-{
+@if(ViewBag.ShowActions == "Empleados"){
     <h1>Gestionar Empleados</h1>
     <a href="@Url.Action("VerAgregarEmpleado", "Empleado")" class="btn custom-btn-info">
         <i style="font-size: 2rem" class="bi bi-plus-square"></i>
@@ -141,7 +140,7 @@
                         </td>
                     </tr>
                 }
-
+                
             }
         }
         else

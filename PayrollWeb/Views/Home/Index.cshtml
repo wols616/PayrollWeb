@@ -2,20 +2,90 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    @if (User.IsInRole("Admin"))
-    {
-        <h1 class="display-4">Welcome @ViewBag.Admin.Nombre @ViewBag.Admin.Apellidos</h1>
-    }
-    else if (User.IsInRole("Empleado"))
-    {
-        <h1 class="display-4">Welcome @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos</h1>
-    }
-    else
-    {
-        <h1 class="display-4">Welcome</h1>
-    }
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<body class="page-center">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-body text-center p-5" style="color: #064789">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <h1 class="display-5 fw-bold text-primary mb-4">
+                            Welcome, @ViewBag.Admin.Nombre @ViewBag.Admin.Apellidos
+                        </h1>
+                    }
+                    else if (User.IsInRole("Empleado"))
+                    {
+                        <h1 class="display-5 fw-bold text-success mb-4">
+                            Welcome, @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos
+                        </h1>
+                    }
+                    else
+                    {
+                        <h1 class="display-5 fw-bold">
+                            Welcome
+                        </h1>
+                        <p>Inicia Sesión para ver más</p>
 
+                        <a class="btn custom-outline" asp-controller="Account" asp-action="Login">Iniciar Sesión</a>
 
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+@if (!User.IsInRole("Admin") && !User.IsInRole("Empleado"))
+{
+    <style>
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.ibb.co/Hf9DR4SX/pexels-sevenstormphotography-443383.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            z-index: -1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            color: #000000;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+            }
+
+        .page-center {
+            min-height: calc(100vh - 100px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-outline {
+            background-color: white;
+            color: #064789;
+            border: 2px solid #064789;
+            transition: all 0.3s ease;
+        }
+
+            .custom-outline:hover {
+                background-color: #064789;
+                color: white;
+            }
+    </style>
+}
