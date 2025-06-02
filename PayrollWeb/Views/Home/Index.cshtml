@@ -15,9 +15,37 @@
                     }
                     else if (User.IsInRole("Empleado"))
                     {
-                        <h1 class="display-5 fw-bold text-success mb-4">
-                            Welcome, @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos
+                        <h1 class="display-5 fw-bold text-success mb-5">
+                            Welcome, @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos @ViewBag.Empleado.Dui
                         </h1>
+
+                        <div class="row g-3 justify-content-center mb-5">
+                            <div class="col-12 col-md-6">
+                                <a class="btn btn-primary w-100 py-3 shadow-sm btn-hover" asp-controller="Perfil" asp-action="VerPerfil">
+                                    Mi Perfil
+                                </a>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <a class="btn btn-primary w-100 py-3 shadow-sm btn-hover"
+                                   asp-controller="Asistencia"
+                                   asp-action="VerAsistencia"
+                                   asp-route-dui="@ViewBag.Empleado.Dui">
+                                    Ver Asistencia
+                                </a>
+
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <a class="btn btn-primary w-100 py-3 shadow-sm btn-hover" asp-controller="Permisos" asp-action="Solicitar">
+                                    Solicitar Permiso
+                                </a>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <a class="btn btn-primary w-100 py-3 shadow-sm btn-hover" asp-controller="Account" asp-action="Logout">
+                                    Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
+
                     }
                     else
                     {
@@ -36,8 +64,21 @@
 
 </body>
 
-@if (!User.IsInRole("Admin") && !User.IsInRole("Empleado"))
+@if (User.IsInRole("Admin"))
 {
+   
+}
+else if (User.IsInRole("Empleado")){
+    <style>
+        .btn-hover:hover {
+            transform: scale(1.03);
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+
+
+}
+else{
     <style>
         body::before {
             content: "";

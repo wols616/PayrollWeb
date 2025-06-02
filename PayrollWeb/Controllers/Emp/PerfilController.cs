@@ -17,6 +17,7 @@ namespace PayrollWeb.Controllers.Emp
             int EmpleadoId = Int32.Parse(EmpleadoIdClaim.Value);
 
             Empleado empleado = _empleado.ObtenerEmpleado(EmpleadoId);
+            ViewBag.Empleado = empleado;
             return View("/Views/Emp/Perfil.cshtml", empleado);
         }
 

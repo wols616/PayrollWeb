@@ -32,7 +32,7 @@ public class HomeController : Controller
             if (EmpleadoIdClaim != null)
             {
                 int EmpleadoId = Int32.Parse(EmpleadoIdClaim.Value);
-                ViewBag.Empleado = _administrador.ObtenerAdministrador(EmpleadoId);
+                ViewBag.Empleado = _empleado.ObtenerEmpleado(EmpleadoId);
             }
         }
 
