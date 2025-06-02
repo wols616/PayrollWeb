@@ -14,7 +14,7 @@
     <header>
         @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
         {
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 pt-4 pb-4">
                 <div class="container-fluid">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PayrollWeb</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -79,7 +79,7 @@
                             {
                                 <li class="nav-item">
                                     <form method="post" asp-controller="Account" asp-action="Logout">
-                                        <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+                                        <button type="submit" class="btn btn-outline-logout">Cerrar Sesión</button>
                                     </form>
                                 </li>
                             }
@@ -108,3 +108,18 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+<style>
+    .btn-outline-logout {
+        background-color: white;
+        color: #dc3545; /* rojo Bootstrap */
+        border: 2px solid #dc3545;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-logout:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+</style>
