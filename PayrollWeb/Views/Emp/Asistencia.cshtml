@@ -1,0 +1,39 @@
+﻿@model List<string>
+
+@{
+    ViewData["Title"] = "Mi Asistencia";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-success">Mi Asistencia</h2>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-success">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora de Entrada</th>
+                        <th>Hora de Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var registro in Model)
+                    {
+                        var datos = registro.Split('|');
+                        <tr>
+                            <td>@datos[0]</td>
+                            <td>@datos[1]</td>
+                            <td>@datos[2]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No se encontraron registros de asistencia.</div>
+    }
+</div>

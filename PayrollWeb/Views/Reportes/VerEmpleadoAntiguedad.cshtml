@@ -1,0 +1,42 @@
+﻿@model List<PayrollWeb.Models.Empleado>
+
+@{
+    ViewData["Title"] = "Empleados - Reporte de Antiguedad";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mt-4 mb-4">@ViewData["Title"]</h2>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>DUI</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in Model)
+            {
+                <tr>
+                    <td>@emp.Dui</td>
+                    <td>@emp.Nombre</td>
+                    <td>@emp.Apellidos</td>
+                    <td>@emp.Telefono</td>
+                    <td>@emp.Correo</td>
+                    <td>@emp.Estado</td>
+                    <td>
+                        <a asp-controller="ReporteAntiguedadEmpleado" asp-action="ReporteAntiguedad" asp-route-IdEmpleado="@emp.IdEmpleado" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-calendar2-check"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
