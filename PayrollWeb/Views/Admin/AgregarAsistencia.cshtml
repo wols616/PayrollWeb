@@ -14,8 +14,11 @@
         Agregar Hora de Salida
     </a>
 
-    <a href="@Url.Action("AsistenciaAusencia", "Asistencia")" class="btn btn-success mb-3">
-        Agregar Ausencia
-    </a>
-   
+    @if (User.IsInRole("Admin"))
+    {
+        <a href="@Url.Action("AsistenciaAusencia", "Asistencia")" class="btn btn-success mb-3">
+            Agregar Ausencia
+        </a>
+    }
+
 </div>
