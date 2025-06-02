@@ -19,6 +19,32 @@ namespace PayrollWeb.Controllers.Admin
             return View();
         }
 
+        [HttpPost]
+        public IActionResult BuscarNombrePorCorreo(string correo)
+        {
+            List<Empleado> empleados = _empleado.ObtenerEmpleados();
+
+            Empleado empleadoEncontrado = empleados
+                .FirstOrDefault(e => e.Correo.Equals(correo, StringComparison.OrdinalIgnoreCase));
+
+            if (empleadoEncontrado != null)
+            {
+                var resultado = new
+                {
+                    success = true,
+                    nombreCompleto = empleadoEncontrado.Nombre + " " + empleadoEncontrado.Apellidos
+                };
+                return Json(resultado);
+            }
+            else
+            {
+                return Json(new { success = false });
+            }
+        }
+
+
+
+
         // Ver la asistencia de un empleado específico
 
         public IActionResult VerAsistenciaEmpleado(string dui)

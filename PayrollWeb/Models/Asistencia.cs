@@ -18,7 +18,7 @@ namespace PayrollWeb.Models
 
 
         // Métodos:
-
+       
 
         //Con este método podrá ver todas las asistencias de un empleado
         public List<string> VerAsistencia(string dui)
@@ -53,102 +53,6 @@ namespace PayrollWeb.Models
             }
             return Asistencia;
         }
-
-
-        ////Con este podrá ver la asistencia de un día específico de un empleado
-        //public List<string> ObtenerAsistenciaPorFecha(DateTime fecha, string dui)
-        //{
-        //    List<string> Asistencia = new List<string>();
-
-        //    // Consulta SQL ajustada
-        //    string query = "SELECT Asistencia.fecha, Asistencia.hora_entrada, Asistencia.hora_salida " +
-        //                   "FROM Asistencia " +
-        //                   "JOIN Empleado ON Asistencia.id_empleado = Empleado.id_empleado " +
-        //                   "WHERE Empleado.dui = @dui AND Asistencia.fecha = @fecha";
-
-        //    // Crear la conexión y comando
-        //    using (SqlConnection connection = conexion.GetConnection())
-        //    {
-        //        try
-        //        {
-        //            connection.Open();
-
-        //            // Preparar el comando SQL
-        //            using (SqlCommand command = new SqlCommand(query, connection))
-        //            {
-        //                // Agregar parámetros correctamente
-        //                command.Parameters.AddWithValue("@dui", dui);
-        //                command.Parameters.AddWithValue("@fecha", fecha.Date); // Usar .Date para comparar solo la fecha
-
-        //                // Ejecutar la consulta y leer los resultados
-        //                using (SqlDataReader reader = command.ExecuteReader())
-        //                {
-        //                    // Leer los resultados
-        //                    while (reader.Read())
-        //                    {
-        //                        string fechaAsistencia = reader.GetDateTime(0).ToString("yyyy-MM-dd"); // Convertir a formato de fecha
-        //                        string horaEntrada = reader.GetTimeSpan(1).ToString(@"hh\:mm"); // Convertir a formato de hora
-        //                        string horaSalida = reader.GetTimeSpan(2).ToString(@"hh\:mm"); // Convertir a formato de hora
-
-        //                        // Agregar los datos a la lista como un string formateado
-        //                        Asistencia.Add($"{fechaAsistencia}|{horaEntrada}|{horaSalida}");
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            // Manejo de errores
-        //            Console.WriteLine("Error al obtener la información: " + ex.Message);
-
-        //        }
-        //    }
-
-
-        //    // Retornar la lista con los datos obtenidos
-        //    return Asistencia;
-        //}
-
-
-        //public List<string> VerAsistencia()
-        //{
-        //    List<string> Asistencia = new List<string>();
-        //    string query = "SELECT Asistencia.fecha, Empleado.id_empleado, Empleado.nombre, Empleado.apellidos, Asistencia.hora_entrada, Asistencia.hora_salida " +
-        //                   "FROM Asistencia " +
-        //                   "JOIN Empleado ON Asistencia.id_empleado = Empleado.id_empleado";
-
-        //    using (SqlConnection connection = conexion.GetConnection())
-        //    {
-        //        try
-        //        {
-        //            connection.Open();
-        //            using (SqlCommand command = new SqlCommand(query, connection))
-        //            {
-        //                using (SqlDataReader reader = command.ExecuteReader())
-        //                {
-        //                    while (reader.Read())
-        //                    {
-        //                        string fechaAsistencia = reader.GetDateTime(0).ToString("yyyy-MM-dd");
-        //                        string idEmpleado = reader.GetInt32(1).ToString();
-        //                        string nombreEmpleado = reader.GetString(2);
-        //                        string apellidoEmpleado = reader.GetString(3);
-        //                        string horaEntrada = reader.GetTimeSpan(4).ToString(@"hh\:mm");
-        //                        string horaSalida = reader.GetTimeSpan(5).ToString(@"hh\:mm");
-
-        //                        // Concatenamos los datos de la asistencia, incluyendo fecha, ID, nombre, apellido,
-        //                        // hora de entrada y hora de salida.
-        //                        Asistencia.Add($"{fechaAsistencia}|{idEmpleado}|{nombreEmpleado}|{apellidoEmpleado}|{horaEntrada}|{horaSalida}");
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine("Error al obtener la información: " + ex.Message);
-        //        }
-        //    }
-        //    return Asistencia;
-        //}
 
         public List<string> VerAsistencia()
         {
@@ -200,8 +104,6 @@ namespace PayrollWeb.Models
         }
 
 
-
-
         public List<string> ObtenerAsistenciaPorEmpleadoYFecha(int id, string fecha)
         {
             List<string> listaAsistenciaMostrar = new List<string>();
@@ -250,7 +152,6 @@ namespace PayrollWeb.Models
         }
 
 
-
         public bool ActualizarAsistencia(int idEmpleado, string fechaAsistencia, string horaEntrada, string horaSalida)
         {
             // Definir la consulta SQL para actualizar la asistencia
@@ -285,8 +186,6 @@ namespace PayrollWeb.Models
                 }
             }
         }
-
-
 
 
         public Boolean RegistrarAsistenciaEntrada(int idEmpleado, DateTime fecha, TimeSpan horaEntrada, TimeSpan horaSalida, string ausencia)
