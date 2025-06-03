@@ -38,11 +38,12 @@
                     @foreach (var registro in Model)
                     {
                         var datos = registro.Split('|');
-                        <tr>
+                        <tr class="fecha-asistencia" data-fecha="@datos[0]">
                             <td>@datos[0]</td>
                             <td>@datos[1]</td>
                             <td>@datos[2]</td>
                         </tr>
+
                     }
                 </tbody>
             </table>
@@ -72,6 +73,20 @@
         // Limpiar el campo de búsqueda por empleado cuando se cambie la fecha
         document.getElementById("empleadoBusqueda").value = "";
         filtrarEmpleados(); // Aplicar filtro para empleado vacío cuando se cambia la fecha
+    });
+
+      document.getElementById("fechaBusqueda").addEventListener("change", function () {
+        var fechaSeleccionada = this.value;
+        var filas = document.querySelectorAll(".fecha-asistencia");
+
+        filas.forEach(function (fila) {
+            var fechaFila = fila.getAttribute("data-fecha");
+            if (fechaSeleccionada === "" || fechaFila === fechaSeleccionada) {
+                fila.style.display = "table-row";
+            } else {
+                fila.style.display = "none";
+            }
+        });
     });
 </script>
 

@@ -30,7 +30,7 @@
 
         <div class="form-group">
             <label for="horaEntrada">Hora de Entrada</label>
-            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" />
+            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" min="06:30" max="16:30" required />
         </div>
 
         <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Asistencia</button>
@@ -129,60 +129,101 @@
     }
 }
 else{
-    <!-- Formulario para agregar hora de entrada -->
-    <form id="formAgregarAsistencia" method="post" action="@Url.Action("AgregarAsistenciaEntrada", "Asistencia")">
-        <div class="form-group">
-            <label for="fecha">Fecha</label>
-            <input type="date" class="form-control" id="fecha" name="fecha" required
-                   min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
-        </div>
+    <form id="formAgregarAsistencia" method="post">
+        <input type="date"
+               class="form-control"
+               id="fecha"
+               name="fecha"
+               required
+               min="@DateTime.Now.ToString("yyyy-MM-dd")"
+               max="@DateTime.Now.ToString("yyyy-MM-dd")"
+               value="@DateTime.Now.ToString("yyyy-MM-dd")" />
 
         <div class="form-group">
             <label for="empleado">Empleado</label>
             <input type="text" class="form-control" id="empleado" name="empleado" readonly>
-           
+            <input type="hidden" id="idEmpleado" name="idEmpleado">
         </div>
 
         <div class="form-group">
             <label for="horaEntrada">Hora de Entrada</label>
-            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" />
+            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" min="06:30" max="16:30" required>
         </div>
 
         <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Asistencia</button>
+
+        <hr />
+        <!-- Mensaje de éxito -->
+        <div id="mensajeExito" class="alert alert-success" style="display: none;">
+            Asistencia agregada con éxito.
+        </div>
+
+        <!-- Mensaje de error -->
+        <div id="mensajeError" class="alert alert-danger" style="display: none;">
+            No se pudo agregar la asistencia.
+        </div>
+
     </form>
 
-    <hr />
-    <!-- Mensaje de éxito -->
-    <div id="mensajeExito" class="alert alert-success" style="display: none;">
-        Asistencia agregada con éxito.
-    </div>
-
-    <!-- Mensaje de error -->
-    <div id="mensajeError" class="alert alert-danger" style="display: none;">
-        No se pudo agregar la asistencia.
-    </div>
-
+    @section Scripts {
     <script>
-            $(document).ready(function() {
+        $(document).ready(function () {
             var correoUsuario = '@User.Identity.Name';
 
+            // Obtener información del empleado (nombre e ID)
             $.ajax({
                 url: '@Url.Action("BuscarNombrePorCorreo", "Asistencia")',
                 type: 'POST',
                 data: { correo: correoUsuario },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         $('#empleado').val(response.nombreCompleto);
+                        $('#idEmpleado').val(response.idEmpleado);
                     } else {
                         $('#empleado').val('Empleado no encontrado');
+                        $('#btnRegistrar').prop('disabled', true);
                     }
                 },
-                error: function() {
+                error: function () {
                     $('#empleado').val('Error buscando empleado');
+                    $('#btnRegistrar').prop('disabled', true);
                 }
             });
-        });
 
+            // Enviar el formulario vía AJAX
+            $('#formAgregarAsistencia').submit(function (e) {
+                e.preventDefault();
+
+                var datos = {
+                    id: $('#idEmpleado').val(),
+                    fecha: $('#fecha').val(),
+                    horaEntrada: $('#horaEntrada').val(),
+                    horaSalida: null, // Puedes dejarlo como null o adaptarlo si lo vas a usar luego
+                    ausencia: null // Puedes dejarlo como null o adaptarlo según el caso
+                };
+
+                $.ajax({
+                    url: '@Url.Action("AgregarAsistenciaEntrada", "Asistencia")',
+                    type: 'POST',
+                    data: datos,
+                    success: function (response) {
+                        if (response.success) {
+                            $('#mensajeExito').show();
+                            $('#mensajeError').hide();
+                        } else {
+                            $('#mensajeExito').hide();
+                            $('#mensajeError').text(response.message).show();
+                        }
+                    },
+                    error: function () {
+                        $('#mensajeExito').hide();
+                        $('#mensajeError').text("Error en la solicitud.").show();
+                    }
+                });
+            });
+        });
     </script>
+    }
+
 
 }
