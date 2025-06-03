@@ -39,11 +39,24 @@
                                     Solicitar Permiso
                                 </a>
                             </div>
-                            <div class="col-12 col-md-6">
-                                <a class="btn btn-primary w-100 py-3 shadow-sm btn-hover" asp-controller="Account" asp-action="Logout">
-                                    Cerrar Sesión
-                                </a>
-                            </div>
+                            @{
+                                var idEmpleado = ViewBag.Empleado != null ? ViewBag.Empleado.IdEmpleado : 0;
+                            }
+
+                            @if (idEmpleado != 0)
+                            {
+                                <div class="col-12 col-md-6">
+                                    <a class="btn btn-primary w-100 py-3 shadow-sm btn-hover"
+                                       asp-controller="EmpleadoEvaluacion"
+                                       asp-action="MisEvaluaciones"
+                                       asp-route-idEmpleado="@idEmpleado">
+                                        Ver Evaluaciones de Desempeño
+                                    </a>
+                                </div>
+                            }
+
+
+
                         </div>
 
                     }
