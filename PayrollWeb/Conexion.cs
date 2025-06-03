@@ -6,7 +6,7 @@ namespace PayrollWeb
     public class Conexion
     {
 
-        private readonly string connectionString = "Server=EYLEEN\\SQLEXPRESS;Database=payroll_web1;User Id=eyleen1;Password=123456;Encrypt=False;";
+        private readonly string connectionString = "Server=LOCALHOST;Database=payroll_web1;User Id=brenda;Password=Beds123;Encrypt=False;";
         // Método para obtener la conexión
         public SqlConnection GetConnection()
         {

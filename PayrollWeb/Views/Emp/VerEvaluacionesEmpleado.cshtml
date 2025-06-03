@@ -1,0 +1,259 @@
+﻿@model List<EvaluacionDesempenoViewModel>
+
+@{
+    ViewData["Title"] = "Ver Evaluación de Desempeño";
+}
+
+<h2>Evaluaciones de @ViewBag.Empleado.Nombre</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+<!-- Filtro por fecha única -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Filtrar Evaluaciones por Fecha</h5>
+        @if (!Context.Request.Query.ContainsKey("fechaInicio"))
+        {
+            <span class="badge bg-info">Mostrando promedio de todas las evaluaciones</span>
+        }
+    </div>
+    <div class="card-body">
+        <form id="filtroForm" method="get"
+              asp-controller="EmpleadoEvaluacion"
+              asp-action="MisEvaluaciones"
+              asp-route-idEmpleado="@ViewBag.Empleado.IdEmpleado">
+            <div class="row align-items-end">
+                <div class="col-md-8">
+                    <label for="fechaEvaluacion" class="form-label">Seleccione una fecha</label>
+                    <input type="date" class="form-control" id="fechaEvaluacion" name="fechaInicio"
+                           value="@Context.Request.Query["fechaInicio"]">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="@Url.Action("MisEvaluaciones", "EmpleadoEvaluacion", new { idEmpleado = ViewBag.Empleado.IdEmpleado })"
+                       class="btn btn-outline-secondary">Mostrar todas</a>
+                </div>
+            </div>
+            <input type="hidden" name="fechaFin" value="@Context.Request.Query["fechaInicio"]">
+        </form>
+    </div>
+</div>
+
+
+<!-- Tabla de Evaluaciones de Desempeño existentes -->
+@if (Model.Any())
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Evaluaciones Registradas</h3>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>KPI Evaluado</th>
+                <th>Puntuación</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evaluacion in Model)
+            {
+                <tr>
+                    <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
+                    <td>@evaluacion.KPI.Nombre</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            @evaluacion.puntuacion
+                            <div class="ms-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="@(i <= evaluacion.puntuacion ? "text-warning" : "text-secondary")">★</span>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        @if (Context.Request.Query.ContainsKey("fechaInicio"))
+        {
+            <span>No se encontraron evaluaciones para la fecha especificada.</span>
+        }
+        else
+        {
+            <span>No hay evaluaciones registradas para este empleado.</span>
+        }
+    </div>
+}
+
+<!-- Gráfica comparativa -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Comparación de Desempeño</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="desempenoChart" height="300"></canvas>
+    </div>
+    <div class="card-footer text-muted">
+        <small>Línea azul: @(Context.Request.Query.ContainsKey("fechaInicio") ? "Puntuación actual" : "Puntuación promedio") | Línea verde: Puntuación ideal (5 en todos los KPIs)</small>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Datos para la gráfica
+        const kpiNames = [
+        @foreach (var kpi in ViewBag.KPIs)
+        {
+            @Html.Raw($"'{kpi.Nombre}',")
+        }
+                ];
+
+        const puntuaciones = [
+        @foreach (var dato in ViewBag.DatosGrafica)
+        {
+            @Html.Raw($"{dato},")
+        }
+                ];
+
+        const tieneFiltroFecha = @(Context.Request.Query.ContainsKey("fechaInicio") ? "true" : "false");
+        const tituloGrafica = tieneFiltroFecha ? 'Comparación de Desempeño (Fecha específica)' : 'Comparación de Desempeño (Promedio general)';
+        const etiquetaDataset = tieneFiltroFecha ? 'Puntuación Actual' : 'Puntuación Promedio';
+
+        // Configuración de la gráfica
+        const ctx = document.getElementById('desempenoChart').getContext('2d');
+        const desempenoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: kpiNames,
+                datasets: [
+                    {
+                        label: etiquetaDataset,
+                        data: puntuaciones,
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        tension: 0.1,
+                        fill: false
+                    },
+                    {
+                        label: 'Puntuación Ideal',
+                        data: Array(kpiNames.length).fill(5),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        tension: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: tituloGrafica
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    // Mostrar con 1 decimal si es promedio
+                                    const value = tieneFiltroFecha ? context.parsed.y : context.parsed.y.toFixed(1);
+                                    label += value;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Función para validar fecha única
+        function validarFechaUnica(fechaSeleccionada) {
+            const fechaInput = document.getElementById('fecha');
+            const fechaError = document.getElementById('fechaError');
+            const submitButton = document.getElementById('submitButton');
+
+            // Obtener todas las fechas existentes del empleado
+            const fechasExistentes = [
+        @{
+            var todasEvaluaciones = ViewBag.Evaluaciones;
+            foreach (var eval in todasEvaluaciones)
+            {
+                @Html.Raw($"'{eval.fecha.ToString("yyyy-MM-dd")}',")
+            }
+        }
+                    ].filter(Boolean);
+
+            // Verificar si la fecha ya existe en cualquier evaluación
+            if (fechasExistentes.includes(fechaSeleccionada)) {
+                fechaInput.classList.add('is-invalid');
+                fechaError.style.display = 'block';
+                fechaError.textContent = 'Ya existe una evaluación para esta fecha. No se pueden agregar evaluaciones a fechas ya evaluadas.';
+                submitButton.disabled = true;
+            } else {
+                fechaInput.classList.remove('is-invalid');
+                fechaError.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        }
+
+        // Función para editar evaluación
+        function editarEvaluacion(idEvaluacion, fecha, idKpi, puntuacion) {
+            document.getElementById('evaluacionId').value = idEvaluacion;
+            document.getElementById('editFecha').value = fecha;
+            document.getElementById('fechaMostrada').value = fecha;
+            document.getElementById('editIdKpi').value = idKpi;
+
+            // Seleccionar el radio button correspondiente a la puntuación
+            document.querySelector(`input[name="Puntuacion"][value="${puntuacion}"]`).checked = true;
+
+            // Configurar el formulario para enviar a la acción de actualización
+            document.getElementById('editarEvaluacionForm').action = '/Evaluacion/ActualizarEvaluacion';
+
+            // Mostrar el modal
+            var modal = new bootstrap.Modal(document.getElementById('evaluacionModal'));
+            modal.show();
+        }
+
+        // Habilitar el botón de submit cuando se seleccione al menos un radio button
+        document.querySelectorAll('input[type="radio"][name^="Puntuaciones"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const submitButton = document.getElementById('submitButton');
+                const checkedRadios = document.querySelectorAll('input[type="radio"][name^="Puntuaciones"]:checked');
+                submitButton.disabled = checkedRadios.length === 0;
+            });
+        });
+    </script>
+}
