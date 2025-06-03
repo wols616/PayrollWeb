@@ -187,16 +187,48 @@ namespace PayrollWeb.Models
             }
         }
 
+        public bool ExisteAsistencia(int idEmpleado, DateTime fecha)
+        {
+            string query = "SELECT COUNT(*) FROM Asistencia WHERE id_empleado = @idEmpleado AND fecha = @fecha";
+            int count = 0;
+
+            try
+            {
+                using (SqlConnection connection = conexion.GetConnection())
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@idEmpleado", idEmpleado);
+                        command.Parameters.AddWithValue("@fecha", fecha);
+
+                        count = (int)command.ExecuteScalar();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al verificar asistencia: {ex.Message}");
+            }
+
+            return count > 0;
+        }
+
 
         public Boolean RegistrarAsistenciaEntrada(int idEmpleado, DateTime fecha, TimeSpan horaEntrada, TimeSpan horaSalida, string ausencia)
         {
             Boolean result = false;
-           
+
+            if (ExisteAsistencia(idEmpleado, fecha))
+            {
+                Console.WriteLine("Ya existe una asistencia para este empleado en esta fecha.");
+                return false; // No se permite registrar doble asistencia para el mismo día
+            }
+
 
             string query = "INSERT INTO Asistencia (id_empleado, fecha, hora_entrada, hora_salida, ausencia) " +
                            "VALUES (@idEmpleado, @fecha, @horaEntrada, @horaSalida, @ausencia)";
 
-            Console.WriteLine("Comando SQL: " + query); // Para depuración
 
             try
             {
@@ -232,6 +264,41 @@ namespace PayrollWeb.Models
             return result;
         }
 
+
+
+        public bool ExisteAsistenciaConEntradaValida(int idEmpleado, DateTime fecha)
+{
+    string query = @"
+        SELECT COUNT(*) 
+        FROM Asistencia 
+        WHERE id_empleado = @idEmpleado 
+          AND fecha = @fecha 
+          AND hora_entrada IS NOT NULL 
+          AND CONVERT(time, hora_entrada) != '00:00:00'";
+
+    int count = 0;
+
+    try
+    {
+        using (SqlConnection connection = conexion.GetConnection())
+        {
+            connection.Open();
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@idEmpleado", idEmpleado);
+                command.Parameters.AddWithValue("@fecha", fecha);
+
+                count = (int)command.ExecuteScalar();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al verificar asistencia: {ex.Message}");
+    }
+
+    return count > 0;
+}
 
         public Boolean RegistrarHoraSalida(int idEmpleado, DateTime fecha, TimeSpan nuevaHoraSalida)
         {

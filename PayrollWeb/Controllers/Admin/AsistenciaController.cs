@@ -22,24 +22,22 @@ namespace PayrollWeb.Controllers.Admin
         [HttpPost]
         public IActionResult BuscarNombrePorCorreo(string correo)
         {
-            List<Empleado> empleados = _empleado.ObtenerEmpleados();
+            Console.WriteLine("Correo recibido: " + correo); // Temporal para prueba
 
-            Empleado empleadoEncontrado = empleados
-                .FirstOrDefault(e => e.Correo.Equals(correo, StringComparison.OrdinalIgnoreCase));
+            Empleado empleado = _empleado.ObtenerEmpleadoPorCorreo(correo);
 
-            if (empleadoEncontrado != null)
+            if (empleado != null)
             {
-                var resultado = new
+                return Json(new
                 {
                     success = true,
-                    nombreCompleto = empleadoEncontrado.Nombre + " " + empleadoEncontrado.Apellidos
-                };
-                return Json(resultado);
+                    nombreCompleto = empleado.Nombre + " " + empleado.Apellidos,
+                     idEmpleado = empleado.IdEmpleado
+
+                });
             }
-            else
-            {
-                return Json(new { success = false });
-            }
+
+            return Json(new { success = false });
         }
 
 
@@ -132,7 +130,7 @@ namespace PayrollWeb.Controllers.Admin
                 }
                 else
                 {
-                    return Json(new { success = false, message = "No se pudo agregar la asistencia." });
+                    return Json(new { success = false, message = "No se pudo agregar la asistencia o ya existe una asistencia para ese empleado" });
                 }
             }
             catch (Exception ex)
