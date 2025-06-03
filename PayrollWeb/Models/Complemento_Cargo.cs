@@ -131,7 +131,7 @@ namespace PayrollWeb.Models
                         command.Parameters.AddWithValue("@FechaFin", FechaFin);
                         command.Parameters.AddWithValue("@MontoComplemento", MontoComplemento);
                         command.ExecuteNonQuery();
-                        metodos.EjecutarActualizarSueldosConComplementosCargo();
+                        //metodos.EjecutarActualizarSueldosConComplementosCargo();
                         return true;
                     }
                 }
@@ -160,7 +160,7 @@ namespace PayrollWeb.Models
                     {
                         command.Parameters.AddWithValue("@IdComplementoCargo", idComplementoCargo);
                         command.ExecuteNonQuery();
-                        metodos.EjecutarActualizarSueldosConComplementosCargo();
+                        //metodos.EjecutarActualizarSueldosConComplementosCargo();
                     }
                 }
                 catch (Exception ex)
