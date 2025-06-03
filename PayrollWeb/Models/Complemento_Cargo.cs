@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using iText.Kernel.Pdf.Canvas.Wmf;
+using Microsoft.Data.SqlClient;
 
 namespace PayrollWeb.Models
 {
@@ -112,6 +113,7 @@ namespace PayrollWeb.Models
         //MÉTODO PARA AGREGAR UN COMPLEMENTO DE CARGO
         public bool AgregarComplementoCargo()
         {
+            Metodos metodos = new Metodos();
             // Consulta SQL para agregar un complemento de cargo
             string query = "INSERT INTO Complemento_Cargo (id_cargo, id_empleado, fecha_inicio, fecha_fin, monto_complemento) VALUES (@IdCargo, @IdEmpleado, @FechaInicio, @FechaFin, @MontoComplemento)";
             using (SqlConnection connection = conexion.GetConnection())
@@ -129,6 +131,7 @@ namespace PayrollWeb.Models
                         command.Parameters.AddWithValue("@FechaFin", FechaFin);
                         command.Parameters.AddWithValue("@MontoComplemento", MontoComplemento);
                         command.ExecuteNonQuery();
+                        metodos.EjecutarActualizarSueldosConComplementosCargo();
                         return true;
                     }
                 }
@@ -143,6 +146,7 @@ namespace PayrollWeb.Models
         //MÉTODO PARA ELIMINAR UN COMPLEMENTO DE CARGO
         public bool EliminarComplementoCargo(int idComplementoCargo)
         {
+            Metodos metodos = new Metodos();
             // Consulta SQL para eliminar un complemento de cargo
             string query = "DELETE FROM Complemento_Cargo WHERE id_complemento_cargo = @IdComplementoCargo";
             using (SqlConnection connection = conexion.GetConnection())
@@ -156,6 +160,7 @@ namespace PayrollWeb.Models
                     {
                         command.Parameters.AddWithValue("@IdComplementoCargo", idComplementoCargo);
                         command.ExecuteNonQuery();
+                        metodos.EjecutarActualizarSueldosConComplementosCargo();
                     }
                 }
                 catch (Exception ex)
