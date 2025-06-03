@@ -55,39 +55,50 @@
 <!-- Tabla de Evaluaciones de Desempeño existentes -->
 @if (Model.Any())
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Evaluaciones Registradas</h3>
-    </div>
+    var fechasUnicas = Model
+        .Select(e => e.fecha.Date)
+        .Distinct()
+        .OrderByDescending(f => f)
+        .ToList();
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>KPI Evaluado</th>
-                <th>Puntuación</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var evaluacion in Model)
-            {
+    foreach (var fecha in fechasUnicas)
+    {
+        <div class="card border-warning mb-2">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Evaluaciones del día @fecha.ToString("dd-MM-yyyy")</h5>
+            </div>
+        </div>
+
+        <table class="table table-bordered mb-4">
+            <thead>
                 <tr>
-                    <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
-                    <td>@evaluacion.KPI.Nombre</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            @evaluacion.puntuacion
-                            <div class="ms-2">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="@(i <= evaluacion.puntuacion ? "text-warning" : "text-secondary")">★</span>
-                                }
-                            </div>
-                        </div>
-                    </td>
+                    <th>Fecha</th>
+                    <th>KPI Evaluado</th>
+                    <th>Puntuación</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var evaluacion in Model.Where(e => e.fecha.Date == fecha))
+                {
+                    <tr>
+                        <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@evaluacion.KPI.Nombre</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                @evaluacion.puntuacion
+                                <div class="ms-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="@(i <= evaluacion.puntuacion ? "text-warning" : "text-secondary")">★</span>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 else
 {

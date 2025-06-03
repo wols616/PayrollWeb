@@ -1,0 +1,144 @@
+﻿@model PayrollWeb.Models.Administrador
+
+@{
+    ViewData["Title"] = "Perfil del Administrador";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-delete-later">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-delete-later">
+        @TempData["Success"]
+    </div>
+}
+
+<div class="container">
+    <h2>Perfil del Administrador</h2>
+
+    <!-- Actualizar Datos Generales -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Actualizar Datos Generales</h4>
+            <form asp-action="ActualizarDatosGeneralesAdministrador" method="post">
+                <input type="hidden" name="IdAdministrador" value="@Model.IdAdministrador" />
+
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="apellidos">Apellidos</label>
+                    <input type="text" name="Apellidos" class="form-control" value="@Model.Apellidos" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" name="Telefono" class="form-control" value="@Model.Telefono" required
+                           maxlength="9" oninput="formatearTelefono(this)" pattern="[0-9]{4}-[0-9]{4}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="dui">DUI</label>
+                    <input type="text" name="Dui" class="form-control" value="@Model.Dui" required
+                           maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" />
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Actualizar Datos Generales</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Actualizar Datos Sensibles -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Actualizar Datos Sensibles</h4>
+            <form asp-action="ActualizarDatosSensiblesAdministrador" method="post">
+                <input type="hidden" name="idAdministrador" value="@Model.IdAdministrador" />
+
+                <div class="form-group">
+                    <label for="correo">Nuevo Correo</label>
+                    <input type="email" name="Correo" class="form-control" value="@Model.Correo" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="passwordActual">Contraseña Actual</label>
+                    <div class="input-group">
+                        <input type="password" name="passwordActual" class="form-control" id="passwordActual" required />
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('passwordActual')">
+                                <i id="eye-icon-passwordActual" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+                <h5>Cambiar Contraseña</h5>
+                <div class="form-group">
+                    <label for="nuevaPassword">Nueva Contraseña</label>
+                    <div class="input-group">
+                        <input type="password" name="nuevaPassword" class="form-control" id="nuevaPassword" />
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('nuevaPassword')">
+                                <i id="eye-icon-nuevaPassword" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
+                    <div class="input-group">
+                        <input type="password" name="confirmarPassword" class="form-control" id="confirmarPassword" />
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirmarPassword')">
+                                <i id="eye-icon-confirmarPassword" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Actualizar Datos Sensibles</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function formatearTelefono(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.substring(0, 4) + '-' + value.substring(4, 8);
+            input.value = value.substring(0, 9);
+        }
+
+        function formatearDUI(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 8) value = value.substring(0, 8) + '-' + value.substring(8, 9);
+            input.value = value.substring(0, 10);
+        }
+
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById("eye-icon-" + fieldId);
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.replace("bi-eye", "bi-eye-slash");
+            } else {
+                field.type = "password";
+                icon.classList.replace("bi-eye-slash", "bi-eye");
+            }
+        }
+
+        setTimeout(() => {
+            document.querySelectorAll('.alert-delete-later').forEach(a => a.remove());
+        }, 3000);
+    </script>
+}

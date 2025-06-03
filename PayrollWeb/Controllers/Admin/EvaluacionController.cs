@@ -17,33 +17,40 @@ namespace PayrollWeb.Controllers.Admin
 
         public IActionResult VerEvaluacionDesempeno(int id, DateTime? fechaInicio = null, DateTime? fechaFin = null)
         {
-            List<EvaluacionDesempenoViewModel> listaEvaluacionesDesempeno = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(id);
-            bool tieneFiltroFecha = fechaInicio.HasValue || fechaFin.HasValue;
+            // Obtener todas las evaluaciones una sola vez
+            var todasEvaluaciones = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(id);
 
-            // Aplicar filtro por fecha si se especificó
-            if (tieneFiltroFecha)
+            // Aplicar filtro por fecha si es necesario
+            List<EvaluacionDesempenoViewModel> listaEvaluacionesDesempeno;
+
+            if (fechaInicio.HasValue && fechaFin.HasValue)
             {
-                if (fechaInicio.HasValue && fechaFin.HasValue)
-                {
-                    listaEvaluacionesDesempeno = listaEvaluacionesDesempeno
-                        .Where(e => e.fecha == fechaInicio.Value)
-                        .ToList();
-                }
-                else if (fechaInicio.HasValue)
-                {
-                    listaEvaluacionesDesempeno = listaEvaluacionesDesempeno
-                        .Where(e => e.fecha >= fechaInicio.Value)
-                        .ToList();
-                }
+                listaEvaluacionesDesempeno = todasEvaluaciones
+                    .Where(e => e.fecha.Date == fechaInicio.Value.Date)
+                    .OrderByDescending(e => e.fecha)
+                    .ToList();
+            }
+            else if (fechaInicio.HasValue)
+            {
+                listaEvaluacionesDesempeno = todasEvaluaciones
+                    .Where(e => e.fecha.Date >= fechaInicio.Value.Date)
+                    .OrderByDescending(e => e.fecha)
+                    .ToList();
+            }
+            else
+            {
+                listaEvaluacionesDesempeno = todasEvaluaciones
+                    .OrderByDescending(e => e.fecha)
+                    .ToList();
             }
 
-            // Preparar datos para la gráfica
+            // Obtener KPIs
             var kpis = _kpi.ObtenerKPI();
             var datosGrafica = new List<double>();
 
-            if (tieneFiltroFecha)
+            if (fechaInicio.HasValue || fechaFin.HasValue)
             {
-                // Usar datos filtrados
+                // Datos específicos
                 foreach (var kpi in kpis)
                 {
                     var evaluacion = listaEvaluacionesDesempeno.FirstOrDefault(e => e.id_kpi == kpi.IdKpi);
@@ -52,26 +59,29 @@ namespace PayrollWeb.Controllers.Admin
             }
             else
             {
-                // Calcular promedios
-                var evaluacionesAgrupadas = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(id)
+                // Promedios generales
+                var promedios = todasEvaluaciones
                     .GroupBy(e => e.id_kpi)
                     .ToDictionary(g => g.Key, g => g.Average(e => e.puntuacion));
 
                 foreach (var kpi in kpis)
                 {
-                    datosGrafica.Add(evaluacionesAgrupadas.TryGetValue(kpi.IdKpi, out var promedio) ? promedio : 0);
+                    datosGrafica.Add(promedios.TryGetValue(kpi.IdKpi, out var promedio) ? promedio : 0);
                 }
             }
 
-            ViewBag.Evaluaciones = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(id);
+            // ViewBags necesarios
+            ViewBag.Evaluaciones = todasEvaluaciones; // para validación JS
             ViewBag.Empleado = _empleado.ObtenerEmpleado(id);
             ViewBag.KPIs = kpis;
             ViewBag.Metas = _meta.ObtenerMetasDeEmpleado(id);
             ViewBag.DatosGrafica = datosGrafica;
-            ViewBag.TieneFiltroFecha = tieneFiltroFecha;
+            ViewBag.TieneFiltroFecha = fechaInicio.HasValue || fechaFin.HasValue;
 
+            // Retornar vista con el modelo filtrado y ordenado
             return View("/Views/Admin/VerEvaluacionDesempeno.cshtml", listaEvaluacionesDesempeno);
         }
+
 
         [Authorize]
         public IActionResult VerEmpleados()
