@@ -1,0 +1,96 @@
+﻿@model List<object>
+
+@{
+    ViewData["Title"] = "Reporte de Competencias y Habilidades";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            No se encontraron competencias ni habilidades para este empleado.
+        </div>
+    }
+    else
+    {
+        var primerRegistro = (dynamic)Model.First();
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Datos del Empleado</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <p><strong>Nombre:</strong> @primerRegistro.nombreCompleto</p>
+                    </div>
+                    <div class="col-md-2">
+                        <p><strong>DUI:</strong> @primerRegistro.dui</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>Correo:</strong> @primerRegistro.correo</p>
+                    </div>
+                    <div class="col-md-2">
+                        <p><strong>Teléfono:</strong> @primerRegistro.telefono</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>Dirección:</strong> @primerRegistro.direccion</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Competencia</th>
+                        <th>Habilidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var registro = (dynamic)item;
+                        <tr>
+                            <td>@registro.competencia</td>
+                            <td>@registro.habilidad</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 botones">
+            <a href="javascript:window.print()" class="btn btn-outline-primary">
+                <i class="fas fa-print"></i> Imprimir Reporte
+            </a>
+            <a href="@Url.Action("VerEmpleados", "ReporteCompetenciasHabilidades")" class="btn btn-outline-secondary ml-2">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        @@media print {
+            .botones, .navbar, .site-header {
+                display: none !important;
+            }
+            body {
+                padding: 20px;
+                font-size: 12px;
+            }
+            .table {
+                width: 100% !important;
+            }
+            @@page {
+                margin: 0;
+            }
+        }
+    </style>
+}

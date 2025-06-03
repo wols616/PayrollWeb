@@ -14,7 +14,7 @@ namespace PayrollWeb.Controllers.Reportes
         {
 
             ViewBag.ShowActions = "HistorialAscensosReportes";
-            return View("/Views/Admin/VerEmpleados.cshtml", new Empleado().ObtenerEmpleados());
+            return View("/Views/Reportes/VerEmpleadosHistorialAscenso.cshtml", new Empleado().ObtenerEmpleados());
         }
 
         public IActionResult VerReportes()

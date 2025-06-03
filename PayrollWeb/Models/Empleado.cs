@@ -126,6 +126,51 @@ namespace PayrollWeb.Models
             }
         }
 
+        public Empleado ObtenerEmpleadoPorCorreo(string correo)
+        {
+            Empleado empleado = null;
+
+            using (SqlConnection con = conexion.GetConnection())
+            {
+                try
+                {
+                    con.Open();
+                    string query = "SELECT * FROM Empleado WHERE correo = @correo";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@correo", correo);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                empleado = new Empleado
+                                {
+                                    IdEmpleado = Convert.ToInt32(reader["id_empleado"]),
+                                    Dui = reader["dui"].ToString(),
+                                    Nombre = reader["nombre"].ToString(),
+                                    Apellidos = reader["apellidos"].ToString(),
+                                    Telefono = reader["telefono"].ToString(),
+                                    Direccion = reader["direccion"].ToString(),
+                                    CuentaCorriente = reader["cuenta_corriente"].ToString(),
+                                    Estado = reader["estado"].ToString(),
+                                    Correo = reader["correo"].ToString(),
+                                    Contrasena = reader["contrasena"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al buscar empleado: " + ex.Message);
+                }
+            }
+
+            return empleado;
+        }
+
 
         //Mostrar
         public List<Empleado> ObtenerEmpleados()

@@ -30,7 +30,10 @@
         }
     </div>
     <div class="card-body">
-        <form id="filtroForm" method="get" asp-action="VerEvaluacionDesempeno" asp-route-id="@ViewBag.Empleado.IdEmpleado">
+        <form id="filtroForm" method="get"
+              asp-controller="EmpleadoEvaluacion"
+              asp-action="MisEvaluaciones"
+              asp-route-idEmpleado="@ViewBag.Empleado.IdEmpleado">
             <div class="row align-items-end">
                 <div class="col-md-8">
                     <label for="fechaEvaluacion" class="form-label">Seleccione una fecha</label>
@@ -39,7 +42,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <a href="@Url.Action("VerEvaluacionDesempeno", new { id = ViewBag.Empleado.IdEmpleado })"
+                    <a href="@Url.Action("MisEvaluaciones", "EmpleadoEvaluacion", new { idEmpleado = ViewBag.Empleado.IdEmpleado })"
                        class="btn btn-outline-secondary">Mostrar todas</a>
                 </div>
             </div>
@@ -47,6 +50,7 @@
         </form>
     </div>
 </div>
+
 
 <!-- Tabla de Evaluaciones de Desempeño existentes -->
 @if (Model.Any())
@@ -61,7 +65,7 @@
     {
         <div class="card border-warning mb-2">
             <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">Evaluaciones del día @fecha.ToString("yyyy-MM-dd")</h5>
+                <h5 class="mb-0">Evaluaciones del día @fecha.ToString("dd-MM-yyyy")</h5>
             </div>
         </div>
 
@@ -71,7 +75,6 @@
                     <th>Fecha</th>
                     <th>KPI Evaluado</th>
                     <th>Puntuación</th>
-                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,9 +94,6 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editarEvaluacion(@evaluacion.IdEvaluacionDesempeno, '@evaluacion.fecha.ToString("yyyy-MM-dd")', @evaluacion.id_kpi, @evaluacion.puntuacion)">Editar</button>
-                        </td>
                     </tr>
                 }
             </tbody>
@@ -103,7 +103,14 @@
 else
 {
     <div class="alert alert-info">
-        No hay evaluaciones registradas.
+        @if (Context.Request.Query.ContainsKey("fechaInicio"))
+        {
+            <span>No se encontraron evaluaciones para la fecha especificada.</span>
+        }
+        else
+        {
+            <span>No hay evaluaciones registradas para este empleado.</span>
+        }
     </div>
 }
 
@@ -120,112 +127,6 @@ else
     </div>
 </div>
 
-<!-- Modal para agregar evaluación -->
-<div class="modal fade" id="agregarEvaluacionModal" tabindex="-1" aria-labelledby="agregarEvaluacionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarEvaluacionModalLabel">Agregar Nueva Evaluación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <form id="evaluacionForm" method="post" action="/Evaluacion/CrearEvaluaciones">
-                    <input type="hidden" id="idEmpleado" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
-                    <div class="mb-3">
-                        <label for="fecha" class="form-label">Fecha de Evaluación</label>
-                        <input type="date" class="form-control" id="fecha" name="Fecha" required
-                               onchange="validarFechaUnica(this.value)">
-                        <div id="fechaError" class="invalid-feedback" style="display:none;">
-                            Ya existe una evaluación para esta fecha. Por favor seleccione otra.
-                        </div>
-                    </div>
-
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5>Evaluación de Competencias y Habilidades</h5>
-                            <p class="text-muted">Califique cada aspecto del desempeño del empleado según la siguiente escala:</p>
-                            <ul>
-                                <li><strong>1 - Insatisfactorio</strong>: No cumple con las expectativas básicas</li>
-                                <li><strong>2 - En desarrollo</strong>: Cumple parcialmente, necesita mejorar</li>
-                                <li><strong>3 - Satisfactorio</strong>: Cumple con lo esperado</li>
-                                <li><strong>4 - Bueno</strong>: Supera las expectativas</li>
-                                <li><strong>5 - Excelente</strong>: Desempeño excepcional</li>
-                            </ul>
-                        </div>
-                        <div class="card-body">
-                            @foreach (var kpi in ViewBag.KPIs)
-                            {
-                                <div class="mb-4">
-                                    <h6>@kpi.Nombre</h6>
-                                    <div class="btn-group" role="group" aria-label="Puntuación para @kpi.Nombre">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <input type="radio" class="btn-check" name="Puntuaciones[@kpi.IdKpi]" id="kpi-@kpi.IdKpi-@i" value="@i" autocomplete="off" required>
-                                            <label class="btn btn-outline-primary" for="kpi-@kpi.IdKpi-@i">@i</label>
-                                        }
-                                    </div>
-                                </div>
-                                <hr>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" id="submitButton" disabled>Guardar Evaluaciones</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para editar evaluación -->
-<div class="modal fade" id="evaluacionModal" tabindex="-1" aria-labelledby="evaluacionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="evaluacionModalLabel">Editar Evaluación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editarEvaluacionForm" method="post">
-                    <input type="hidden" id="evaluacionId" name="IdEvaluacionDesempeno">
-                    <input type="hidden" name="IdEmpleado" value="@ViewBag.Empleado.IdEmpleado">
-                    <input type="hidden" id="editFecha" name="Fecha">
-                    <div class="mb-3">
-                        <label class="form-label">Fecha</label>
-                        <input type="text" class="form-control-plaintext" id="fechaMostrada" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editIdKpi" class="form-label">KPI Evaluado</label>
-                        <select class="form-control" id="editIdKpi" name="IdKpi" required>
-                            @foreach (var kpi in ViewBag.KPIs)
-                            {
-                                <option value="@kpi.IdKpi">@kpi.Nombre</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Puntuación</label>
-                        <div class="btn-group" role="group">
-                            @for (int i = 1; i <= 5; i++)
-                            {
-                                <input type="radio" class="btn-check" name="Puntuacion" id="editPuntuacion-@i" value="@i" autocomplete="off">
-                                <label class="btn btn-outline-primary" for="editPuntuacion-@i">@i</label>
-                            }
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Actualizar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -235,14 +136,14 @@ else
         {
             @Html.Raw($"'{kpi.Nombre}',")
         }
-        ];
+                ];
 
         const puntuaciones = [
         @foreach (var dato in ViewBag.DatosGrafica)
         {
             @Html.Raw($"{dato},")
         }
-        ];
+                ];
 
         const tieneFiltroFecha = @(Context.Request.Query.ContainsKey("fechaInicio") ? "true" : "false");
         const tituloGrafica = tieneFiltroFecha ? 'Comparación de Desempeño (Fecha específica)' : 'Comparación de Desempeño (Promedio general)';
@@ -282,7 +183,7 @@ else
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -324,7 +225,7 @@ else
                 @Html.Raw($"'{eval.fecha.ToString("yyyy-MM-dd")}',")
             }
         }
-            ].filter(Boolean);
+                    ].filter(Boolean);
 
             // Verificar si la fecha ya existe en cualquier evaluación
             if (fechasExistentes.includes(fechaSeleccionada)) {
@@ -359,7 +260,7 @@ else
 
         // Habilitar el botón de submit cuando se seleccione al menos un radio button
         document.querySelectorAll('input[type="radio"][name^="Puntuaciones"]').forEach(radio => {
-            radio.addEventListener('change', function() {
+            radio.addEventListener('change', function () {
                 const submitButton = document.getElementById('submitButton');
                 const checkedRadios = document.querySelectorAll('input[type="radio"][name^="Puntuaciones"]:checked');
                 submitButton.disabled = checkedRadios.length === 0;

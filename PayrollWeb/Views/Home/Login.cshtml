@@ -1,36 +1,70 @@
 ﻿@{
     ViewBag.Title = "Iniciar Sesión";
 }
+<body class= "fondo">
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+        <div class="card shadow-lg p-5 rounded-4 border-0" style="max-width: 500px; width: 100%; background-color: white;">
+            <h2 class="text-center mb-4" style="color: #064789;">Iniciar Sesión</h2>
 
-<h2>Iniciar Sesión</h2>
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger text-center">@ViewBag.Error</div>
+            }
 
-@if (ViewBag.Error != null)
-{
-    <div style="color: red;">@ViewBag.Error</div>
-}
+            <form method="post" action="/Account/Login">
+                <div class="mb-3">
+                    <label class="form-label" style="color: #064789;">Correo:</label>
+                    <input type="email" name="Correo" class="form-control" required />
+                </div>
 
-<form method="post" action="/Account/Login">
-    <label>Correo:</label>
-    <input type="email" name="Correo" class="form-control" required />
+                <div class="mb-3">
+                    <label class="form-label" style="color: #064789;">Contraseña:</label>
+                    <div class="input-group">
+                        <input type="password" name="Contrasena" id="password" class="form-control" required />
+                        <button type="button" class="btn btn-outline-primary" onclick="togglePassword()">
+                            <i id="toggleIcon" class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-    <label>Contraseña:</label>
-    <div class="input-group">
-        <input type="password" name="Contrasena" id="password" class="form-control" required />
-        <div class="input-group-append">
-            <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
-                <i id="toggleIcon" class="bi bi-eye"></i>
-            </button>
+                <div class="mb-4">
+                    <label class="form-label" style="color: #064789;">Tipo de Usuario:</label>
+                    <select name="Tipo" class="form-select" required>
+                        <option value="Empleado">Empleado</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-outline-custom">Ingresar</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <label>Tipo de Usuario:</label>
-    <select name="Tipo" class="form-control" required>
-        <option value="Empleado">Empleado</option>
-        <option value="Admin">Admin</option>
-    </select>
+</body>
 
-    <button type="submit" class="btn btn-primary mt-2">Ingresar</button>
-</form>
+<style>
+    .btn-outline-custom {
+        background-color: white !important;
+        color: #064789 !important;
+        border: 2px solid #064789 !important;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #064789 !important;
+            color: white !important;
+            border-color: #064789 !important;
+        }
+
+    .fondo{
+        background-color: #064789;
+    }
+
+
+    
+</style>
 
 <script>
     function togglePassword() {

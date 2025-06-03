@@ -6,50 +6,54 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<!-- Formulario para agregar hora de salida -->
-<form id="formAgregarSalida" method="post" action="@Url.Action("AgregarAsistenciaSalida", "Asistencia")">
-    <div class="form-group">
-        <label for="fecha">Fecha</label>
-        <input type="date" class="form-control" id="fecha" name="fecha" required
-               min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
-    </div>
 
-    <div class="form-group">
-        <label for="empleado">Empleado</label>
-        <select class="form-control" id="empleado" name="id" required>
-            <option value="">Seleccione un empleado</option>
-        </select>
-        <div id="spinnerEmpleados" style="display: none; margin-top: 5px;">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Cargando empleados...
+@if (User.IsInRole("Admin")){
+
+    <!-- Formulario para agregar hora de salida -->
+    <form id="formAgregarSalida" method="post" action="@Url.Action("AgregarAsistenciaSalida", "Asistencia")">
+        <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="date" class="form-control" id="fecha" name="fecha" required
+                   min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
         </div>
+
+        <div class="form-group">
+            <label for="empleado">Empleado</label>
+            <select class="form-control" id="empleado" name="id" required>
+                <option value="">Seleccione un empleado</option>
+            </select>
+            <div id="spinnerEmpleados" style="display: none; margin-top: 5px;">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Cargando empleados...
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="horaEntrada">Hora de Entrada</label>
+            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="horaSalida">Hora de Salida</label>
+            <input type="time" class="form-control" id="nuevaHoraSalida" name="nuevaHoraSalida"
+                   min="06:30" max="16:30" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar Salida</button>
+    </form>
+
+    <hr />
+    <!-- Mensaje de éxito -->
+    <div id="mensajeExito" class="alert alert-success" style="display: none;">
+        Hora de salida agregada con éxito.
     </div>
 
-    <div class="form-group">
-        <label for="horaEntrada">Hora de Entrada</label>
-        <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" readonly />
+    <!-- Mensaje de error -->
+    <div id="mensajeError" class="alert alert-danger" style="display: none;">
+        No se pudo agregar la hora de salida.
     </div>
 
-    <div class="form-group">
-        <label for="horaSalida">Hora de Salida</label>
-        <input type="time" class="form-control" id="nuevaHoraSalida" name="nuevaHoraSalida" required />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Registrar Salida</button>
-</form>
-
-<hr />
-<!-- Mensaje de éxito -->
-<div id="mensajeExito" class="alert alert-success" style="display: none;">
-    Hora de salida agregada con éxito.
-</div>
-
-<!-- Mensaje de error -->
-<div id="mensajeError" class="alert alert-danger" style="display: none;">
-    No se pudo agregar la hora de salida.
-</div>
-
-@section Scripts {
+    @section Scripts {
     <script>
         // Función que se ejecuta cuando cambia la fecha
         $('#fecha').on('change', function() {
@@ -154,4 +158,135 @@
 
 
     </script>
+    }
+
+}
+else{
+
+
+    <form id="formAgregarSalida" method="post">
+        <input type="date"
+               class="form-control"
+               id="fecha"
+               name="fecha"
+               required
+               min="@DateTime.Now.ToString("yyyy-MM-dd")"
+               max="@DateTime.Now.ToString("yyyy-MM-dd")"
+               value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+        <div class="form-group">
+            <label for="empleado">Empleado</label>
+            <input type="text" class="form-control" id="empleado" name="empleado" readonly>
+            <input type="hidden" id="idEmpleado" name="idEmpleado">
+        </div>
+
+        <div class="form-group">
+            <label for="horaEntrada">Hora de Entrada</label>
+            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" readonly />
+        </div>
+
+
+        <div class="form-group">
+            <label for="nuevaHoraSalida">Hora de Salida</label>
+            <input type="time" class="form-control" id="nuevaHoraSalida" name="nuevaHoraSalida"
+                   min="06:30" max="16:30" required>
+
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar Salida</button>
+
+        <hr />
+        <!-- Mensaje de éxito -->
+        <div id="mensajeExito" class="alert alert-success" style="display: none;">
+            Hora de salida agregada con éxito.
+        </div>
+
+        <!-- Mensaje de error -->
+        <div id="mensajeError" class="alert alert-danger" style="display: none;">
+            No se pudo agregar la hora de salida.
+        </div>
+    </form>
+
+    @section Scripts {
+    <script>
+        $(document).ready(function () {
+            var correoUsuario = '@User.Identity.Name';
+
+            // Obtener datos del empleado por correo
+            $.ajax({
+                url: '@Url.Action("BuscarNombrePorCorreo", "Asistencia")',
+                type: 'POST',
+                data: { correo: correoUsuario },
+                success: function (response) {
+                    if (response.success) {
+                        $('#empleado').val(response.nombreCompleto);
+                        $('#idEmpleado').val(response.idEmpleado);
+
+                        // Buscar hora de entrada para la fecha actual
+                        $.ajax({
+                            url: '@Url.Action("ObtenerHoraEntrada", "Asistencia")',
+                            type: 'GET',
+                            data: {
+                                id: response.idEmpleado,
+                                fecha: $('#fecha').val()
+                            },
+                            success: function (entradaResp) {
+                                if (entradaResp.success) {
+                                    $('#horaEntrada').val(entradaResp.horaEntrada);
+                                } else {
+                                    $('#horaEntrada').val('');
+                                    $('#mensajeError').text(entradaResp.message).show();
+                                }
+                            },
+                            error: function () {
+                                $('#mensajeError').text("Error al obtener la hora de entrada.").show();
+                            }
+                        });
+
+                    } else {
+                        $('#empleado').val('Empleado no encontrado');
+                        $('#mensajeError').text("No se encontró el empleado.").show();
+                    }
+                },
+                error: function () {
+                    $('#empleado').val('Error buscando empleado');
+                    $('#mensajeError').text("Error al obtener el empleado.").show();
+                }
+            });
+
+            // Enviar el formulario vía AJAX
+            $('#formAgregarSalida').submit(function (e) {
+                e.preventDefault();
+
+                var datos = {
+                    id: $('#idEmpleado').val(),
+                    fecha: $('#fecha').val(),
+                    horaEntrada: $('#horaEntrada').val(),
+                    nuevaHoraSalida: $('#nuevaHoraSalida').val()
+                };
+
+                $.ajax({
+                    url: '@Url.Action("AgregarAsistenciaSalida", "Asistencia")',
+                    type: 'POST',
+                    data: datos,
+                    success: function (response) {
+                        if (response.success) {
+                            $('#mensajeExito').show();
+                            $('#mensajeError').hide();
+                            $('#nuevaHoraSalida').val('');
+                        } else {
+                            $('#mensajeExito').hide();
+                            $('#mensajeError').text(response.message).show();
+                        }
+                    },
+                    error: function () {
+                        $('#mensajeExito').hide();
+                        $('#mensajeError').text("Error al registrar la salida.").show();
+                    }
+                });
+            });
+        });
+    </script>
+    }
+
 }

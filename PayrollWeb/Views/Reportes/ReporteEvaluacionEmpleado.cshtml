@@ -1,0 +1,181 @@
+﻿@model List<object>
+
+@{
+    ViewData["Title"] = "Reporte de Evaluaciones";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">
+        No se encontraron evaluaciones para este empleado en la fecha seleccionada.
+    </div>
+}
+else
+{
+    var emp = (dynamic)Model.First();
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Datos del Empleado</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Nombre:</strong> @emp.nombreCompleto</p>
+            <p><strong>DUI:</strong> @emp.dui</p>
+            <p><strong>Correo:</strong> @emp.correo</p>
+            <p><strong>Teléfono:</strong> @emp.telefono</p>
+            <p><strong>Dirección:</strong> @emp.direccion</p>
+        </div>
+    </div>
+
+    var evaluaciones = Model.Cast<dynamic>().Where(e => e.kpi != null).ToList();
+
+    <div class="row mb-4 filtro-fecha">
+        <div class="col-md-4">
+            <label for="fechaFiltro">Filtrar por Fecha:</label>
+            <input type="date" id="fechaFiltro" class="form-control">
+        </div>
+        <div class="col-md-4 align-self-end">
+            <button id="btnFiltrar" class="btn btn-primary">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+            <button id="btnLimpiar" class="btn btn-secondary ml-2">
+                Limpiar
+            </button>
+        </div>
+    </div>
+
+    <div class="card-header mb-4">
+        <h5>Evaluación de Competencias y Habilidades</h5>
+        <ul>
+            <li><strong>1 - Insatisfactorio</strong>: No cumple con las expectativas básicas</li>
+            <li><strong>2 - En desarrollo</strong>: Cumple parcialmente, necesita mejorar</li>
+            <li><strong>3 - Satisfactorio</strong>: Cumple con lo esperado</li>
+            <li><strong>4 - Bueno</strong>: Supera las expectativas</li>
+            <li><strong>5 - Excelente</strong>: Desempeño excepcional</li>
+        </ul>
+    </div>
+
+    @if (evaluaciones.Any())
+    {
+        var evaluacionesPorFecha = evaluaciones
+            .GroupBy(e => DateTime.Parse((string)e.fecha).ToString("yyyy-MM-dd"))
+            .OrderBy(g => g.Key)
+            .ToList();
+
+        <div id="contenedorTablas">
+            @foreach (var grupo in evaluacionesPorFecha)
+            {
+                <div class="grupo-evaluaciones" data-fecha="@grupo.Key">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5>Evaluaciones del día @grupo.Key</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>KPI</th>
+                                        <th>Puntuación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var eval in grupo)
+                                    {
+                                        <tr>
+                                            <td>@eval.kpi</td>
+                                            <td>@eval.puntuacion</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            Este empleado no tiene evaluaciones registradas en la fecha seleccionada.
+        </div>
+    }
+
+    <div class="mt-4 botones">
+        <a href="javascript:window.print()" class="btn btn-outline-primary">
+            <i class="fas fa-print"></i> Imprimir Reporte
+        </a>
+        <a href="@Url.Action("VerEmpleados", "ReporteEvaluacionEmpleado")" class="btn btn-outline-secondary ml-2">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+}
+
+@section Styles {
+    <style>
+        @@media print {
+            nav, .navbar, .site-header, .botones, .filtro-fecha {
+                display: none !important;
+            }
+
+            body {
+                padding: 20px;
+                font-size: 12px;
+            }
+
+            .table {
+                width: 100% !important;
+            }
+
+            @@page {
+                margin: 0;
+            }
+
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style>
+}
+
+
+
+@section Scripts {
+    <script>
+        document.getElementById("btnFiltrar").addEventListener("click", function () {
+            const fechaBuscada = document.getElementById("fechaFiltro").value;
+            const grupos = document.querySelectorAll(".grupo-evaluaciones");
+
+            if (!fechaBuscada) {
+                alert("Por favor, selecciona una fecha.");
+                return;
+            }
+
+            let hayCoincidencia = false;
+
+            grupos.forEach(grupo => {
+                const fechaGrupo = grupo.getAttribute("data-fecha");
+                if (fechaGrupo === fechaBuscada) {
+                    grupo.style.display = "";
+                    hayCoincidencia = true;
+                } else {
+                    grupo.style.display = "none";
+                }
+            });
+
+            if (!hayCoincidencia) {
+                alert("No se encontraron evaluaciones para la fecha seleccionada.");
+            }
+        });
+
+        document.getElementById("btnLimpiar").addEventListener("click", function () {
+            const grupos = document.querySelectorAll(".grupo-evaluaciones");
+            grupos.forEach(grupo => grupo.style.display = "");
+            document.getElementById("fechaFiltro").value = "";
+        });
+    </script>
+}

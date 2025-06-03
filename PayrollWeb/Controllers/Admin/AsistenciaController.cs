@@ -19,6 +19,30 @@ namespace PayrollWeb.Controllers.Admin
             return View();
         }
 
+        [HttpPost]
+        public IActionResult BuscarNombrePorCorreo(string correo)
+        {
+            Console.WriteLine("Correo recibido: " + correo); // Temporal para prueba
+
+            Empleado empleado = _empleado.ObtenerEmpleadoPorCorreo(correo);
+
+            if (empleado != null)
+            {
+                return Json(new
+                {
+                    success = true,
+                    nombreCompleto = empleado.Nombre + " " + empleado.Apellidos,
+                     idEmpleado = empleado.IdEmpleado
+
+                });
+            }
+
+            return Json(new { success = false });
+        }
+
+
+
+
         // Ver la asistencia de un empleado específico
 
         public IActionResult VerAsistenciaEmpleado(string dui)
@@ -106,7 +130,7 @@ namespace PayrollWeb.Controllers.Admin
                 }
                 else
                 {
-                    return Json(new { success = false, message = "No se pudo agregar la asistencia." });
+                    return Json(new { success = false, message = "No se pudo agregar la asistencia o ya existe una asistencia para ese empleado" });
                 }
             }
             catch (Exception ex)

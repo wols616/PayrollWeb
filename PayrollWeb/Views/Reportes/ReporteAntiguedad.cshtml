@@ -1,7 +1,7 @@
 ﻿@model List<object>
 
 @{
-    ViewData["Title"] = "Historial de Ascensos y Aumentos";
+    ViewData["Title"] = "Antiguedad de Empleado";
     Layout = "~/Views/Shared/_Layout.cshtml"; // Ajusta según tu layout
 }
 
@@ -55,12 +55,7 @@
                     <tr>
                         <th>Fecha Cambio</th>
                         <th>Puesto Anterior</th>
-                        <th>Puesto Actual</th>
-                        <th>Sueldo Anterior</th>
-                        <th>Sueldo Actual</th>
-                        <th>Motivo</th>
-                        <th>Fin contrato</th>
-                        
+                        <th>Puesto Actual</th>                        
                     </tr>
                 </thead>
                 <tbody>
@@ -71,17 +66,7 @@
                             <td>@registro.fecha.ToString("dd/MM/yyyy")</td>
                             <td>@registro.puestoAnterior</td>
                             <td>@registro.puestoActual</td>
-                            <td class="text-right">@string.Format("{0:C}", registro.sueldoAnterior)</td>
-                            <td class="text-right">@string.Format("{0:C}", registro.sueldoBase)</td>
-                            <td>@registro.motivo</td>
-                            @if (registro.fechaFinContrato == new DateTime(1900, 1, 1))
-                            {
-                                <td>Indefinido</td>
-                            }
-                            else
-                            {
-                                <td>@registro.fechaFinContrato.ToString("dd/MM/yyyy")</td>
-                            }
+                            
                         </tr>
                     }
                 </tbody>
@@ -101,7 +86,7 @@
 
 @section Styles {
     <style>
-       
+
         /* Estilos específicos para la impresión */
         @@media print {
             .no-print {
@@ -118,7 +103,7 @@
                 font-size: 12px;
             }
 
-            .botones{
+            .botones {
                 display: none;
             }
 
@@ -134,11 +119,10 @@
                 content: none !important;
             }
 
-            footer a{
+            footer a {
                 text-decoration: none;
                 color: black;
             }
-
         }
     </style>
 }
