@@ -45,21 +45,29 @@ namespace PayrollWeb.Controllers.Emp
             }
             else
             {
-                var evaluacionesAgrupadas = evaluaciones
+                var evaluacionesAgrupadasProm = evaluaciones
                     .GroupBy(e => e.id_kpi)
                     .ToDictionary(g => g.Key, g => g.Average(e => e.puntuacion));
 
                 foreach (var kpi in kpis)
                 {
-                    datosGrafica.Add(evaluacionesAgrupadas.TryGetValue(kpi.IdKpi, out var promedio) ? promedio : 0);
+                    datosGrafica.Add(evaluacionesAgrupadasProm.TryGetValue(kpi.IdKpi, out var promedio) ? promedio : 0);
                 }
             }
 
+            // ✅ Agrupar por fecha (clave final para la vista)
+            var evaluacionesAgrupadas = evaluaciones
+                .GroupBy(e => e.fecha.Date)
+                .OrderByDescending(g => g.Key)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // ViewBags
             ViewBag.Empleado = empleado;
             ViewBag.KPIs = kpis;
             ViewBag.Evaluaciones = evaluaciones;
             ViewBag.DatosGrafica = datosGrafica;
             ViewBag.TieneFiltroFecha = tieneFiltroFecha;
+            ViewBag.EvaluacionesAgrupadas = evaluacionesAgrupadas; // ✅ Agregado
 
             return View("~/Views/Emp/VerEvaluacionesEmpleado.cshtml", evaluaciones);
         }

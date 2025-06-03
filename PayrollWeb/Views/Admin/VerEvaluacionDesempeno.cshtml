@@ -51,63 +51,59 @@
 <!-- Tabla de Evaluaciones de Desempeño existentes -->
 @if (Model.Any())
 {
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Evaluaciones Registradas</h3>
-        <div>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarEvaluacionModal">
-                <i class="bi bi-plus-circle"></i> Agregar Evaluación
-            </button>
-        </div>
-    </div>
+    var fechasUnicas = Model
+        .Select(e => e.fecha.Date)
+        .Distinct()
+        .OrderByDescending(f => f)
+        .ToList();
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>KPI Evaluado</th>
-                <th>Puntuación</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var evaluacion in Model)
-            {
+    foreach (var fecha in fechasUnicas)
+    {
+        <div class="card border-warning mb-2">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Evaluaciones del día @fecha.ToString("yyyy-MM-dd")</h5>
+            </div>
+        </div>
+
+        <table class="table table-bordered mb-4">
+            <thead>
                 <tr>
-                    <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
-                    <td>@evaluacion.KPI.Nombre</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            @evaluacion.puntuacion
-                            <div class="ms-2">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    <span class="@(i <= evaluacion.puntuacion ? "text-warning" : "text-secondary")">★</span>
-                                }
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editarEvaluacion(@evaluacion.IdEvaluacionDesempeno, '@evaluacion.fecha.ToString("yyyy-MM-dd")', @evaluacion.id_kpi, @evaluacion.puntuacion)">Editar</button>
-                    </td>
+                    <th>Fecha</th>
+                    <th>KPI Evaluado</th>
+                    <th>Puntuación</th>
+                    <th>Acciones</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var evaluacion in Model.Where(e => e.fecha.Date == fecha))
+                {
+                    <tr>
+                        <td>@evaluacion.fecha.ToString("dd/MM/yyyy")</td>
+                        <td>@evaluacion.KPI.Nombre</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                @evaluacion.puntuacion
+                                <div class="ms-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="@(i <= evaluacion.puntuacion ? "text-warning" : "text-secondary")">★</span>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editarEvaluacion(@evaluacion.IdEvaluacionDesempeno, '@evaluacion.fecha.ToString("yyyy-MM-dd")', @evaluacion.id_kpi, @evaluacion.puntuacion)">Editar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 else
 {
     <div class="alert alert-info">
-        @if (Context.Request.Query.ContainsKey("fechaInicio"))
-        {
-            <span>No se encontraron evaluaciones para la fecha especificada.</span>
-        }
-        else
-        {
-            <span>No hay evaluaciones registradas para este empleado.</span>
-        }
-        <button class="btn btn-primary ms-3" data-bs-toggle="modal" data-bs-target="#agregarEvaluacionModal">
-            <i class="bi bi-plus-circle"></i> Agregar Evaluación
-        </button>
+        No hay evaluaciones registradas.
     </div>
 }
 
