@@ -474,6 +474,117 @@ BEGIN
     );
 END;
 
+--.............................................................................................................
+--Procedimiento Almacenado para Actualizar Sueldos con Complementos de Cargo
+CREATE PROCEDURE ActualizarSueldosConComplementosCargo
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Actualizar el sueldo base de todos los puestos con sus complementos de cargo vigentes
+    UPDATE p
+    SET p.sueldo_base = c.sueldo_base + 
+                        ISNULL((SELECT SUM(monto) 
+                               FROM Complemento_puesto cp 
+                               WHERE cp.id_puesto = p.id_puesto), 0) +
+                        ISNULL((SELECT SUM(cc.monto_complemento)
+                               FROM Complemento_Cargo cc
+                               INNER JOIN Contrato co ON cc.id_empleado = co.id_empleado
+                               WHERE co.id_puesto = p.id_puesto
+                               AND co.vigente = 'S'
+                               AND cc.fecha_inicio <= GETDATE()
+                               AND (cc.fecha_fin IS NULL OR cc.fecha_fin >= GETDATE())), 0)
+    FROM Puesto p
+    INNER JOIN Categoria c ON p.id_categoria = c.id_categoria;
+    
+    -- Actualizar los porcentajes de deducción
+    EXEC ActualizarPorcentajesDeducciones;
+    
+    PRINT 'Sueldos actualizados con complementos de cargo vigentes';
+END; 
 
+--............................................................................................................................
+--Trigger para Actualizar cuando se Modifican Complementos de Cargo
+CREATE TRIGGER trg_ComplementoCargo_Change
+ON Complemento_Cargo
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Identificar los puestos afectados
+    DECLARE @PuestosAfectados TABLE (id_puesto INT);
+    
+    -- Insertar puestos afectados por cambios en complementos de cargo
+    INSERT INTO @PuestosAfectados (id_puesto)
+    SELECT DISTINCT co.id_puesto
+    FROM (
+        SELECT id_empleado FROM inserted
+        UNION
+        SELECT id_empleado FROM deleted
+    ) AS cambios
+    INNER JOIN Contrato co ON cambios.id_empleado = co.id_empleado
+    WHERE co.vigente = 'S';
+    
+    -- Actualizar solo los puestos afectados
+    UPDATE p
+    SET p.sueldo_base = c.sueldo_base + 
+                        ISNULL((SELECT SUM(monto) 
+                               FROM Complemento_puesto cp 
+                               WHERE cp.id_puesto = p.id_puesto), 0) +
+                        ISNULL((SELECT SUM(cc.monto_complemento)
+                               FROM Complemento_Cargo cc
+                               INNER JOIN Contrato co ON cc.id_empleado = co.id_empleado
+                               WHERE co.id_puesto = p.id_puesto
+                               AND co.vigente = 'S'
+                               AND cc.fecha_inicio <= GETDATE()
+                               AND (cc.fecha_fin IS NULL OR cc.fecha_fin >= GETDATE())), 0)
+    FROM Puesto p
+    INNER JOIN Categoria c ON p.id_categoria = c.id_categoria
+    WHERE p.id_puesto IN (SELECT id_puesto FROM @PuestosAfectados);
+    
+    -- Actualizar los porcentajes de deducción
+    EXEC ActualizarPorcentajesDeducciones;
+END;
 
-
+--............................................................................................................................
+--Trigger Adicional para Actualizar cuando Cambia la Vigencia de un Contrato
+CREATE TRIGGER trg_Contrato_Vigencia_Change
+ON Contrato
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Solo actuar si cambió el campo 'vigente'
+    IF UPDATE(vigente)
+    BEGIN
+        -- Identificar los puestos afectados
+        DECLARE @PuestosAfectados TABLE (id_puesto INT);
+        
+        INSERT INTO @PuestosAfectados (id_puesto)
+        SELECT DISTINCT id_puesto
+        FROM inserted
+        WHERE id_puesto IN (SELECT id_puesto FROM deleted);
+        
+        -- Actualizar solo los puestos afectados
+        UPDATE p
+        SET p.sueldo_base = c.sueldo_base + 
+                            ISNULL((SELECT SUM(monto) 
+                                   FROM Complemento_puesto cp 
+                                   WHERE cp.id_puesto = p.id_puesto), 0) +
+                            ISNULL((SELECT SUM(cc.monto_complemento)
+                                   FROM Complemento_Cargo cc
+                                   INNER JOIN Contrato co ON cc.id_empleado = co.id_empleado
+                                   WHERE co.id_puesto = p.id_puesto
+                                   AND co.vigente = 'S'
+                                   AND cc.fecha_inicio <= GETDATE()
+                                   AND (cc.fecha_fin IS NULL OR cc.fecha_fin >= GETDATE())), 0)
+        FROM Puesto p
+        INNER JOIN Categoria c ON p.id_categoria = c.id_categoria
+        WHERE p.id_puesto IN (SELECT id_puesto FROM @PuestosAfectados);
+        
+        -- Actualizar los porcentajes de deducción
+        EXEC ActualizarPorcentajesDeducciones;
+    END
+END;
