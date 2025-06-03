@@ -1,7 +1,7 @@
 ﻿
     @model List<PayrollWeb.Models.Deduccion>
 
-    <h2>Lista de Deducciones</h2>
+    <h2>Lista de Deduccioness</h2>
 
     <!-- Botón para abrir el modal de agregar deducción -->
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal">Agregar Nueva Deducción</button>
@@ -25,17 +25,21 @@
             <tr>
                 <th>Nombre</th>
                 <th>Porcentaje</th>
-                <th>Fija</th>
+                @* <th>Fija</th> *@
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var deduccion in Model)
             {
+                if (deduccion.NombreDeduccion == "AFP" || deduccion.NombreDeduccion == "ISSS" || deduccion.NombreDeduccion == "ISR")
+                {
+                    continue; // No mostrar AFP e ISSS
+                }
                 <tr>
                     <td>@deduccion.NombreDeduccion</td>
                     <td>@deduccion.Porcentaje.ToString("0.00")%</td>
-                    <td>@(deduccion.Fija == "S" ? "Sí" : "No")</td>
+                   @*  <td>@(deduccion.Fija == "S" ? "Sí" : "No")</td> *@
                     <td>
                         <!-- Botón para abrir el modal de edición -->
                         <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarDeduccionModal"
@@ -73,14 +77,14 @@
                             <label for="porcentaje" class="form-label">Porcentaje</label>
                             <input type="number" class="form-control" id="porcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
                         </div>
-
-                        <div class="mb-3">
+                    <input type="hidden" name="Fija" value="N" />
+@*                         <div class="mb-3">
                             <label for="fija" class="form-label">¿Es fija?</label>
                             <select class="form-control" id="fija" name="Fija" required>
                                 <option value="S">Sí</option>
                                 <option value="N">No</option>
                             </select>
-                        </div>
+                        </div> *@
 
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </form>
@@ -110,13 +114,14 @@
                         <input type="number" class="form-control" id="editarPorcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
                     </div>
 
-                    <div class="mb-3">
+                    <input type="hidden" name="Fija" value="N" />
+@*                     <div class="mb-3">
                         <label for="editarFija" class="form-label">¿Es fija?</label>
                         <select class="form-control" id="editarFija" name="Fija" required>
                             <option value="S">Sí</option>
                             <option value="N">No</option>
                         </select>
-                    </div>
+                    </div> *@
 
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </form>

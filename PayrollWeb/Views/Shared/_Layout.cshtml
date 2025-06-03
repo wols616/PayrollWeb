@@ -14,95 +14,100 @@
     <header>
         @if (User.IsInRole("Admin") || User.IsInRole("Empleado"))
         {
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 pt-4 pb-4">
-                <div class="container-fluid">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PayrollWeb</a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+                <div class="container">
+                    <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-cash-coin me-2"></i>
+                        <span class="fw-bold">PayrollWeb</span>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent"
                             aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1">
+                    <div class="collapse navbar-collapse" id="navbarContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             @if (User.Identity.IsAuthenticated)
                             {
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <!-- Menú de opciones para administradores -->
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                            <i class="bi bi-house-door me-1"></i>Inicio
+                                        </a>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="empleadosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-people me-1"></i>Personal
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="empleadosDropdown">
+                                            <li><a class="dropdown-item" asp-controller="Empleado" asp-action="VerEmpleados">Gestionar Empleados</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Contrato" asp-action="VerEmpleados">Contratos</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Evaluacion" asp-action="VerEmpleados">Evaluaciones</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Asistencia" asp-action="AsistenciaEmpleados">Asistencias</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-gear me-1"></i>Configuración
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="configDropdown">
+                                            <li><a class="dropdown-item" asp-controller="Categoria" asp-action="VerCategoriaPuestoSelect">Categorías y Puestos</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Deduccion" asp-action="VerDeduccionesSelect">Deducciones</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Cargo" asp-action="VerCargosSelect">Cargos</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Trienios" asp-action="VerTrienios">Triénios</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="reportesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-graph-up me-1"></i>Reportes
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="reportesDropdown">
+                                            <li><a class="dropdown-item" asp-controller="Graficos" asp-action="VerGraficos">Gráficas</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Reportes" asp-action="VerReportes">Reportes</a></li>
+                                        </ul>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="PerfilAdministrador" asp-action="VerPerfil">Ver perfil</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Empleado" asp-action="VerEmpleados">Gestionar Empleados</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Categoria" asp-action="VerCategoriaPuestoSelect">Categoria y puesto</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Contrato" asp-action="VerEmpleados">Contratos</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Evaluacion" asp-action="VerEmpleados">Evaluación de desempeño</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Deduccion" asp-action="VerDeduccionesSelect">Deducciones</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Cargo" asp-action="VerCargosSelect">Cargos</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Graficos" asp-action="VerGraficos">Gráficas</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Reportes" asp-action="VerReportes">Reportes</a>
-                                    </li>
-                                    @*                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="CompetenciasHabilidades" asp-action="VerCompetenciasHabilidadesSelect">Competencias y habilidades</a>
-                                </li> *@
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Trienios" asp-action="VerTrienios">Trienios</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Asistencia" asp-action="AsistenciaEmpleados">Asistencia</a>
+                                        <a class="nav-link" asp-area="" asp-controller="PerfilAdministrador" asp-action="VerPerfil">
+                                            <i class="bi bi-person-circle me-1"></i>Perfil
+                                        </a>
                                     </li>
                                 }
                                 else if (User.IsInRole("Empleado"))
                                 {
                                     <!-- Menú de opciones para empleados -->
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Perfil" asp-action="VerPerfil">Ver Perfil</a>
+                                        <a class="nav-link" asp-area="" asp-controller="Perfil" asp-action="VerPerfil">
+                                            <i class="bi bi-person-circle me-1"></i>Mi Perfil
+                                        </a>
                                     </li>
                                 }
                             }
                         </ul>
-                        <ul class="navbar-nav">
+                        <div class="d-flex">
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <li class="nav-item">
-                                    <form method="post" asp-controller="Account" asp-action="Logout">
-                                        <button type="submit" class="btn btn-outline-logout">Cerrar Sesión</button>
-                                    </form>
-                                </li>
+                                <form method="post" asp-controller="Account" asp-action="Logout">
+                                    <button type="submit" class="btn btn-logout">
+                                        <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+                                    </button>
+                                </form>
                             }
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </nav>
         }
-       
-
     </header>
-    <div class="container">
+    <div class="container p-5">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container" style="color: white">
-            &copy; 2025 - PayrollWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="footer py-3 bg-dark text-white">
+        <div class="container text-center">
+            &copy; 2025 - PayrollWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-light">Políticas de Privacidad</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -112,17 +117,101 @@
 </body>
 </html>
 
-
 <style>
-    .btn-outline-logout {
-        background-color: white;
-        color: #dc3545; /* rojo Bootstrap */
-        border: 2px solid #dc3545;
+    /* Estilos generales del navbar */
+    .navbar {
+        padding: 0.8rem 1rem;
         transition: all 0.3s ease;
     }
 
-        .btn-outline-logout:hover {
-            background-color: #dc3545;
-            color: white;
+    .navbar-brand {
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        margin: 0 0.1rem;
+        border-radius: 0.25rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+        .nav-link:hover, .nav-link:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
         }
+
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+
+    /* Estilos para los dropdowns */
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-radius: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+    .dropdown-item {
+        padding: 0.5rem 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+            transform: translateX(5px);
+        }
+
+    /* Botón de logout */
+    .btn-logout {
+        background-color: transparent;
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-radius: 0.5rem;
+        padding: 0.375rem 1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+        .btn-logout:hover {
+            background-color: rgba(220, 53, 69, 0.9);
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Efecto activo para elementos del navbar */
+    .nav-item.active .nav-link {
+        background-color: rgba(255, 255, 255, 0.2);
+        font-weight: 600;
+    }
+
+    /* Footer mejorado */
+    .footer {
+        margin-top: 2rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 992px) {
+        .navbar-collapse {
+            padding: 1rem 0;
+        }
+
+        .nav-link {
+            margin: 0.25rem 0;
+            padding: 0.75rem 1rem;
+        }
+
+        .btn-logout {
+            margin-top: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>

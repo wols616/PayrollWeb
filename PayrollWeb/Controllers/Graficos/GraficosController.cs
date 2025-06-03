@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using PayrollWeb.Models;
 
@@ -24,6 +25,14 @@ namespace PayrollWeb.Controllers.Graficos
 
             ViewBag.ShowActions = "HistorialAscensos";
             return View("/Views/Admin/VerEmpleados.cshtml", _Empleado.ObtenerEmpleados());
+        }
+
+        [Authorize]
+        public IActionResult VerEvaluacionesEmpleado()
+        {
+            List<Empleado> empleados = _Empleado.ObtenerEmpleados();
+            ViewBag.ShowActions = "Evaluaciones";
+            return View("/Views/Admin/VerEmpleados.cshtml", empleados);
         }
 
         public IActionResult VerAscensosEmpleados(int IdEmpleado)

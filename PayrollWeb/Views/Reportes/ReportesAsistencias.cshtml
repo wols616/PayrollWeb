@@ -65,14 +65,25 @@ else
 
 @section Styles {
     <style>
+
+        /* Estilos específicos para la impresión */
         @@media print {
-            nav, .navbar, .site-header, .botones {
+            .no-print {
+                display: none !important;
+            }
+            /* Oculta el header de la página */
+            .site-header, /* Reemplaza con el selector correcto de tu header */
+            .navbar { /* Si tu header está en un navbar */
                 display: none !important;
             }
 
             body {
                 padding: 20px;
                 font-size: 12px;
+            }
+
+            .botones {
+                display: none;
             }
 
             .table {
@@ -85,6 +96,18 @@ else
 
             a[href]:after {
                 content: none !important;
+            }
+
+            footer {
+                display: none;
+            }
+
+            .filtro-fecha {
+                display: none;
+            }
+
+            .indicaciones {
+                display: none;
             }
         }
     </style>

@@ -4,121 +4,198 @@
     ViewData["Title"] = "Editar Empleado";
 }
 
-<h2>Editar Empleado</h2>
-
-<form asp-controller="Empleado" asp-action="ActualizarEmpleado" method="post" id="formEditarEmpleado">
-    
-    <input type="hidden" name="IdEmpleado" value="@Model.IdEmpleado" />
-@*     <input type="hidden" name="Estado" value="@Model.Estado" /> *@
-
-    @* Mostrar los errores globales si existen *@
-@*     @if (!ViewData.ModelState.IsValid)
+<div class="container mt-4">
+    @if (TempData["Error"] != null)
     {
-        <div style="color:red;">
-            <ul>
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <li>@error.ErrorMessage</li>
-                }
-            </ul>
+        <div class="alert alert-danger alert-dismissible fade show alert-delete-later" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    } *@
+    }
 
-    <div>
-        <label for="Dui">DUI:</label>
-        <input type="text" id="Dui" name="Dui" value="@Model.Dui" required />
-        @if (ViewData.ModelState["Dui"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Dui"]?.Errors[0]?.ErrorMessage</span>
-        }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show alert-delete-later" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="bi bi-person-gear me-2"></i>Editar Empleado</h2>
+        </div>
+        <div class="card-body">
+            <form asp-controller="Empleado" asp-action="ActualizarEmpleado" method="post" id="formEditarEmpleado" class="needs-validation" novalidate>
+                <input type="hidden" name="IdEmpleado" value="@Model.IdEmpleado" />
+
+                <div class="row g-3">
+                    <!-- Primera columna -->
+                    <div class="col-md-6">
+                        <!-- DUI -->
+                        <div class="mb-3">
+                            <label for="Dui" class="form-label">DUI</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                <input type="text" class="form-control" id="Dui" name="Dui" value="@Model.Dui" required maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" placeholder="00000000-0" />
+                            </div>
+                            @if (ViewData.ModelState["Dui"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Dui"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label for="Nombre" class="form-label">Nombre</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="Nombre" name="Nombre" value="@Model.Nombre" required placeholder="Nombre del empleado" />
+                            </div>
+                            @if (ViewData.ModelState["Nombre"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Nombre"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Apellidos -->
+                        <div class="mb-3">
+                            <label for="Apellidos" class="form-label">Apellidos</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="Apellidos" name="Apellidos" value="@Model.Apellidos" required placeholder="Apellidos del empleado" />
+                            </div>
+                            @if (ViewData.ModelState["Apellidos"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Apellidos"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div class="mb-3">
+                            <label for="Telefono" class="form-label">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text" class="form-control" id="Telefono" name="Telefono" value="@Model.Telefono" required maxlength="9" oninput="formatearTelefono(this)" pattern="[0-9]{4}-[0-9]{4}" placeholder="0000-0000" />
+                            </div>
+                            @if (ViewData.ModelState["Telefono"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Telefono"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Segunda columna -->
+                    <div class="col-md-6">
+                        <!-- Dirección -->
+                        <div class="mb-3">
+                            <label for="Direccion" class="form-label">Dirección</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-house"></i></span>
+                                <input type="text" class="form-control" id="Direccion" name="Direccion" value="@Model.Direccion" required placeholder="Dirección completa" />
+                            </div>
+                            @if (ViewData.ModelState["Direccion"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Direccion"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Cuenta Corriente -->
+                        <div class="mb-3">
+                            <label for="CuentaCorriente" class="form-label">Cuenta Corriente</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-bank"></i></span>
+                                <input type="text" class="form-control" id="CuentaCorriente" name="CuentaCorriente" value="@Model.CuentaCorriente" required maxlength="12" oninput="formatearCuentaCorriente(this)" pattern="[0-9]{12}" placeholder="12 dígitos sin espacios" />
+                            </div>
+                            @if (ViewData.ModelState["CuentaCorriente"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["CuentaCorriente"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="mb-3" style="display: none">
+                            <label for="Estado" class="form-label">Estado</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-toggle-on"></i></span>
+                                <select class="form-select" id="Estado" name="Estado" asp-for="Estado">
+                                    <option value="Activo">Activo</option>
+                                    <option value="Inactivo">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Correo -->
+                        <div class="mb-3">
+                            <label for="Correo" class="form-label">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="Correo" name="Correo" value="@Model.Correo" required placeholder="correo@ejemplo.com" />
+                            </div>
+                            @if (ViewData.ModelState["Correo"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Correo"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Contraseña -->
+                        <div class="mb-3">
+                            <label for="Contrasena" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="Contrasena" name="Contrasena" value="@Model.Contrasena" placeholder="Dejar en blanco para no cambiar" />
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" type="button" id="btnGenerarContrasena">
+                                    <i class="bi bi-key"></i> Generar
+                                </button>
+                            </div>
+                            @if (ViewData.ModelState["Contrasena"]?.Errors.Count > 0)
+                            {
+                                <div class="invalid-feedback d-block">
+                                    @ViewData.ModelState["Contrasena"]?.Errors[0]?.ErrorMessage
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary me-md-2">
+                        <i class="bi bi-save me-2"></i>Actualizar Empleado
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div>
-        <label for="Nombre">Nombre:</label>
-        <input type="text" id="Nombre" name="Nombre" value="@Model.Nombre" required />
-        @if (ViewData.ModelState["Nombre"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Nombre"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div>
-
-    <div>
-        <label for="Apellidos">Apellidos:</label>
-        <input type="text" id="Apellidos" name="Apellidos" value="@Model.Apellidos" required />
-        @if (ViewData.ModelState["Apellidos"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Apellidos"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div>
-
-    <div>
-        <label for="Telefono">Teléfono:</label>
-        <input type="text" id="Telefono" name="Telefono" value="@Model.Telefono" required />
-        @if (ViewData.ModelState["Telefono"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Telefono"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div>
-
-    <div>
-        <label for="Direccion">Dirección:</label>
-        <input type="text" id="Direccion" name="Direccion" value="@Model.Direccion" required />
-        @if (ViewData.ModelState["Direccion"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Direccion"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div>
-
-    <div>
-        <label for="CuentaCorriente">Cuenta Corriente:</label>
-        <input type="text" id="CuentaCorriente" name="CuentaCorriente" value="@Model.CuentaCorriente" required />
-        @if (ViewData.ModelState["CuentaCorriente"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["CuentaCorriente"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div>
-
-    <div>
-        <label for="Estado" type="hidden">Estado:</label>
-        <select id="Estado" type="hidden" name="Estado" asp-for="Estado">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-        </select>
-    </div>
-
-
-    <div>
-        <label for="Correo">Correo:</label>
-        <input type="email" id="Correo" name="Correo" value="@Model.Correo" required />
-        @if (ViewData.ModelState["Correo"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Correo"]?.Errors[0]?.ErrorMessage</span>
-        }
-    </div>
-
-    <div>
-        <label for="Contrasena">Contraseña:</label>
-        <input type="password"  id="Contrasena" name="Contrasena" value="@Model.Contrasena"/>
-        <a id="togglePassword" href="#"><i class="bi bi-eye"></i></a>
-        @if (ViewData.ModelState["Contrasena"]?.Errors.Count > 0)
-        {
-            <span style="color:red;">@ViewData.ModelState["Contrasena"]?.Errors[0]?.ErrorMessage</span>
-        }
-        <button type="button" id="btnGenerarContrasena">Generar Contraseña</button>
-    </div>
-
-    <button type="submit">Actualizar</button>
-</form>
+<!-- Incluir Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         $("#btnGenerarContrasena").click(function() {
             $.ajax({
-                url: '/Empleado/GenerarContrasena', // Ruta al método del controlador
+                url: '/Empleado/GenerarContrasena',
                 type: 'GET',
                 success: function(data) {
-                    // Actualizar el valor del campo de contraseña con la nueva contraseña generada
                     $('#Contrasena').val(data);
                 },
                 error: function() {
@@ -128,10 +205,37 @@
         });
     });
 
-        document.getElementById('togglePassword').addEventListener('click', function() {
+    document.getElementById('togglePassword').addEventListener('click', function() {
         const passwordField = document.getElementById('Contrasena');
-        // Cambiar el tipo del input entre password y text
         const type = passwordField.type === 'password' ? 'text' : 'password';
         passwordField.type = type;
     });
+
+    function formatearDUI(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 8) {
+            value = value.substring(0, 8) + '-' + value.substring(8, 9);
+        }
+        input.value = value.substring(0, 10);
+    }
+
+    function formatearTelefono(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 4) {
+            value = value.substring(0, 4) + '-' + value.substring(4, 8);
+        }
+        input.value = value.substring(0, 9);
+    }
+
+    function formatearCuentaCorriente(input) {
+        let value = input.value.replace(/\D/g, '');
+        input.value = value.substring(0, 12);
+    }
+
+    setTimeout(function() {
+        var alertElements = document.querySelectorAll('.alert-delete-later');
+        alertElements.forEach(function(alert) {
+            alert.remove();
+        });
+    }, 3000);
 </script>
