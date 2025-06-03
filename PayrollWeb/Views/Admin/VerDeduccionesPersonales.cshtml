@@ -42,6 +42,10 @@
         {
             foreach (var deduccion in Model)
             {
+                if (deduccion.Deduccion.NombreDeduccion == "AFP" || deduccion.Deduccion.NombreDeduccion == "ISR" || deduccion.Deduccion.NombreDeduccion == "ISSS")
+                {
+                    continue;
+                }
                 <tr>
                     <td>@deduccion.Deduccion.NombreDeduccion</td>
                     <td>@deduccion.Deduccion.Porcentaje.ToString("0.00")%</td>
