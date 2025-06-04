@@ -4,50 +4,199 @@
     ViewData["Title"] = "Agregar Hora de Entrada";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>
+    body {
+        background-color: #f2f9ff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    .main-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin: 20px auto;
+        max-width: 800px;
+    }
 
-@if (User.IsInRole("Admin")){
+    h2 {
+        color: #007bff;
+        font-weight: 600;
+        font-size: 28px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #007bff;
+        text-align: center;
+    }
 
-    <!-- Formulario para agregar hora de entrada -->
-    <form id="formAgregarAsistencia" method="post" action="@Url.Action("AgregarAsistenciaEntrada", "Asistencia")">
+    .formAsistencia {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 10px 15px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+            opacity: 1;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: 12px 20px;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: all 0.3s;
+        width: 100%;
+        font-size: 16px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+            transform: translateY(-2px);
+        }
+
+    .alert {
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    hr {
+        margin: 30px 0;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    /* Spinner para carga de empleados */
+    .spinner-container {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .spinner-border {
+        color: #007bff;
+        margin-right: 10px;
+    }
+
+    /* Estilo para el select */
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23007bff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px 12px;
+    }
+
+    /* Estilo para el campo de fecha y hora */
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.5) sepia(1) saturate(5) hue-rotate(175deg);
+    }
+</style>
+
+<div class="main-container">
+    <h2>@ViewData["Title"]</h2>
+
+    <form id="formAgregarAsistencia" method="post" class="formAsistencia">
         <div class="form-group">
             <label for="fecha">Fecha</label>
-            <input type="date" class="form-control" id="fecha" name="fecha" required
-                   min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            @if (User.IsInRole("Admin"))
+            {
+                <input type="date" class="form-control" id="fecha" name="fecha" required
+                       min="2015-01-01" max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            }
+            else
+            {
+                <input type="date" class="form-control" id="fecha" name="fecha" required
+                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       max="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")" disabled />
+            }
         </div>
 
         <div class="form-group">
             <label for="empleado">Empleado</label>
-            <select class="form-control" id="empleado" name="id" required>
-                <option value="">Seleccione un empleado</option>
-            </select>
-            <div id="spinnerEmpleados" style="display: none; margin-top: 5px;">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                Cargando empleados...
-            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <select class="form-control" id="empleado" name="id" required>
+                    <option value="">Seleccione un empleado</option>
+                </select>
+                <div id="spinnerEmpleados" class="spinner-container" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Cargando empleados...</span>
+                </div>
+            }
+            else
+            {
+                <input type="text" class="form-control" id="empleado" name="empleado" readonly>
+                <input type="hidden" id="idEmpleado" name="idEmpleado">
+            }
         </div>
 
         <div class="form-group">
             <label for="horaEntrada">Hora de Entrada</label>
-            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" min="06:30" max="16:30" required />
+            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" min="06:30" max="16:30" required>
         </div>
 
-        <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Asistencia</button>
+        <button type="submit" class="btn btn-primary" id="btnRegistrar">
+            Registrar Asistencia
+        </button>
     </form>
 
     <hr />
-    <!-- Mensaje de éxito -->
+
+    <!-- Mensajes -->
     <div id="mensajeExito" class="alert alert-success" style="display: none;">
         Asistencia agregada con éxito.
     </div>
 
-    <!-- Mensaje de error -->
     <div id="mensajeError" class="alert alert-danger" style="display: none;">
         No se pudo agregar la asistencia.
     </div>
+</div>
 
 
+@if (User.IsInRole("Admin")){
     @section Scripts {
     <script>
         // Función que se ejecuta cuando cambia la fecha
@@ -129,42 +278,6 @@
     }
 }
 else{
-    <form id="formAgregarAsistencia" method="post">
-        <input type="date"
-               class="form-control"
-               id="fecha"
-               name="fecha"
-               required
-               min="@DateTime.Now.ToString("yyyy-MM-dd")"
-               max="@DateTime.Now.ToString("yyyy-MM-dd")"
-               value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-
-        <div class="form-group">
-            <label for="empleado">Empleado</label>
-            <input type="text" class="form-control" id="empleado" name="empleado" readonly>
-            <input type="hidden" id="idEmpleado" name="idEmpleado">
-        </div>
-
-        <div class="form-group">
-            <label for="horaEntrada">Hora de Entrada</label>
-            <input type="time" class="form-control" id="horaEntrada" name="horaEntrada" min="06:30" max="16:30" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="btnRegistrar">Registrar Asistencia</button>
-
-        <hr />
-        <!-- Mensaje de éxito -->
-        <div id="mensajeExito" class="alert alert-success" style="display: none;">
-            Asistencia agregada con éxito.
-        </div>
-
-        <!-- Mensaje de error -->
-        <div id="mensajeError" class="alert alert-danger" style="display: none;">
-            No se pudo agregar la asistencia.
-        </div>
-
-    </form>
-
     @section Scripts {
     <script>
         $(document).ready(function () {
@@ -225,5 +338,5 @@ else{
     </script>
     }
 
-
 }
+            
