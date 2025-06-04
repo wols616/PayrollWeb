@@ -3,16 +3,90 @@ using PayrollWeb.Models;
 
 namespace PayrollWeb.Controllers.Emp
 {
-    public class EmpleadoEvaluacionController : Controller
+    public class EvaluacionEmpleadoController : Controller
     {
         private readonly EvaluacionDesempeno _evaluacionDesempeno = new();
         private readonly Empleado _empleado = new();
         private readonly KPI _kpi = new();
 
-        public IActionResult MisEvaluaciones(int idEmpleado, DateTime? fechaInicio = null, DateTime? fechaFin = null)
+        //public IActionResult MisEvaluaciones(int idEmpleado, DateTime? fechaInicio = null, DateTime? fechaFin = null)
+        //{
+        //    var empleado = _empleado.ObtenerEmpleado(idEmpleado);
+        //    var evaluaciones = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(idEmpleado);
+
+        //    bool tieneFiltroFecha = fechaInicio.HasValue || fechaFin.HasValue;
+
+        //    if (tieneFiltroFecha)
+        //    {
+        //        if (fechaInicio.HasValue && fechaFin.HasValue)
+        //        {
+        //            evaluaciones = evaluaciones
+        //                .Where(e => e.fecha == fechaInicio.Value)
+        //                .ToList();
+        //        }
+        //        else if (fechaInicio.HasValue)
+        //        {
+        //            evaluaciones = evaluaciones
+        //                .Where(e => e.fecha >= fechaInicio.Value)
+        //                .ToList();
+        //        }
+        //    }
+
+        //    var kpis = _kpi.ObtenerKPI();
+        //    var datosGrafica = new List<double>();
+
+        //    if (tieneFiltroFecha)
+        //    {
+        //        foreach (var kpi in kpis)
+        //        {
+        //            var evaluacion = evaluaciones.FirstOrDefault(e => e.id_kpi == kpi.IdKpi);
+        //            datosGrafica.Add(evaluacion != null ? evaluacion.puntuacion : 0);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var evaluacionesAgrupadasProm = evaluaciones
+        //            .GroupBy(e => e.id_kpi)
+        //            .ToDictionary(g => g.Key, g => g.Average(e => e.puntuacion));
+
+        //        foreach (var kpi in kpis)
+        //        {
+        //            datosGrafica.Add(evaluacionesAgrupadasProm.TryGetValue(kpi.IdKpi, out var promedio) ? promedio : 0);
+        //        }
+        //    }
+
+        //    // ✅ Agrupar por fecha (clave final para la vista)
+        //    var evaluacionesAgrupadas = evaluaciones
+        //        .GroupBy(e => e.fecha.Date)
+        //        .OrderByDescending(g => g.Key)
+        //        .ToDictionary(g => g.Key, g => g.ToList());
+
+        //    // ViewBags
+        //    ViewBag.Empleado = empleado;
+        //    ViewBag.KPIs = kpis;
+        //    ViewBag.Evaluaciones = evaluaciones;
+        //    ViewBag.DatosGrafica = datosGrafica;
+        //    ViewBag.TieneFiltroFecha = tieneFiltroFecha;
+        //    ViewBag.EvaluacionesAgrupadas = evaluacionesAgrupadas; // ✅ Agregado
+
+        //    return View("~/Views/Emp/VerEvaluacionesEmpleado.cshtml", evaluaciones);
+        //}
+
+
+
+        public IActionResult MisEvaluaciones(DateTime? fechaInicio = null, DateTime? fechaFin = null)
         {
-            var empleado = _empleado.ObtenerEmpleado(idEmpleado);
-            var evaluaciones = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(idEmpleado);
+            string correo = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(correo))
+                return Unauthorized("No se pudo obtener el usuario logueado.");
+
+            var empleado = _empleado.ObtenerEmpleado(correo);
+
+            if (empleado == null)
+                return NotFound("Empleado no encontrado.");
+
+            var evaluaciones = _evaluacionDesempeno.ObtenerEvaluacionesDeEmpleado(empleado.IdEmpleado);
 
             bool tieneFiltroFecha = fechaInicio.HasValue || fechaFin.HasValue;
 
@@ -21,7 +95,7 @@ namespace PayrollWeb.Controllers.Emp
                 if (fechaInicio.HasValue && fechaFin.HasValue)
                 {
                     evaluaciones = evaluaciones
-                        .Where(e => e.fecha == fechaInicio.Value)
+                        .Where(e => e.fecha >= fechaInicio.Value && e.fecha <= fechaFin.Value)
                         .ToList();
                 }
                 else if (fechaInicio.HasValue)
@@ -55,7 +129,6 @@ namespace PayrollWeb.Controllers.Emp
                 }
             }
 
-            // ✅ Agrupar por fecha (clave final para la vista)
             var evaluacionesAgrupadas = evaluaciones
                 .GroupBy(e => e.fecha.Date)
                 .OrderByDescending(g => g.Key)
@@ -67,7 +140,7 @@ namespace PayrollWeb.Controllers.Emp
             ViewBag.Evaluaciones = evaluaciones;
             ViewBag.DatosGrafica = datosGrafica;
             ViewBag.TieneFiltroFecha = tieneFiltroFecha;
-            ViewBag.EvaluacionesAgrupadas = evaluacionesAgrupadas; // ✅ Agregado
+            ViewBag.EvaluacionesAgrupadas = evaluacionesAgrupadas;
 
             return View("~/Views/Emp/VerEvaluacionesEmpleado.cshtml", evaluaciones);
         }

@@ -403,6 +403,54 @@ namespace PayrollWeb.Models
             return empleado;
         }
 
+
+
+        public Empleado ObtenerEmpleado(string correo)
+        {
+            Empleado empleado = null;
+
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT id_empleado, dui, nombre, apellidos, telefono, direccion, cuenta_corriente, estado, correo, contrasena " +
+                                   "FROM Empleado WHERE correo = @correo";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@correo", SqlDbType.NVarChar).Value = correo;
+
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                empleado = new Empleado
+                                {
+                                    IdEmpleado = Convert.ToInt32(reader["id_empleado"]),
+                                    Dui = reader["dui"].ToString(),
+                                    Nombre = reader["nombre"].ToString(),
+                                    Apellidos = reader["apellidos"].ToString(),
+                                    Telefono = reader["telefono"].ToString(),
+                                    Direccion = reader["direccion"].ToString(),
+                                    CuentaCorriente = reader["cuenta_corriente"].ToString(),
+                                    Estado = reader["estado"].ToString(),
+                                    Correo = reader["correo"].ToString(),
+                                    Contrasena = reader["contrasena"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener los datos del empleado: " + ex.Message);
+            }
+
+            return empleado;
+        }
+
         public bool ActualizarDatosGenerales(int idEmpleado, string dui, string nombre, string apellidos, string telefono, string direccion)
         {
             try
@@ -806,91 +854,51 @@ namespace PayrollWeb.Models
             return tieneMayuscula && tieneMinuscula && tieneNumero && tieneCaracterEspecial;
         }
 
-        //string impresion;
-
-        //public void printDoc_PrintPage(object sender, PrintPageEventArgs e)
-        //{
-        //    // Imprime el docx
-        //    e.Graphics.DrawString(impresion, new Font("Arial", 12), Brushes.Black, 100, 100);
-        //}
-
-
-
-        //public void CrearReporte(int idEmpleado)
-        //{
-        //    using (SqlConnection con = conexion.GetConnection())
-        //    {
-        //        try
-        //        {
-        //            con.Open();
-        //            string query = "SELECT * FROM Empleado WHERE id_empleado = @idEmpleado";
-        //            using (SqlCommand cmd = new SqlCommand(query, con))
-        //            {
-        //                // Agregar el parámetro al comando
-        //                cmd.Parameters.AddWithValue("@idEmpleado", idEmpleado);
-
-        //                Empleado empleado = null; // Crear un objeto empleado fuera del bucle
-
-        //                using (SqlDataReader reader = cmd.ExecuteReader())
-        //                {
-        //                    while (reader.Read())
-        //                    {
-        //                        // Solo asignar el primer empleado encontrado
-        //                        empleado = new Empleado
-        //                        {
-        //                            IdEmpleado = Convert.ToInt32(reader["id_empleado"]),
-        //                            Dui = reader["dui"].ToString(),
-        //                            Nombre = reader["nombre"].ToString(),
-        //                            Apellidos = reader["apellidos"].ToString(),
-        //                            Telefono = reader["telefono"].ToString(),
-        //                            Direccion = reader["direccion"].ToString(),
-        //                            CuentaCorriente = reader["cuenta_corriente"].ToString(),
-        //                            Estado = reader["estado"].ToString(),
-        //                            Correo = reader["correo"].ToString(),
-        //                            Contrasena = reader["contrasena"].ToString()
-        //                        };
-        //                    }
-        //                }
-
-        //                if (empleado != null) // Asegurarse de que el empleado no es nulo
-        //                {
-        //                    // Construir la cadena de impresión usando los datos del empleado
-        //                    impresion = "---------------------------------------------------------------------------------------------------------------\n" +
-        //                                "                              DATOS DEL EMPLEADO REGISTRADO         \n" +
-        //                                "---------------------------------------------------------------------------------------------------------------\n\n\n" +
-        //                                $"                          Nombre:                               {empleado.Nombre}\n\n" +
-        //                                $"                          Apellido:                               {empleado.Apellidos}\n\n" +
-        //                                $"                          DUI:                                     {empleado.Dui:C}\n\n" +
-        //                                $"                          Teléfono:                              {empleado.Telefono:C}\n\n" +
-        //                                $"                          Direccion:                             {empleado.Direccion:C}\n\n" +
-        //                                $"                          N° de cuenta:                       {empleado.CuentaCorriente:C}\n\n" +
-        //                                $"                          Estado:                                 {empleado.Estado:C}\n\n" +
-        //                                $"                          Correo Electrónico:              {empleado.Correo:C}\n\n" +
-        //                                $"                          Contraseña:                         {empleado.Contrasena:C}\n\n\n" +
-        //                                "---------------------------------------------------------------------------------------------------------------\n" +
-        //                                "                      FIRMA DEL EMPLEADO:                \n" +
-        //                                "---------------------------------------------------------------------------------------------------------------\n";
-
-        //                    // instancia de PrintDocument
-        //                    PrintDocument printDoc = new PrintDocument();
-        //                    printDoc.PrintPage += new PrintPageEventHandler(printDoc_PrintPage);
-
-        //                    // Mostrar la vista previa de impresión
-        //                    PrintPreviewDialog printPreview = new PrintPreviewDialog();
-        //                    printPreview.Document = printDoc;
-        //                    printPreview.ShowDialog();
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine("Empleado no encontrado.", "Error");
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine("Error al obtener datos: " + ex.Message, "Error");
-        //        }
-        //    }
-        //}
+        /// <summary>
+        /// Busca empleados cuyo nombre o apellidos contengan el término de búsqueda.
+        /// </summary>
+        public List<Empleado> BuscarPorTexto(string texto)
+        {
+            var lista = new List<Empleado>();
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string sql = @"SELECT id_empleado, dui, nombre, apellidos, telefono, direccion, cuenta_corriente, estado, correo 
+                                   FROM Empleado 
+                                   WHERE nombre LIKE @texto + '%' 
+                                      OR apellidos LIKE @texto + '%' 
+                                      OR dui LIKE @texto + '%'";
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.Add("@texto", SqlDbType.VarChar).Value = texto;
+                        con.Open();
+                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                lista.Add(new Empleado
+                                {
+                                    IdEmpleado = Convert.ToInt32(rdr["id_empleado"]),
+                                    Dui = rdr["dui"].ToString(),
+                                    Nombre = rdr["nombre"].ToString(),
+                                    Apellidos = rdr["apellidos"].ToString(),
+                                    Telefono = rdr["telefono"].ToString(),
+                                    Direccion = rdr["direccion"].ToString(),
+                                    CuentaCorriente = rdr["cuenta_corriente"].ToString(),
+                                    Estado = rdr["estado"].ToString(),
+                                    Correo = rdr["correo"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Manejo de errores (opcional: loguear)
+            }
+            return lista;
+        }
     }
 }

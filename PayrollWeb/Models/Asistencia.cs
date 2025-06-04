@@ -21,10 +21,10 @@ namespace PayrollWeb.Models
        
 
         //Con este método podrá ver todas las asistencias de un empleado
-        public List<string> VerAsistencia(string dui)
+        public List<string> VerAsistencia(string correo)
         {
             List<string> Asistencia = new List<string>();
-            string query = "SELECT Asistencia.fecha, Asistencia.hora_entrada, Asistencia.hora_salida FROM Asistencia JOIN Empleado on Asistencia.id_empleado = Empleado.id_empleado WHERE Empleado.dui = @dui";
+            string query = "SELECT Asistencia.fecha, Asistencia.hora_entrada, Asistencia.hora_salida FROM Asistencia JOIN Empleado on Asistencia.id_empleado = Empleado.id_empleado WHERE Empleado.correo = @correo";
 
             using (SqlConnection connection = conexion.GetConnection())
             {
@@ -33,7 +33,7 @@ namespace PayrollWeb.Models
                     connection.Open();
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@dui", dui);
+                        command.Parameters.AddWithValue("@correo", correo);
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())

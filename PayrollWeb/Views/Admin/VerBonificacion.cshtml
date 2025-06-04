@@ -1,0 +1,511 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Gestión de Bonificaciones";
+    var categoriasIniciales = ViewBag.Categorias as List<PayrollWeb.Models.CategoriaBonificacion>;
+    var bonosIniciales = ViewBag.Bonificaciones as List<PayrollWeb.Models.Bonificacion>;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Estilos mínimos para organizar la vista */
+        .buscador-empleados {
+            margin-bottom: 1rem;
+        }
+
+        #lista-empleados, #lista-bonificaciones {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+            #lista-empleados li {
+                cursor: pointer;
+            }
+
+        .oculto {
+            display: none;
+        }
+
+        .mensaje-error {
+            color: red;
+            font-size: 0.9rem;
+        }
+    </style>
+}
+
+<h2>Gestión de Bonificaciones</h2>
+
+<div class="row">
+    <!-- =================== PANEL IZQUIERDO: Búsqueda y filtros de empleados =================== -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>Buscar Empleado</strong>
+            </div>
+            <div class="card-body">
+                <input type="text" id="txtBuscarEmpleado" class="form-control" placeholder="Escriba nombre, apellidos o DUI..." />
+                <ul id="lista-empleados" class="list-group mt-2"></ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Categorías</strong>
+                <button id="btnGestionCategorias" class="btn btn-sm btn-outline-primary">
+                    <i class="fa fa-cogs"></i> Gestionar
+                </button>
+            </div>
+            <div class="card-body">
+                <ul id="lista-categorias" class="list-group">
+                    @foreach (var cat in categoriasIniciales)
+                    {
+                        <li class="list-group-item" data-id="@cat.IdCategoriaBono">@cat.Nombre</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================== PANEL CENTRAL: Listado de bonificaciones =================== -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <strong>Bonificaciones</strong>
+                <button id="btnEliminarBonoSeleccionado" class="btn btn-sm btn-danger">
+                    <i class="fa fa-trash"></i> Eliminar
+                </button>
+            </div>
+            <div class="card-body">
+                <ul id="lista-bonificaciones" class="list-group">
+                    @* Items iniciales de ejemplo (se reemplazarán con AJAX) *@
+                    @foreach (var b in bonosIniciales)
+                    {
+                        string nombreCat = "";
+                        if (b.CategoriaId > 0)
+                        {
+                            var c = categoriasIniciales.FirstOrDefault(x => x.IdCategoriaBono == b.CategoriaId);
+                            nombreCat = c != null ? c.Nombre : "—";
+                        }
+                        else
+                        {
+                            nombreCat = "Aguinaldo";
+                        }
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-id="@b.IdBonificacion">
+                            <div>
+                                <span><strong>@nombreCat</strong> - @b.Fecha.ToString("yyyy-MM-dd")</span><br />
+                                <small>Empleado ID: @b.IdEmpleado</small>
+                            </div>
+                            <span class="badge badge-primary">@b.Monto.ToString("C2")</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================== PANEL DERECHO: Formulario Agregar/Filtrar =================== -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <strong>Agregar / Filtrar Bonificación</strong>
+            </div>
+            <div class="card-body">
+                <form id="frmBonificacion">
+                    <input type="hidden" id="hdnIdEmpleadoSeleccionado" value="" />
+
+                    <div class="form-group">
+                        <label>Empleado Seleccionado</label>
+                        <input type="text" id="txtEmpleadoSeleccionado" class="form-control" readonly placeholder="Ninguno" />
+                    </div>
+
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="chkTodosEmpleados" />
+                        <label class="form-check-label" for="chkTodosEmpleados">Para todos los empleados</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="cmbCategorias" class="form-control">
+                            <option value="">-- Seleccione categoría --</option>
+                            @foreach (var c in categoriasIniciales)
+                            {
+                                <option value="@c.IdCategoriaBono">@c.Nombre</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Monto</label>
+                        <input type="number" step="0.01" id="txtMonto" class="form-control" placeholder="0.00" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="txtFecha" class="form-control" />
+                    </div>
+
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="chkAguinaldo" />
+                        <label class="form-check-label" for="chkAguinaldo">Aguinaldo</label>
+                    </div>
+
+                    <!-- Sección Aguinaldo -->
+                    <div id="seccionAguinaldo" class="oculto">
+                        <hr />
+                        <div class="form-group">
+                            <label>Salario Base</label>
+                            <input type="number" step="0.01" id="txtSalarioBase" class="form-control" placeholder="0.00" />
+                        </div>
+                        <div class="form-group">
+                            <label>Años de Servicio</label>
+                            <input type="number" step="1" id="txtAniosServicio" class="form-control" placeholder="Ej. 2" />
+                        </div>
+                    </div>
+
+                    <div class="mensaje-error" id="mensajeError"></div>
+
+                    <button type="button" id="btnAgregarBonificacion" class="btn btn-success btn-block mt-2">
+                        <i class="fa fa-plus"></i> Agregar Bonificación
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =================== Modal para Gestión de Categorías =================== -->
+<div class="modal fade" id="modalCategorias" tabindex="-1" role="dialog" aria-labelledby="modalCategoriasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Gestión de Categorías</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Lista de categorías -->
+                <ul id="listaCategoriasModal" class="list-group mb-3">
+                    @foreach (var cat in categoriasIniciales)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-id="@cat.IdCategoriaBono">
+                            <span class="nombre-cat">@cat.Nombre</span>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary btnEditarCategoria">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btnEliminarCategoria">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <div class="form-inline">
+                    <input type="text" id="txtNuevaCategoria" class="form-control mr-2" placeholder="Nombre nueva categoría" />
+                    <button type="button" id="btnAgregarCategoria" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <div class="mensaje-error" id="mensajeCategoria"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let empleadoSeleccionadoId = null;
+            let bonificacionSeleccionadaId = null;
+
+            // ================== BÚSQUEDA DE EMPLEADOS ==================
+            $("#txtBuscarEmpleado").on("input", function () {
+                let texto = $(this).val().trim();
+                $.ajax({
+                    url: '@Url.Action("BuscarEmpleados", "Bonificacion")',
+                    data: { texto: texto },
+                    type: "GET",
+                    success: function (data) {
+                        let ul = $("#lista-empleados");
+                        ul.empty();
+                        data.forEach(function (item) {
+                            ul.append(`<li class="list-group-item" data-id="${item.idEmpleado}">
+                                                ${item.nombreCompleto}
+                                            </li>`);
+                        });
+                    }
+                });
+            });
+
+            // Al hacer clic en un empleado, se selecciona y se cargan sus bonificaciones
+            $("#lista-empleados").on("click", "li", function () {
+                empleadoSeleccionadoId = $(this).data("id");
+                let texto = $(this).text();
+                $("#txtEmpleadoSeleccionado").val(texto);
+                $("#hdnIdEmpleadoSeleccionado").val(empleadoSeleccionadoId);
+                cargarBonificaciones(empleadoSeleccionadoId);
+            });
+
+            // ================== CARGAR BONIFICACIONES ==================
+            function cargarBonificaciones(idEmpleado) {
+                $.ajax({
+                    url: '@Url.Action("ObtenerBonificaciones", "Bonificacion")',
+                    data: { idEmpleado: idEmpleado },
+                    type: "GET",
+                    success: function (data) {
+                        let ul = $("#lista-bonificaciones");
+                        ul.empty();
+                        data.forEach(function (b) {
+                            // Convertimos "2025-06-03T00:00:00" a "2025-06-03":
+                            let soloFecha = b.fecha.split('T')[0];
+                            ul.append(`<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${b.idBonificacion}">
+                                                <div>
+                                                    <span><strong>${b.categoria}</strong> - ${soloFecha}</span><br/>
+                                                    <small>Empleado ID: ${b.idEmpleado}</small>
+                                                </div>
+                                                <span class="badge badge-primary">${b.monto.toFixed(2)}</span>
+                                            </li>`);
+                        });
+                    }
+                });
+            }
+
+            // Si no se ha seleccionado empleado, cargar todas inicialmente
+            cargarBonificaciones(0);
+
+            // ================== SELECCIONAR BONIFICACIÓN ==================
+            $("#lista-bonificaciones").on("click", "li", function () {
+                $("#lista-bonificaciones li").removeClass("active");
+                $(this).addClass("active");
+                bonificacionSeleccionadaId = $(this).data("id");
+            });
+
+            // ================== ELIMINAR BONIFICACIÓN ==================
+            $("#btnEliminarBonoSeleccionado").click(function () {
+                if (!bonificacionSeleccionadaId) {
+                    alert("Seleccione una bonificación para eliminar.");
+                    return;
+                }
+                if (!confirm("¿Está seguro de eliminar esta bonificación?")) return;
+
+                $.ajax({
+                    url: '@Url.Action("EliminarBonificacion", "Bonificacion")',
+                    data: { idBonificacion: bonificacionSeleccionadaId },
+                    type: "POST",
+                    success: function (resp) {
+                        alert(resp.mensaje);
+                        if (resp.exito) {
+                            cargarBonificaciones(empleadoSeleccionadoId || 0);
+                            bonificacionSeleccionadaId = null;
+                        }
+                    }
+                });
+            });
+
+            // ================== TOGGLE AGUINALDO ==================
+            $("#chkAguinaldo").change(function () {
+                if ($(this).is(":checked")) {
+                    $("#seccionAguinaldo").removeClass("oculto");
+                    $("#cmbCategorias").prop("disabled", true);
+                } else {
+                    $("#seccionAguinaldo").addClass("oculto");
+                    $("#cmbCategorias").prop("disabled", false);
+                }
+            });
+
+            // ================== TOGGLE PARA TODOS ==================
+            $("#chkTodosEmpleados").change(function () {
+                if ($(this).is(":checked")) {
+                    // Deshabilitar selección de empleado
+                    $("#hdnIdEmpleadoSeleccionado").val("");
+                    empleadoSeleccionadoId = null;
+                    $("#txtEmpleadoSeleccionado").val("Todos los empleados");
+                    $("#txtBuscarEmpleado").prop("disabled", true);
+                    $("#lista-empleados").empty();
+                } else {
+                    $("#txtBuscarEmpleado").prop("disabled", false);
+                    $("#txtEmpleadoSeleccionado").val("");
+                    empleadoSeleccionadoId = null;
+                }
+            });
+
+            // ================== AGREGAR BONIFICACIÓN ==================
+            $("#btnAgregarBonificacion").click(function () {
+                $("#mensajeError").text("");
+
+                let isAguinaldo = $("#chkAguinaldo").is(":checked");
+                let esParaTodos = $("#chkTodosEmpleados").is(":checked");
+
+                // Convertir valores a tipos numéricos / Date
+                const idEmp = empleadoSeleccionadoId ? parseInt(empleadoSeleccionadoId) : null;
+                const catId = $("#cmbCategorias").val() ? parseInt($("#cmbCategorias").val()) : null;
+                const montoVal = $("#txtMonto").val() ? parseFloat($("#txtMonto").val()) : null;
+                const fechaTxt = $("#txtFecha").val(); // "YYYY-MM-DD"
+                const fechaVal = fechaTxt ? new Date(fechaTxt) : null;
+                const salarioVal = $("#txtSalarioBase").val() ? parseFloat($("#txtSalarioBase").val()) : null;
+                const aniosVal = $("#txtAniosServicio").val() ? parseInt($("#txtAniosServicio").val()) : null;
+
+                // Validaciones frontales mínimas:
+                if (!esParaTodos && !idEmp) {
+                    $("#mensajeError").text("Debe seleccionar un empleado o marcar 'Para todos los empleados'.");
+                    return;
+                }
+
+                if (isAguinaldo) {
+                    if (!salarioVal || !aniosVal || !fechaVal) {
+                        $("#mensajeError").text("Ingrese salario, años de servicio y fecha para calcular aguinaldo.");
+                        return;
+                    }
+                } else {
+                    if (!esParaTodos && (!catId || !montoVal || !fechaVal)) {
+                        $("#mensajeError").text("Seleccione categoría, monto y fecha.");
+                        return;
+                    }
+                    if (esParaTodos && (!catId || !montoVal || !fechaVal)) {
+                        $("#mensajeError").text("Seleccione categoría, monto y fecha para aplicar a todos.");
+                        return;
+                    }
+                }
+
+                // Armar objeto data para AJAX (ASP.NET MVC binder lo convierte a DateTime del lado servidor)
+                let data = {
+                    idEmpleado: idEmp,
+                    categoriaId: catId,
+                    monto: montoVal,
+                    fecha: fechaTxt,      // Enviamos "YYYY-MM-DD"
+                    aguinaldo: isAguinaldo,
+                    salarioBase: salarioVal,
+                    aniosServicio: aniosVal,
+                    paraTodos: esParaTodos
+                };
+
+                $.ajax({
+                    url: '@Url.Action("AgregarBonificacion", "Bonificacion")',
+                    data: data,
+                    type: "POST",
+                    success: function (resp) {
+                        alert(resp.mensaje);
+                        if (resp.exito) {
+                            cargarBonificaciones(esParaTodos ? 0 : idEmp);
+                            // Limpiar formulario
+                            $("#frmBonificacion")[0].reset();
+                            $("#seccionAguinaldo").addClass("oculto");
+                            $("#cmbCategorias").prop("disabled", false);
+                            $("#txtEmpleadoSeleccionado").val("");
+                            empleadoSeleccionadoId = null;
+                            $("#hdnIdEmpleadoSeleccionado").val("");
+                            $("#chkTodosEmpleados").prop("checked", false);
+                            $("#txtBuscarEmpleado").prop("disabled", false);
+                        }
+                    }
+                });
+            });
+
+            // ================== GESTIÓN DE CATEGORÍAS (Modal) ==================
+            $("#btnGestionCategorias").click(function () {
+                $("#modalCategorias").modal("show");
+                cargarCategoriasModal();
+            });
+
+            function cargarCategoriasModal() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerCategorias", "Bonificacion")',
+                    type: "GET",
+                    success: function (data) {
+                        let ul = $("#listaCategoriasModal");
+                        ul.empty();
+                        data.forEach(function (c) {
+                            ul.append(`<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${c.idCategoriaBono}">
+                                                <span class="nombre-cat">${c.nombre}</span>
+                                                <div>
+                                                    <button class="btn btn-sm btn-outline-primary btnEditarCategoria"><i class="fa fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-outline-danger btnEliminarCategoria"><i class="fa fa-trash"></i></button>
+                                                </div>
+                                            </li>`);
+                        });
+                        // Actualizar el combobox principal
+                        actualizarComboCategorias(data);
+                    }
+                });
+            }
+
+            $("#btnAgregarCategoria").click(function () {
+                let nombre = $("#txtNuevaCategoria").val().trim();
+                if (!nombre) {
+                    $("#mensajeCategoria").text("Ingrese nombre de la categoría.");
+                    return;
+                }
+                $.ajax({
+                    url: '@Url.Action("AgregarCategoria", "Bonificacion")',
+                    data: { nombre: nombre },
+                    type: "POST",
+                    success: function (resp) {
+                        alert(resp.mensaje);
+                        if (resp.exito) {
+                            $("#txtNuevaCategoria").val("");
+                            $("#mensajeCategoria").text("");
+                            cargarCategoriasModal();
+                        }
+                    }
+                });
+            });
+
+            // Editar categoría (inline)
+            $("#listaCategoriasModal").on("click", ".btnEditarCategoria", function () {
+                let li = $(this).closest("li");
+                let id = li.data("id");
+                let nombreActual = li.find(".nombre-cat").text();
+                let nuevoNombre = prompt("Nuevo nombre de categoría:", nombreActual);
+                if (nuevoNombre && nuevoNombre.trim() !== "" && nuevoNombre.trim() !== nombreActual) {
+                    $.ajax({
+                        url: '@Url.Action("EditarCategoria", "Bonificacion")',
+                        data: { id: id, nombre: nuevoNombre.trim() },
+                        type: "POST",
+                        success: function (resp) {
+                            alert(resp.mensaje);
+                            if (resp.exito) {
+                                cargarCategoriasModal();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Eliminar categoría
+            $("#listaCategoriasModal").on("click", ".btnEliminarCategoria", function () {
+                let li = $(this).closest("li");
+                let id = li.data("id");
+                if (!confirm("¿Está seguro de eliminar esta categoría?")) return;
+                $.ajax({
+                    url: '@Url.Action("EliminarCategoria", "Bonificacion")',
+                    data: { id: id },
+                    type: "POST",
+                    success: function (resp) {
+                        alert(resp.mensaje);
+                        if (resp.exito) {
+                            cargarCategoriasModal();
+                        }
+                    }
+                });
+            });
+
+            function actualizarComboCategorias(categorias) {
+                let select = $("#cmbCategorias");
+                select.empty();
+                select.append('<option value="">-- Seleccione categoría --</option>');
+                categorias.forEach(function (c) {
+                    select.append(`<option value="${c.idCategoriaBono}">${c.nombre}</option>`);
+                });
+                // También actualizar la lista lateral
+                let ulLateral = $("#lista-categorias");
+                ulLateral.empty();
+                categorias.forEach(function (c) {
+                    ulLateral.append(`<li class="list-group-item" data-id="${c.idCategoriaBono}">${c.nombre}</li>`);
+                });
+            }
+        });
+    </script>
+}
