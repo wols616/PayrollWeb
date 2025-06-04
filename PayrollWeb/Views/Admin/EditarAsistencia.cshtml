@@ -1,112 +1,252 @@
-﻿@model List<string>
+﻿Editar asistencia:
+@model List<string>
 
-@{
-    ViewBag.Title = "Editar Asistencia";
-}
-
-<h2>Editar Asistencia del Empleado</h2>
-
-@if (Model != null && Model.Any())
-{
-    @foreach (var asistencia in Model)
-    {
-        var datos = asistencia.Split('|'); // Dividir la cadena por '|'
-        var nombreEmpleado = datos[2] + " " + datos[3]; // Nombre y Apellido
-        var fechaAsistencia = datos[0]; // Fecha
-        var horaEntrada = datos[4]; // Hora de entrada
-        var horaSalida = datos[5]; // Hora de salida
-        var idEmpleado = datos[1]; // ID del empleado
-
-        <form class="formAsistencia">
-            <div class="form-group">
-                <label for="empleado">Empleado:</label>
-                <input type="text" class="form-control" value="@nombreEmpleado" disabled />
-            </div>
-
-            <div class="form-group">
-                <label for="fecha">Fecha:</label>
-                <input type="text" class="form-control" name="fechaAsistencia" value="@fechaAsistencia" disabled />
-            </div>
-
-            <div class="form-group">
-                <label for="horaEntrada">Hora Entrada:</label>
-                <input type="time" class="form-control" name="horaEntrada" value="@horaEntrada" required id="horaEntrada" />
-            </div>
-
-            <div class="form-group">
-                <label for="horaSalida">Hora Salida:</label>
-                <input type="time" class="form-control" name="horaSalida" value="@horaSalida" required id="horaSalida" />
-            </div>
-
-            <div class="form-group">
-                <input type="checkbox" id="ausente" name="ausente" />
-                <label for="ausente">Marcar como ausente</label>
-                <br />
-                <br />
-            </div>
-
-            <!-- Motivo de la ausencia (solo visible si está marcado el checkbox de ausente) -->
-            <div class="form-group" id="motivoContainer" style="display:none;">
-                <label for="motivoAusencia1">Motivo de la Ausencia:</label>
-                <textarea id="motivoAusencia" name="motivoAusencia" class="form-control" rows="3" placeholder="Ingrese el motivo de la ausencia..."></textarea>
-            </div>
-
-            <input type="hidden" name="idEmpleado" value="@idEmpleado" />
-            <input type="hidden" name="fechaAsistencia" value="@fechaAsistencia" />
-
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </form>
-
-        <hr />
+<style>
+    body {
+        background-color: #f2f9ff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    <!-- Contenedor para mostrar mensajes -->
-    <div id="mensaje"></div>
-}
-else
-{
-    <p>No se encontraron registros para este empleado en la fecha seleccionada.</p>
-}
+    .main-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin: 20px auto;
+        max-width: 800px;
+    }
+
+    h2 {
+        color: #007bff;
+        font-weight: 600;
+        font-size: 28px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .formAsistencia {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 10px 15px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+            opacity: 1;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+    .alert {
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    input[type="checkbox"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+    }
+
+    textarea {
+        min-height: 100px;
+    }
+
+    hr {
+        margin: 30px 0;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #6c757d;
+        padding: 20px;
+        font-size: 18px;
+    }
+</style>
+
+<div class="main-container">
+    <h2><i class="bi bi-pencil-square"></i> Editar Asistencia del Empleado</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var asistencia in Model)
+        {
+            var datos = asistencia.Split('|');
+            var nombreEmpleado = datos[2] + " " + datos[3];
+            var fechaAsistencia = datos[0];
+            var horaEntrada = datos[4];
+            var horaSalida = datos[5];
+            var idEmpleado = datos[1];
+
+            <form class="formAsistencia">
+                <div class="form-group">
+                    <label for="empleado"><i class="bi bi-person-badge"></i> Empleado:</label>
+                    <input type="text" class="form-control" value="@nombreEmpleado" disabled />
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha"><i class="bi bi-calendar-date"></i> Fecha:</label>
+                    <input type="text" class="form-control" name="fechaAsistencia" value="@fechaAsistencia" disabled />
+                </div>
+
+                <div class="form-group">
+                    <label for="horaEntrada"><i class="bi bi-clock"></i> Hora Entrada:</label>
+                    <input type="time" class="form-control" name="horaEntrada" value="@horaEntrada" min="06:30" max="16:30" id="horaEntrada" />
+                </div>
+
+                <div class="form-group">
+                    <label for="horaSalida"><i class="bi bi-clock-history"></i> Hora Salida:</label>
+                    <input type="time" class="form-control" name="horaSalida" value="@horaSalida" min="06:30" max="16:30" id="horaSalida" />
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="ausente" name="ausente" />
+                    <label for="ausente" style="display: inline;"><i class="bi bi-exclamation-triangle"></i> Marcar como ausente</label>
+                </div>
+
+                <div class="form-group" id="motivoContainer" style="display:none;">
+                    <label for="motivoAusencia"><i class="bi bi-chat-left-text"></i> Motivo de la Ausencia:</label>
+                    <textarea id="motivoAusencia" name="motivoAusencia" class="form-control" rows="3" placeholder="Ingrese el motivo de la ausencia..."></textarea>
+                </div>
+
+                <input type="hidden" name="idEmpleado" value="@idEmpleado" />
+                <input type="hidden" name="fechaAsistencia" value="@fechaAsistencia" />
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Guardar Cambios
+                </button>
+            </form>
+
+            <hr />
+        }
+
+        <div id="mensaje"></div>
+    }
+    else
+    {
+        <p class="no-data"><i class="bi bi-exclamation-circle"></i> No se encontraron registros para este empleado en la fecha seleccionada.</p>
+    }
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 
-        $(".formAsistencia").submit(function (e) {
-        e.preventDefault(); // Evita la recarga de la página
+    // Función auxiliar para convertir HH:MM a minutos
+    function convertToMinutes(time) {
+        var parts = time.split(":");
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+
+
+
+        $("#ausente").change(function() {
+        if ($(this).is(":checked")) {
+            // Cuando se marca como ausente, quitamos las validaciones
+            $("#horaEntrada").removeAttr("min").removeAttr("max").val("00:00");
+            $("#horaSalida").removeAttr("min").removeAttr("max").val("00:00");
+            $("#motivoContainer").show();
+        } else {
+            // Cuando se desmarca, restauramos las validaciones
+            $("#horaEntrada").attr("min", "06:30").attr("max", "16:30").val("");
+            $("#horaSalida").attr("min", "06:30").attr("max", "16:30").val("");
+            $("#motivoContainer").hide();
+        }
+    });
+
+    // En el submit, solo verifica si está marcado como ausente
+    $(".formAsistencia").submit(function(e) {
+        e.preventDefault();
+
+        if ($("#ausente").is(":checked")) {
+            // Si está marcado como ausente, forzar 00:00
+            $("#horaEntrada").val("00:00");
+            $("#horaSalida").val("00:00");
+        }
+    });
+
+
+    $(".formAsistencia").submit(function (e) {
+        e.preventDefault();
 
         var form = $(this);
-        var idEmpleado = $("input[name='idEmpleado']").val();
-        var fechaAsistencia = $("input[name='fechaAsistencia']").val();
-        var ausencia = $("textarea[name='motivoAusencia']").val();
+        var idEmpleado = form.find("input[name='idEmpleado']").val();
+        var fechaAsistencia = form.find("input[name='fechaAsistencia']").val();
+        var ausencia = form.find("textarea[name='motivoAusencia']").val();
 
-        // Verificar si las horas de entrada o salida son diferentes de 00:00
-        var horaEntrada = $("input[name='horaEntrada']").val();
-        var horaSalida = $("input[name='horaSalida']").val();
+        var horaEntrada = form.find("input[name='horaEntrada']").val();
+        var horaSalida = form.find("input[name='horaSalida']").val();
 
         if (horaEntrada !== "00:00" || horaSalida !== "00:00") {
-            // Si alguna hora es diferente de 00:00, establecer ausencia como null
             ausencia = null;
         }
 
-        // Si el checkbox de ausente está marcado, cambiar las horas a 00:00
-        if ($("#ausente").prop("checked")) {
-            $("input[name='horaEntrada']").val("00:00");
-            $("input[name='horaSalida']").val("00:00");
-            // Mostrar el campo para ingresar el motivo de la ausencia
-            $("#motivoContainer").show();
+        if (form.find("#ausente").prop("checked")) {
+            form.find("input[name='horaEntrada']").val("00:00");
+            form.find("input[name='horaSalida']").val("00:00");
+            form.find("#motivoContainer").show();
 
-            // Validar que el motivo de ausencia no esté vacío
-            if ($("#motivoAusencia").val().trim() === "") {
+            if (form.find("#motivoAusencia").val().trim() === "") {
                 alert("Por favor, ingrese el motivo de la ausencia.");
                 return false;
             }
         } else {
-            // Si el checkbox no está marcado, setear la ausencia como null y ocultar el campo
             ausencia = null;
-            $("#motivoContainer").hide();
-            $("textarea[name='motivoAusencia']").val(''); // Limpiar el campo de texto
+            form.find("#motivoContainer").hide();
+            form.find("textarea[name='motivoAusencia']").val('');
 
-            // Validar que al menos una hora no sea 00:00
             if (horaEntrada === "00:00" && horaSalida === "00:00") {
                 alert("Por favor, ingrese al menos una hora diferente de 00:00.");
                 return false;
@@ -120,103 +260,86 @@ else
             success: function (response) {
                 var mensajeDiv = $("#mensaje");
                 if (response.success) {
-                    mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
+                    mensajeDiv.html('<div class="alert alert-success"><i class="bi bi-check-circle"></i> ' + response.message + '</div>');
                 } else {
-                    mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
+                    mensajeDiv.html('<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ' + response.message + '</div>');
                 }
 
-                // Desvanecer mensaje después de 3 segundos
                 setTimeout(function () {
                     $(".alert").fadeOut("slow");
                 }, 3000);
             },
             error: function () {
-                $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
+                $("#mensaje").html('<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Ocurrió un error al actualizar.</div>');
             }
         });
 
-           // Enviar la actualización de la ausencia
-    $.ajax({
-        type: "POST",
-        url: "@Url.Action("ActualizarAusencia", "Asistencia")",
-        data: {
-            idEmpleado: idEmpleado,
-            fecha: fechaAsistencia,
-            ausencia: (horaEntrada !== "00:00" || horaSalida !== "00:00") ? null : ausencia // Si alguna hora es diferente de 00:00, enviar null
-        },
-        success: function (response) {
-            var mensajeDiv = $("#mensaje");
-            if (response.success) {
-                mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
-            } else {
-                mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ActualizarAusencia", "Asistencia")",
+            data: {
+                idEmpleado: idEmpleado,
+                fecha: fechaAsistencia,
+                ausencia: (horaEntrada !== "00:00" || horaSalida !== "00:00") ? null : ausencia
+            },
+            success: function (response) {
+                var mensajeDiv = $("#mensaje");
+                if (response.success) {
+                    mensajeDiv.html('<div class="alert alert-success"><i class="bi bi-check-circle"></i> ' + response.message + '</div>');
+                } else {
+                    mensajeDiv.html('<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ' + response.message + '</div>');
+                }
+
+                setTimeout(function () {
+                    $(".alert").fadeOut("slow");
+                }, 3000);
+            },
+            error: function () {
+                $("#mensaje").html('<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Ocurrió un error al actualizar.</div>');
             }
-
-            // Desvanecer mensaje después de 3 segundos
-            setTimeout(function () {
-                $(".alert").fadeOut("slow");
-            }, 3000);
-        },
-        error: function () {
-            $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
-        }
+        });
     });
 
-    });
-
-    // Si el checkbox de "ausente" está marcado, cambiar las horas a 00:00 automáticamente
     $("#ausente").change(function () {
         if ($(this).prop("checked")) {
             $("#horaEntrada").val("00:00");
             $("#horaSalida").val("00:00");
-            // Mostrar el campo para ingresar el motivo
             $("#motivoContainer").show();
         } else {
-            // Si el checkbox no está marcado, ocultar el campo de motivo y limpiar el texto
             $("#motivoContainer").hide();
             $("#motivoAusencia").val('');
         }
     });
-     // Obtener motivo de la ausencia al cargar la página
-        function obtenerMotivoAusencia(idEmpleado, fecha) {
-            $.ajax({
-                type: "GET",
-                url: "@Url.Action("ObtenerMotivoAusencia", "Asistencia")",
-                data: {
-                    idEmpleado: idEmpleado,
-                    fecha: fecha
-                },
-                success: function (response) {
-                    if (response.success) {
-                        // Si el empleado está ausente, mostrar el motivo
-                        if (response.motivo) {
-                            $("#ausente").prop("checked", true);
-                            $("#motivoAusencia").val(response.motivo);
-                            $("#motivoContainer").show();
-                        }
-                    } else {
-                        console.log("No se pudo obtener el motivo.");
+
+    function obtenerMotivoAusencia(idEmpleado, fecha) {
+        $.ajax({
+            type: "GET",
+            url: "@Url.Action("ObtenerMotivoAusencia", "Asistencia")",
+            data: {
+                idEmpleado: idEmpleado,
+                fecha: fecha
+            },
+            success: function (response) {
+                if (response.success) {
+                    if (response.motivo) {
+                        $("#ausente").prop("checked", true);
+                        $("#motivoAusencia").val(response.motivo);
+                        $("#motivoContainer").show();
                     }
-                },
-                error: function () {
-                    console.log("Error al obtener el motivo.");
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // Llamar a la función para obtener el motivo de la ausencia
-        var idEmpleado = $("input[name='idEmpleado']").val();
-        var fechaAsistencia = $("input[name='fechaAsistencia']").val();
-        obtenerMotivoAusencia(idEmpleado, fechaAsistencia);
+    var idEmpleado = $("input[name='idEmpleado']").val();
+    var fechaAsistencia = $("input[name='fechaAsistencia']").val();
+    obtenerMotivoAusencia(idEmpleado, fechaAsistencia);
 
-        // Si las horas son "00:00", marcar el checkbox automáticamente
-        if ($("#horaEntrada").val() === "00:00" && $("#horaSalida").val() === "00:00") {
-            $("#ausente").prop("checked", true);
-            $("#motivoContainer").show();
-        }
+    if ($("#horaEntrada").val() === "00:00" && $("#horaSalida").val() === "00:00") {
+        $("#ausente").prop("checked", true);
+        $("#motivoContainer").show();
+    }
 
-
-            // Si el checkbox de "ausente" no está marcado, actualizar la ausencia a null
     if (!$("#ausente").prop("checked")) {
         $.ajax({
             type: "POST",
@@ -224,26 +347,8 @@ else
             data: {
                 idEmpleado: idEmpleado,
                 fecha: fechaAsistencia,
-                ausencia: null // Enviar null para la ausencia si el checkbox no está marcado
-            },
-            success: function (response) {
-                var mensajeDiv = $("#mensaje");
-                if (response.success) {
-                    mensajeDiv.html('<div class="alert alert-success">' + response.message + '</div>');
-                } else {
-                    mensajeDiv.html('<div class="alert alert-danger">' + response.message + '</div>');
-                }
-
-                // Desvanecer mensaje después de 3 segundos
-                setTimeout(function () {
-                    $(".alert").fadeOut("slow");
-                }, 3000);
-            },
-            error: function () {
-                $("#mensaje").html('<div class="alert alert-danger">Ocurrió un error al actualizar.</div>');
+                ausencia: null
             }
         });
     }
-
-
 </script>

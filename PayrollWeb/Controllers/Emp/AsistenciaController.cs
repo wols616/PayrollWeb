@@ -8,14 +8,16 @@ namespace PayrollWeb.Controllers.Emp
     {
         Asistencia _asistencia = new Asistencia();
 
-        public IActionResult VerAsistencia(string dui)
+        public IActionResult VerAsistencia()
         {
-            if (string.IsNullOrEmpty(dui))
+            string correo = User.Identity.Name;
+
+            if (string.IsNullOrEmpty(correo))
             {
                 return RedirectToAction("Index", "Home"); // o mostrar error
             }
 
-            List<string> asistencia = _asistencia.VerAsistencia(dui);
+            List<string> asistencia = _asistencia.VerAsistencia(correo);
             return View("/Views/Emp/Asistencia.cshtml", asistencia);
         }
 

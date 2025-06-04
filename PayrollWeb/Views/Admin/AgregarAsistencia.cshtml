@@ -2,23 +2,48 @@
     ViewData["Title"] = "Vista con Botones";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container my-5">
+    <div class="bg-white rounded shadow-lg p-4 text-center">
+        <h2 class="titulo-azul mb-4">Registrar Asistencia</h2>
 
-<div class="text-center">
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="@Url.Action("AsistenciaEntrada", "Asistencia")" class="btn btn-primary">
+                Agregar Hora de Entrada
+            </a>
 
-    <a href="@Url.Action("AsistenciaEntrada", "Asistencia")" class="btn btn-success mb-3">
-        Agregar Hora de Entrada
-    </a>
+            <a href="@Url.Action("AsistenciaSalida", "Asistencia")" class="btn btn-primary">
+                Agregar Hora de Salida
+            </a>
 
-    <a href="@Url.Action("AsistenciaSalida", "Asistencia")" class="btn btn-success mb-3">
-        Agregar Hora de Salida
-    </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a href="@Url.Action("AsistenciaAusencia", "Asistencia")" class="btn btn-primary">
+                    Agregar Ausencia
+                </a>
+            }
+        </div>
+    </div>
+</div>
 
-    @if (User.IsInRole("Admin"))
-    {
-        <a href="@Url.Action("AsistenciaAusencia", "Asistencia")" class="btn btn-success mb-3">
-            Agregar Ausencia
-        </a>
+<style>
+    body {
+        background-color: #f2f9ff;
     }
 
-</div>
+    .titulo-azul {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .btn-outline-custom {
+        color: #007bff;
+        border: 2px solid #007bff;
+        background-color: white;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: #007bff;
+            color: white;
+        }
+</style>
