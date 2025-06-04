@@ -49,9 +49,11 @@
                     {
                         foreach (var deduccion in Model)
                         {
-                            if (deduccion.Deduccion.NombreDeduccion == "AFP" || deduccion.Deduccion.NombreDeduccion == "ISR" || deduccion.Deduccion.NombreDeduccion == "ISSS")
-                            {
-                                continue;
+                                if (deduccion.NombreDeduccion == "AFP" || deduccion.NombreDeduccion == "ISR" || deduccion.NombreDeduccion == "ISSS")
+                                {
+                                    continue;
+                                }
+                                <option value="@deduccion.IdDeduccion">@deduccion.NombreDeduccion (@deduccion.Porcentaje.ToString("0.00")%)</option>
                             }
                             <tr>
                                 <td>@deduccion.Deduccion.NombreDeduccion</td>

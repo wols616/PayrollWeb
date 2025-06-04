@@ -1,0 +1,361 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        /* Mantenemos los estilos existentes pero eliminamos .oculto */
+        .nomina-container {
+            margin-top: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .nomina-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nomina-section {
+            margin-bottom: 20px;
+        }
+
+        .nomina-table {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+            .nomina-table th {
+                background-color: #f8f9fa;
+            }
+
+        .nomina-total {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .nomina-grand-total {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+            border-top: 2px solid #333;
+            padding-top: 10px;
+        }
+    </style>
+}
+
+<h2 class="text-center">Ver Nómina Mensual</h2>
+
+<div class="row">
+    <!-- Panel izquierdo: Búsqueda de empleados -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>Buscar Empleado</strong>
+            </div>
+            <div class="card-body">
+                <input type="text" id="txtBuscarEmpleado" class="form-control" placeholder="Escriba nombre, apellidos o DUI..." />
+                <ul id="lista-empleados" class="list-group mt-2"></ul>
+                <div id="error-busqueda" class="mensaje-error" style="display: none;">— No se encontraron empleados —</div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>Seleccionar fecha</strong>
+            </div>
+            <div class="card-body">
+                <input type="month" id="mesAnno" class="form-control" placeholder="" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel derecho: Información del empleado -->
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>Información del Empleado</strong>
+            </div>
+            <div class="card-body">
+                <form id="formVerNomina" method="get">
+                    <input type="hidden" id="IdEmpleado" name="empleadoId" />
+                    <div class="info-empleado">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="NombreCompleto" class="form-label">Nombre Completo</label>
+                                <input type="text" id="NombreCompleto" class="form-control" disabled />
+                                <label for="Telefono" class="form-label">Teléfono</label>
+                                <input type="text" id="Telefono" class="form-control" disabled />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="Dui" class="form-label">DUI</label>
+                                <input type="text" id="Dui" class="form-control" disabled />
+                                <label for="Estado" class="form-label">Estado</label>
+                                <input type="text" id="Estado" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between mt-3">
+    <button type="button" id="btnVerNomina" class="btn btn-primary flex-fill mx-1" disabled>
+        <i class="fa-solid fa-file-invoice-dollar"></i> Ver Nómina
+    </button>
+    <button type="button" id="btnGenerarNomina" class="btn btn-primary flex-fill mx-1">
+        <i class="fa-solid fa-file-invoice-dollar"></i> Generar Nóminas
+    </button>
+    <!-- Botón de exportar PDF eliminado según solicitud -->
+</div>
+
+<!-- Contenedor de nómina siempre visible -->
+<div id="nominaContainer" class="nomina-container">
+    <div class="nomina-header">
+        <h3>NÓMINA MENSUAL</h3>
+        <p id="nominaPeriodo">Seleccione un empleado y un mes</p>
+        <p id="nominaEmpleado"></p>
+    </div>
+
+    <!-- Sección Devengos -->
+    <div class="nomina-section">
+        <h4>Devengos</h4>
+        <table class="nomina-table table table-bordered">
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Monto ($)</th>
+                </tr>
+            </thead>
+            <tbody id="devengosBody">
+                <tr><td colspan="2">No hay datos disponibles</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="nomina-total">Total Devengos:</td>
+                    <td id="totalDevengos" class="nomina-total">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Sección Deducciones -->
+    <div class="nomina-section">
+        <h4>Deducciones</h4>
+        <table class="nomina-table table table-bordered">
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Monto ($)</th>
+                </tr>
+            </thead>
+            <tbody id="deduccionesBody">
+                <tr><td colspan="2">No hay datos disponibles</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="nomina-total">Total Deducciones:</td>
+                    <td id="totalDeducciones" class="nomina-total">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Sección No Sujetos de Renta -->
+    <div class="nomina-section">
+        <h4>No Sujetos de Renta</h4>
+        <table class="nomina-table table table-bordered">
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Monto ($)</th>
+                </tr>
+            </thead>
+            <tbody id="noSujetosBody">
+                <tr><td colspan="2">No hay datos disponibles</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="nomina-total">Total No Sujetos:</td>
+                    <td id="totalNoSujetos" class="nomina-total">0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Salario Neto -->
+    <div class="nomina-grand-total">
+        <p>SALARIO NETO: <span id="salarioNeto">0.00</span></p>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let empleadoSeleccionadoId = null;
+            let nominaActual = null;
+
+            // Búsqueda de empleados
+            $("#txtBuscarEmpleado").on("input", function () {
+                let texto = $(this).val().trim();
+                if (texto.length === 0) {
+                    $("#lista-empleados").empty();
+                    $("#error-busqueda").hide();
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("BuscarEmpleados", "Nomina")',
+                    data: { texto: texto },
+                    type: "GET",
+                    success: function (data) {
+                        let ul = $("#lista-empleados");
+                        ul.empty();
+
+                        if (data.length === 0) {
+                            $("#error-busqueda").show();
+                            return;
+                        } else {
+                            $("#error-busqueda").hide();
+                        }
+
+                        data.forEach(function (item) {
+                            ul.append(
+                                `<li class="list-group-item"
+                                                     data-id="${item.idEmpleado}"
+                                                     data-nombre="${item.nombreCompleto}"
+                                                     data-dui="${item.dui}"
+                                                     data-telefono="${item.telefono}"
+                                                     data-estado="${item.estado}">
+                                                     ${item.nombreCompleto} &mdash; DUI: ${item.dui}
+                                                 </li>`
+                            );
+                        });
+                    },
+                    error: function () {
+                        $("#lista-empleados").empty();
+                        $("#error-busqueda").text("Error al buscar empleados.").show();
+                    }
+                });
+            });
+
+            // Selección de empleado
+            $("#lista-empleados").on("click", "li", function () {
+                $("#lista-empleados li").removeClass("active");
+                $(this).addClass("active");
+
+                empleadoSeleccionadoId = $(this).data("id");
+                $("#IdEmpleado").val(empleadoSeleccionadoId);
+                $("#NombreCompleto").val($(this).data("nombre"));
+                $("#Dui").val($(this).data("dui"));
+                $("#Telefono").val($(this).data("telefono"));
+                $("#Estado").val($(this).data("estado"));
+                $("#nominaEmpleado").text("Empleado: " + $(this).data("nombre"));
+
+                $("#btnVerNomina").prop("disabled", false);
+            });
+
+            // Generar nóminas
+            $("#btnGenerarNomina").click(function () {
+                $.ajax({
+                    url: '@Url.Action("GenerarNominas", "Nomina")',
+                    type: 'POST',
+                    success: function (data) {
+                        if (data.success) {
+                            alert(data.message);
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Error al procesar la solicitud");
+                    }
+                });
+            });
+
+            // Ver nómina
+            $("#btnVerNomina").click(function () {
+                const mesAnno = $("#mesAnno").val();
+                if (!mesAnno) {
+                    alert("Seleccione un mes y año");
+                    return;
+                }
+
+                if (!empleadoSeleccionadoId) {
+                    alert("Seleccione un empleado");
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ObtenerNomina", "Nomina")',
+                    data: {
+                        empleadoId: empleadoSeleccionadoId,
+                        mesAnno: mesAnno
+                    },
+                    type: "GET",
+                    success: function (data) {
+                        if (data.success) {
+                            nominaActual = data.nomina;
+                            mostrarNomina(nominaActual);
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Error al obtener la nómina");
+                    }
+                });
+            });
+
+            // Función para mostrar la nómina
+            function mostrarNomina(nomina) {
+                // Encabezado
+                const fecha = new Date(nomina.fechaEmision);
+                $("#nominaPeriodo").text(`Periodo: ${fecha.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`);
+
+                // Devengos
+                let devengosHtml = '';
+                if (nomina.devengos && nomina.devengos.length > 0) {
+                    nomina.devengos.forEach(item => {
+                        devengosHtml += `<tr><td>${item.nombreDevengo}</td><td>${item.monto.toFixed(2)}</td></tr>`;
+                    });
+                } else {
+                    devengosHtml = '<tr><td colspan="2">No hay devengos registrados</td></tr>';
+                }
+                $("#devengosBody").html(devengosHtml);
+                $("#totalDevengos").text(nomina.totalDevengos ? nomina.totalDevengos.toFixed(2) : "0.00");
+
+                // Deducciones
+                let deduccionesHtml = '';
+                if (nomina.deducciones && nomina.deducciones.length > 0) {
+                    nomina.deducciones.forEach(item => {
+                        deduccionesHtml += `<tr><td>${item.nombreDeduccion}</td><td>${item.montoDeduccion.toFixed(2)}</td></tr>`;
+                    });
+                } else {
+                    deduccionesHtml = '<tr><td colspan="2">No hay deducciones registradas</td></tr>';
+                }
+                $("#deduccionesBody").html(deduccionesHtml);
+                $("#totalDeducciones").text(nomina.totalDeducciones ? nomina.totalDeducciones.toFixed(2) : "0.00");
+
+                // No Sujetos
+                let noSujetosHtml = '';
+                if (nomina.noSujetos && nomina.noSujetos.length > 0) {
+                    nomina.noSujetos.forEach(item => {
+                        noSujetosHtml += `<tr><td>${item.nombreDevengo}</td><td>${item.monto.toFixed(2)}</td></tr>`;
+                    });
+                } else {
+                    noSujetosHtml = '<tr><td colspan="2">No hay conceptos no sujetos</td></tr>';
+                }
+                $("#noSujetosBody").html(noSujetosHtml);
+                $("#totalNoSujetos").text(nomina.totaNoSujetosDeRenta ? nomina.totaNoSujetosDeRenta.toFixed(2) : "0.00");
+
+                // Salario neto
+                $("#salarioNeto").text(nomina.salarioNeto ? nomina.salarioNeto.toFixed(2) : "0.00");
+            }
+        });
+    </script>
+}
