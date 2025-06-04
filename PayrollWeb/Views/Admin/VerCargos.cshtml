@@ -1,112 +1,137 @@
 ﻿@model List<Cargo>
 
-@{
-    ViewData["Title"] = "Lista de Cargos";
-}
 
-<!-- Alertas para mensajes de éxito o error -->
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-delete-later">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-delete-later">@TempData["Error"]</div>
-}
+<style>
+    body {
+        background-color: #f2f9ff;
+    }
+</style>
 
-<h2>Lista de Cargos</h2>
-
-<!-- Botón para abrir el modal de creación -->
-<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#crearCargoModal">
-    + Agregar Cargo
-</button>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID Cargo</th>
-            <th>Nombre Cargo</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var cargo in Model)
-        {
-            <tr>
-                <td>@cargo.IdCargo</td>
-                <td>@cargo.NombreCargo</td>
-                <td>@cargo.Descripcion</td>
-                <td>
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#editarCargoModal"
-                            onclick="cargarDatos(@cargo.IdCargo, '@cargo.NombreCargo', '@cargo.Descripcion')">
-                        Editar
-                    </button>
-                    <a href="@Url.Action("EliminarCargo", "Cargo", new { IdCargo = cargo.IdCargo })" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este cargo?')" title="Eliminar Cargo">
-                        <i class="bi bi-trash"></i>
-                    </a>
-
-
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- Modal para agregar cargo -->
-<div class="modal fade" id="crearCargoModal" tabindex="-1" aria-labelledby="crearCargoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="crearCargoModalLabel">Agregar Nuevo Cargo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form asp-action="CrearCargo" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="NombreCargo" class="form-label">Nombre del Cargo</label>
-                        <input type="text" class="form-control" id="NombreCargo" name="NombreCargo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="Descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="Descripcion" name="Descripcion" rows="3" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cargo</button>
-                </div>
-            </form>
+<div style="background-color: #f2f9ff; min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #007bff;">Lista de Cargos</h2>
         </div>
-    </div>
-</div>
 
-<!-- Modal para editar cargo -->
-<div class="modal fade" id="editarCargoModal" tabindex="-1" aria-labelledby="editarCargoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarCargoModalLabel">Editar Cargo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Alertas para mensajes de éxito o error -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-delete-later">
+                <i class="bi bi-check-circle"></i> @TempData["Success"]
             </div>
-            <form asp-action="ActualizarCargo" method="post">
-                <div class="modal-body">
-                    <input type="hidden" id="IdCargo" name="IdCargo">
-                    <div class="mb-3">
-                        <label for="NombreCargoEditar" class="form-label">Nombre del Cargo</label>
-                        <input type="text" class="form-control" id="NombreCargoEditar" name="NombreCargo" required>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-delete-later">
+                <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+            </div>
+        }
+
+        <!-- Botón para abrir el modal de creación -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#crearCargoModal">
+            <i class="bi bi-plus-circle"></i> Agregar Cargo
+        </button>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th style="width: 10%">ID Cargo</th>
+                        <th style="width: 20%">Nombre Cargo</th>
+                        <th style="width: 50%">Descripción</th>
+                        <th style="width: 20%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cargo in Model)
+                    {
+                        <tr>
+                            <td>@cargo.IdCargo</td>
+                            <td>@cargo.NombreCargo</td>
+                            <td style="word-wrap: break-word; white-space: normal">@cargo.Descripcion</td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                        data-bs-target="#editarCargoModal"
+                                        onclick="cargarDatos(@cargo.IdCargo, '@cargo.NombreCargo', '@cargo.Descripcion')"
+                                        title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <a href="@Url.Action("EliminarCargo", "Cargo", new { IdCargo = cargo.IdCargo })"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('¿Estás seguro de eliminar este cargo?')"
+                                   title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal para agregar cargo -->
+        <div class="modal fade" id="crearCargoModal" tabindex="-1" aria-labelledby="crearCargoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="crearCargoModalLabel">Agregar Nuevo Cargo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
                     </div>
-                    <div class="mb-3">
-                        <label for="DescripcionEditar" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="DescripcionEditar" name="Descripcion" rows="3" required></textarea>
+                    <form asp-action="CrearCargo" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="NombreCargo" class="form-label">Nombre del Cargo</label>
+                                <input type="text" class="form-control" id="NombreCargo" name="NombreCargo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="Descripcion" name="Descripcion" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
+                                <i class="bi bi-save"></i> Guardar Cargo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para editar cargo -->
+        <div class="modal fade" id="editarCargoModal" tabindex="-1" aria-labelledby="editarCargoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="editarCargoModalLabel">Editar Cargo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
                     </div>
+                    <form asp-action="ActualizarCargo" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" id="IdCargo" name="IdCargo">
+                            <div class="mb-3">
+                                <label for="NombreCargoEditar" class="form-label">Nombre del Cargo</label>
+                                <input type="text" class="form-control" id="NombreCargoEditar" name="NombreCargo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="DescripcionEditar" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="DescripcionEditar" name="Descripcion" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
+                                <i class="bi bi-save"></i> Actualizar Cargo
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Actualizar Cargo</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

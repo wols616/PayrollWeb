@@ -1,156 +1,195 @@
 ﻿@model List<Deduccion_Personal>
 
-@{
-    ViewData["Title"] = "Deducciones Personales del Empleado";
-    var empleado = ViewBag.Empleado as Empleado;
-}
+<style>
+    body {
+        background-color: #f2f9ff;
+    }
+</style>
 
-<h2>Deducciones Personales de @empleado.Nombre @empleado.Apellidos</h2>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-delete-later">
-        @TempData["Success"]
-    </div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-delete-later">
-        @TempData["Error"]
-    </div>
-}
-
-<!-- Botón para abrir el modal de agregar deducción -->
-<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal">
-    Agregar Deducción
-</button>
-
-<!-- Tabla de deducciones personales -->
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Nombre de la Deducción</th>
-            <th>Porcentaje</th>
-            <th>Porcentaje Personal</th>
-            <th>Fija</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var deduccion in Model)
-            {
-                if (deduccion.Deduccion.NombreDeduccion == "AFP" || deduccion.Deduccion.NombreDeduccion == "ISR" || deduccion.Deduccion.NombreDeduccion == "ISSS")
-                {
-                    continue;
-                }
-                <tr>
-                    <td>@deduccion.Deduccion.NombreDeduccion</td>
-                    <td>@deduccion.Deduccion.Porcentaje.ToString("0.00")%</td>
-                    <td>@deduccion.PorcentajePersonal.ToString("0.00")%</td>
-                    <td>@(deduccion.Deduccion.Fija == "S" ? "SÍ" : "No")</td>
-                    <td>
-                        @if (deduccion.Deduccion.Fija == "S")
-                        {
-                            <button class="btn btn-secondary btn-sm" disabled>Eliminar</button>
-                        }
-                        else
-                        {
-                            <a href="@Url.Action("EliminarDeduccionPersonal", "DeduccionesPersonales", new { IdDeduccion = deduccion.IdDeduccion, IdEmpleado = deduccion.IdEmpleado })"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('¿Estás seguro de eliminar esta deducción?');">
-                                Eliminar
-                            </a>
-                            <button class="btn btn-warning btn-sm"
-                                    onclick="cargarDatosEdicion({
-                    IdDeduccionPersonal: @deduccion.IdDeduccionPersonal,
-                    IdDeduccion: @deduccion.IdDeduccion,
-                    IdEmpleado: @deduccion.IdEmpleado,
-                    PorcentajePersonal: @deduccion.PorcentajePersonal.ToString().Replace(",", "."),
-                    Deduccion: {
-                        NombreDeduccion: '@deduccion.Deduccion.NombreDeduccion',
-                        Porcentaje: @deduccion.Deduccion.Porcentaje.ToString().Replace(",", ".")
-                    }
-                })">
-                                Editar
-                            </button>
-                        }
-                    </td>
-                </tr>
-            }
+<div style="background-color: #f2f9ff; min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        @{
+            var empleado = ViewBag.Empleado as Empleado;
         }
-        else
-        {
-            <tr>
-                <td colspan="3" class="text-center">No hay deducciones personales registradas.</td>
-            </tr>
-        }
-    </tbody>
-</table>
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #007bff;">Deducciones Personales de @empleado.Nombre @empleado.Apellidos</h2>
+        </div>
 
-<!-- Modal para agregar deducción -->
-<div class="modal fade" id="agregarDeduccionModal" tabindex="-1" aria-labelledby="agregarDeduccionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="agregarDeduccionModalLabel">Agregar Deducción</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-delete-later">
+                @TempData["Success"]
             </div>
-            <div class="modal-body">
-                <form method="post" action="@Url.Action("CrearDeduccionPersonal", "DeduccionesPersonales")">
-                    <input type="hidden" name="IdEmpleado" value="@empleado.IdEmpleado" />
+        }
 
-                    <div class="mb-3">
-                        <label for="IdDeduccion" class="form-label">Seleccionar Deducción</label>
-                        <select class="form-control" id="IdDeduccion" name="IdDeduccion" required>
-                            <option value="">Seleccione una deducción</option>
-                            @foreach (var deduccion in ViewBag.Deducciones as List<Deduccion>)
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-delete-later">
+                @TempData["Error"]
+            </div>
+        }
+
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal">
+            <i class="bi bi-plus-circle"></i> Agregar Deducción
+        </button>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Nombre de la Deducción</th>
+                        <th>Porcentaje</th>
+                        <th>Porcentaje Personal</th>
+                        <th>Fija</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var deduccion in Model)
+                        {
+                            if (deduccion.Deduccion.NombreDeduccion == "AFP" || deduccion.Deduccion.NombreDeduccion == "ISR" || deduccion.Deduccion.NombreDeduccion == "ISSS")
                             {
-                                <option value="@deduccion.IdDeduccion">@deduccion.NombreDeduccion (@deduccion.Porcentaje.ToString("0.00")%)</option>
+                                continue;
                             }
-                        </select>
-                    </div>
+                            <tr>
+                                <td>@deduccion.Deduccion.NombreDeduccion</td>
+                                <td>@deduccion.Deduccion.Porcentaje.ToString("0.00")%</td>
+                                <td>@deduccion.PorcentajePersonal.ToString("0.00")%</td>
+                                <td>
+                                    <span>
+                                        @(deduccion.Deduccion.Fija == "S" ? "SÍ" : "No")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (deduccion.Deduccion.Fija == "S")
+                                    {
+                                        <button class="btn btn-sm btn-outline-secondary" disabled title="No se puede editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" disabled title="No se puede eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="cargarDatosEdicion({
+                                                    IdDeduccionPersonal: @deduccion.IdDeduccionPersonal,
+                                                    IdDeduccion: @deduccion.IdDeduccion,
+                                                    IdEmpleado: @deduccion.IdEmpleado,
+                                                    PorcentajePersonal: @deduccion.PorcentajePersonal.ToString().Replace(",", "."),
+                                                    Deduccion: {
+                                                        NombreDeduccion: '@deduccion.Deduccion.NombreDeduccion',
+                                                        Porcentaje: @deduccion.Deduccion.Porcentaje.ToString().Replace(",", ".")
+                                                    }
+                                                })"
+                                                title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <a href="@Url.Action("EliminarDeduccionPersonal", "DeduccionesPersonales", new { IdDeduccion = deduccion.IdDeduccion, IdEmpleado = deduccion.IdEmpleado })"
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('¿Estás seguro de eliminar esta deducción?');"
+                                           title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">No hay deducciones personales registradas.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
+        <!-- Modal para agregar deducción -->
+        <div class="modal fade" id="agregarDeduccionModal" tabindex="-1" aria-labelledby="agregarDeduccionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="agregarDeduccionModalLabel">Agregar Deducción</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="@Url.Action("CrearDeduccionPersonal", "DeduccionesPersonales")">
+                            <input type="hidden" name="IdEmpleado" value="@empleado.IdEmpleado" />
+
+                            <div class="mb-3">
+                                <label for="IdDeduccion" class="form-label">Seleccionar Deducción</label>
+                                <select class="form-control" id="IdDeduccion" name="IdDeduccion" required>
+                                    <option value="">Seleccione una deducción</option>
+                                    @foreach (var deduccion in ViewBag.Deducciones as List<Deduccion>)
+                                    {
+                                        if (deduccion.NombreDeduccion == "AFP" || deduccion.NombreDeduccion == "ISR" || deduccion.NombreDeduccion == "ISSS")
+                                        {
+                                            continue;
+                                        }
+                                        <option value="@deduccion.IdDeduccion">@deduccion.NombreDeduccion (@deduccion.Porcentaje.ToString("0.00")%)</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Modal para Editar Porcentaje Personal-->
-<div class="modal fade" id="editarPorcentajePersonalModal" tabindex="-1" aria-labelledby="editarPorcentajePersonalModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarPorcentajePersonalModalLabel">Editar Porcentaje Personal</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="@Url.Action("EditarDeduccionPersonal", "DeduccionesPersonales")">
-                    <input type="hidden" id="edit_IdDeduccionPersonal" name="IdDeduccionPersonal" />
-                    <input type="hidden" id="edit_IdDeduccion" name="IdDeduccion" />
-                    <input type="hidden" id="edit_IdEmpleado" name="IdEmpleado" />
-
-                    <div class="mb-3">
-                        <label class="form-label">Deducción</label>
-                        <p id="deduccionNombre" class="form-control-plaintext"></p>
+        <!-- Modal para Editar Porcentaje Personal-->
+        <div class="modal fade" id="editarPorcentajePersonalModal" tabindex="-1" aria-labelledby="editarPorcentajePersonalModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="editarPorcentajePersonalModalLabel">Editar Porcentaje Personal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
                     </div>
+                    <div class="modal-body">
+                        <form method="post" action="@Url.Action("EditarDeduccionPersonal", "DeduccionesPersonales")">
+                            <input type="hidden" id="edit_IdDeduccionPersonal" name="IdDeduccionPersonal" />
+                            <input type="hidden" id="edit_IdDeduccion" name="IdDeduccion" />
+                            <input type="hidden" id="edit_IdEmpleado" name="IdEmpleado" />
 
-                    <div class="mb-3">
-                        <label class="form-label">Porcentaje General</label>
-                        <p id="deduccionPorcentaje" class="form-control-plaintext"></p>
+                            <div class="mb-3">
+                                <label class="form-label">Deducción</label>
+                                <p id="deduccionNombre" class="form-control-plaintext fw-bold"></p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Porcentaje General</label>
+                                <p id="deduccionPorcentaje" class="form-control-plaintext"></p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="PorcentajePersonal" class="form-label">Porcentaje Personal</label>
+                                <input type="number" step="0.01" class="form-control" id="PorcentajePersonal" name="PorcentajePersonal" required>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="PorcentajePersonal" class="form-label">Porcentaje Personal</label>
-                        <input type="number" step="0.01" class="form-control" id="PorcentajePersonal" name="PorcentajePersonal" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -171,14 +210,13 @@
             var modal = new bootstrap.Modal(document.getElementById('editarPorcentajePersonalModal'));
             modal.show();
         }
-    </script>
-    <script>
+
         // Eliminar mensajes de alerta después de un tiempo
         setTimeout(function() {
             var alertElements = document.querySelectorAll('.alert-delete-later');
             alertElements.forEach(function(alert) {
                 alert.remove();
             });
-        }, 3000); // 3000 ms = 3 segundos
+        }, 3000);
     </script>
 }
