@@ -169,13 +169,14 @@
                                     }
                                     else if (ViewBag.ShowActions == "Contratos")
                                     {
-                                        <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = emp.IdEmpleado })" class="btn btn-success">
+                                        <a href="@Url.Action("VerContratosEmpleado", "Contrato", new { idEmpleado = emp.IdEmpleado })" class="btn btn-primary">
                                             <i class="bi bi-file-earmark-text"></i> Contrato
                                         </a>
+
                                     }
                                     else if (ViewBag.ShowActions == "Deducciones")
                                     {
-                                        <a href="@Url.Action("VerDeducciones", "DeduccionesPersonales", new { IdEmpleado = @emp.IdEmpleado })" class="btn btn-success">
+                                        <a href="@Url.Action("VerDeducciones", "DeduccionesPersonales", new { IdEmpleado = @emp.IdEmpleado })" class="btn btn-primary">
                                             <i class="bi bi-percent"></i> Deducciones
                                         </a>
                                     }

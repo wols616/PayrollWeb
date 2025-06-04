@@ -1,91 +1,112 @@
 ﻿@model List<Complemento_Puesto>
 
-@{
-    ViewData["Title"] = "Ver Complementos";
-}
+<style>
+    body{
+        background-color: #f2f9ff;
+    }
+</style>
 
-<h2>Complementos del @ViewBag.Puesto.NombrePuesto</h2>
+<div style="background-color: #f2f9ff; min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #007bff;">Complementos del @ViewBag.Puesto.NombrePuesto</h2>
+        </div>
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-delete-later">
-        @TempData["Error"]
-    </div>
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-delete-later">
-        @TempData["Success"]
-    </div>
-}
-
-@if (Model != null && Model.Count > 0)
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Monto</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var complemento in Model)
-            {
-                <tr>
-                    <td>@complemento.IdComplementoPuesto</td>
-                    <td>@complemento.NombreComplemento</td>
-                    <td>@complemento.Monto.ToString("C")</td>
-                    <td>
-                        <!-- Botón para abrir el modal de edición -->
-                        <button class="btn btn-warning btn-sm" onclick="openEditModal(@complemento.IdComplementoPuesto, '@complemento.NombreComplemento', @complemento.Monto)">Actualizar</button>
-
-                        <!-- Botón para eliminar complemento -->
-                        <a asp-action="EliminarComplemento" asp-route-id="@complemento.IdComplementoPuesto" asp-route-idPuesto="@ViewBag.Puesto.IdPuesto" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este complemento?');">Eliminar</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <div class="alert alert-warning" role="alert">
-        No existen complementos para este puesto.
-    </div>
-}
-
-<!-- Botón para abrir el modal de agregar complemento -->
-<button class="btn btn-primary" onclick="openAddModal(@ViewBag.Puesto.IdPuesto)">Agregar Complemento</button>
-
-<!-- Modal para Agregar y Editar Complemento -->
-<div class="modal fade" id="complementoModal" tabindex="-1" aria-labelledby="complementoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="complementoModalLabel">Agregar/Editar Complemento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-delete-later">
+                @TempData["Error"]
             </div>
-            <div class="modal-body">
-                <form id="complementoForm" method="post">
-                    <input type="hidden" id="IdComplementoPuesto" name="IdComplementoPuesto" />
-                    <input type="hidden" id="IdPuesto" name="IdPuesto" />
+        }
 
-                    <div class="form-group">
-                        <label for="NombreComplemento">Nombre del Complemento:</label>
-                        <input type="text" class="form-control" id="NombreComplemento" name="NombreComplemento" required>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-delete-later">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Monto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var complemento in Model)
+                        {
+                            <tr>
+                                <td>@complemento.IdComplementoPuesto</td>
+                                <td>@complemento.NombreComplemento</td>
+                                <td>@complemento.Monto.ToString("C")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(@complemento.IdComplementoPuesto, '@complemento.NombreComplemento', @complemento.Monto)" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <a asp-action="EliminarComplemento" asp-route-id="@complemento.IdComplementoPuesto" asp-route-idPuesto="@ViewBag.Puesto.IdPuesto"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('¿Estás seguro de eliminar este complemento?');"
+                                       title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No existen complementos para este puesto.
+            </div>
+        }
+
+        <button class="btn btn-primary mb-3" onclick="openAddModal(@ViewBag.Puesto.IdPuesto)">
+            <i class="bi bi-plus-circle"></i> Agregar Complemento
+        </button>
+
+        <!-- Modal para Agregar y Editar Complemento -->
+        <div class="modal fade" id="complementoModal" tabindex="-1" aria-labelledby="complementoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="complementoModalLabel">Agregar/Editar Complemento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
                     </div>
+                    <div class="modal-body">
+                        <form id="complementoForm" method="post">
+                            <input type="hidden" id="IdComplementoPuesto" name="IdComplementoPuesto" />
+                            <input type="hidden" id="IdPuesto" name="IdPuesto" />
 
-                    <div class="form-group">
-                        <label for="Monto">Monto:</label>
-                        <input type="number" class="form-control" id="Monto" name="Monto" step="0.01" min="0" required>
+                            <div class="mb-3">
+                                <label for="NombreComplemento" class="form-label">Nombre del Complemento:</label>
+                                <input type="text" class="form-control" id="NombreComplemento" name="NombreComplemento" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Monto" class="form-label">Monto:</label>
+                                <input type="number" class="form-control" id="Monto" name="Monto" step="0.01" min="0" required>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>

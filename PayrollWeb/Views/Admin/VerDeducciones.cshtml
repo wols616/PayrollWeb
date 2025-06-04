@@ -1,130 +1,147 @@
-﻿
-    @model List<PayrollWeb.Models.Deduccion>
+﻿    @model List<PayrollWeb.Models.Deduccion>
 
-    <h2>Lista de Deduccioness</h2>
-
-    <!-- Botón para abrir el modal de agregar deducción -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal">Agregar Nueva Deducción</button>
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-delete-later">
-            @TempData["Error"]
-        </div>
+<style>
+    body {
+        background-color: #f2f9ff;
     }
+</style>
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-delete-later">
-            @TempData["Success"]
+<div style="background-color: #f2f9ff; min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #007bff;">Lista de Deducciones</h2>
         </div>
-    }
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Porcentaje</th>
-                @* <th>Fija</th> *@
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var deduccion in Model)
-            {
-                if (deduccion.NombreDeduccion == "AFP" || deduccion.NombreDeduccion == "ISSS" || deduccion.NombreDeduccion == "ISR")
-                {
-                    continue; // No mostrar AFP e ISSS
-                }
-                <tr>
-                    <td>@deduccion.NombreDeduccion</td>
-                    <td>@deduccion.Porcentaje.ToString("0.00")%</td>
-                   @*  <td>@(deduccion.Fija == "S" ? "Sí" : "No")</td> *@
-                    <td>
-                        <!-- Botón para abrir el modal de edición -->
-                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarDeduccionModal"
-                                data-id="@deduccion.IdDeduccion"
-                                data-nombre="@deduccion.NombreDeduccion"
-                                data-porcentaje="@deduccion.Porcentaje"
-                                data-fija="@deduccion.Fija">
-                            Editar
-                        </button>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-delete-later">
+                @TempData["Error"]
+            </div>
+        }
 
-                        <!-- Botón para eliminar deducción -->
-                        <a href="@Url.Action("EliminarDeduccion", "Deduccion", new { id = deduccion.IdDeduccion })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta deducción?');">Eliminar</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-delete-later">
+                @TempData["Success"]
+            </div>
+        }
 
-    <!-- Modal Agregar Deducción -->
-    <div class="modal fade" id="agregarDeduccionModal" tabindex="-1" aria-labelledby="agregarDeduccionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="agregarDeduccionModalLabel">Agregar Nueva Deducción</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="@Url.Action("CrearDeduccion", "Deduccion")">
-                        <div class="mb-3">
-                            <label for="nombreDeduccion" class="form-label">Nombre de la Deducción</label>
-                            <input type="text" class="form-control" id="nombreDeduccion" name="NombreDeduccion" required>
-                        </div>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#agregarDeduccionModal" style="background-color: #007bff; border-color: #007bff;">
+            <i class="bi bi-plus-circle"></i> Agregar Nueva Deducción
+        </button>
 
-                        <div class="mb-3">
-                            <label for="porcentaje" class="form-label">Porcentaje</label>
-                            <input type="number" class="form-control" id="porcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
-                        </div>
-                    <input type="hidden" name="Fija" value="N" />
-@*                         <div class="mb-3">
-                            <label for="fija" class="form-label">¿Es fija?</label>
-                            <select class="form-control" id="fija" name="Fija" required>
-                                <option value="S">Sí</option>
-                                <option value="N">No</option>
-                            </select>
-                        </div> *@
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Porcentaje</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var deduccion in Model)
+                    {
+                        if (deduccion.NombreDeduccion == "AFP" || deduccion.NombreDeduccion == "ISSS" || deduccion.NombreDeduccion == "ISR")
+                        {
+                            continue;
+                        }
+                        <tr>
+                            <td>@deduccion.NombreDeduccion</td>
+                            <td>@deduccion.Porcentaje.ToString("0.00")%</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editarDeduccionModal"
+                                        data-id="@deduccion.IdDeduccion"
+                                        data-nombre="@deduccion.NombreDeduccion"
+                                        data-porcentaje="@deduccion.Porcentaje"
+                                        data-fija="@deduccion.Fija"
+                                        title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
 
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                    </form>
+                                <a href="@Url.Action("EliminarDeduccion", "Deduccion", new { id = deduccion.IdDeduccion })"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('¿Estás seguro de eliminar esta deducción?');"
+                                   title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal Agregar Deducción -->
+        <div class="modal fade" id="agregarDeduccionModal" tabindex="-1" aria-labelledby="agregarDeduccionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="agregarDeduccionModalLabel">Agregar Nueva Deducción</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="@Url.Action("CrearDeduccion", "Deduccion")">
+                            <div class="mb-3">
+                                <label for="nombreDeduccion" class="form-label">Nombre de la Deducción</label>
+                                <input type="text" class="form-control" id="nombreDeduccion" name="NombreDeduccion" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="porcentaje" class="form-label">Porcentaje</label>
+                                <input type="number" class="form-control" id="porcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
+                            </div>
+
+                            <input type="hidden" name="Fija" value="N" />
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-<!-- Modal Editar Deducción -->
-<div class="modal fade" id="editarDeduccionModal" tabindex="-1" aria-labelledby="editarDeduccionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarDeduccionModalLabel">Editar Deducción</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="@Url.Action("ActualizarDeduccion", "Deduccion")">
-                    <input type="hidden" id="editarIdDeduccion" name="IdDeduccion">
-                    <div class="mb-3">
-                        <label for="editarNombreDeduccion" class="form-label">Nombre de la Deducción</label>
-                        <input type="text" class="form-control" id="editarNombreDeduccion" name="NombreDeduccion" required>
+        <!-- Modal Editar Deducción -->
+        <div class="modal fade" id="editarDeduccionModal" tabindex="-1" aria-labelledby="editarDeduccionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="editarDeduccionModalLabel">Editar Deducción</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="color: white;"></button>
                     </div>
+                    <div class="modal-body">
+                        <form method="post" action="@Url.Action("ActualizarDeduccion", "Deduccion")">
+                            <input type="hidden" id="editarIdDeduccion" name="IdDeduccion">
+                            <div class="mb-3">
+                                <label for="editarNombreDeduccion" class="form-label">Nombre de la Deducción</label>
+                                <input type="text" class="form-control" id="editarNombreDeduccion" name="NombreDeduccion" required>
+                            </div>
 
-                    <div class="mb-3">
-                        <label for="editarPorcentaje" class="form-label">Porcentaje</label>
-                        <input type="number" class="form-control" id="editarPorcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
+                            <div class="mb-3">
+                                <label for="editarPorcentaje" class="form-label">Porcentaje</label>
+                                <input type="number" class="form-control" id="editarPorcentaje" name="Porcentaje" step="0.01" min="0" max="100" required>
+                            </div>
+
+                            <input type="hidden" name="Fija" value="N" />
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="background-color: #007bff; border-color: #007bff;">
+                                    <i class="bi bi-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-                    <input type="hidden" name="Fija" value="N" />
-@*                     <div class="mb-3">
-                        <label for="editarFija" class="form-label">¿Es fija?</label>
-                        <select class="form-control" id="editarFija" name="Fija" required>
-                            <option value="S">Sí</option>
-                            <option value="N">No</option>
-                        </select>
-                    </div> *@
-
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -136,9 +153,9 @@
         setTimeout(function() {
             var alertElements = document.querySelectorAll('.alert-delete-later');
             alertElements.forEach(function(alert) {
-                alert.remove();  // Eliminamos cada mensaje de la lista
+                alert.remove();
             });
-        }, 3000); // 3000 ms = 3 segundos
+        }, 3000);
 
         // Script para pasar datos al modal de edición
         var editarDeduccionModal = document.getElementById('editarDeduccionModal');
