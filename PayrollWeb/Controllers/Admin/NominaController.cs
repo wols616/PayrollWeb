@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using PayrollWeb.Models;
 using System.Collections.Generic;
 using System.Linq;
-using DinkToPdf;            // Importación para PDF
-using DinkToPdf.Contracts;   // Importación para PDF
+//using DinkToPdf;            // Importación para PDF
+//using DinkToPdf.Contracts;   // Importación para PDF
 using Microsoft.AspNetCore.Mvc.ViewEngines; // Para RenderViewToString
 using Microsoft.AspNetCore.Mvc.ViewFeatures; // Para RenderViewToString
 
