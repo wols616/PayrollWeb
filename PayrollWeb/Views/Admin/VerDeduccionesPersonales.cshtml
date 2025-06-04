@@ -59,12 +59,12 @@
                         else
                         {
                             <a href="@Url.Action("EliminarDeduccionPersonal", "DeduccionesPersonales", new { IdDeduccion = deduccion.IdDeduccion, IdEmpleado = deduccion.IdEmpleado })"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('¿Estás seguro de eliminar esta deducción?');">
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('¿Estás seguro de eliminar esta deducción?');">
                                 Eliminar
                             </a>
                             <button class="btn btn-warning btn-sm"
-                                    onclick="cargarDatosEdicion({
+                            onclick="cargarDatosEdicion({
                     IdDeduccionPersonal: @deduccion.IdDeduccionPersonal,
                     IdDeduccion: @deduccion.IdDeduccion,
                     IdEmpleado: @deduccion.IdEmpleado,
@@ -108,6 +108,10 @@
                             <option value="">Seleccione una deducción</option>
                             @foreach (var deduccion in ViewBag.Deducciones as List<Deduccion>)
                             {
+                                if (deduccion.NombreDeduccion == "AFP" || deduccion.NombreDeduccion == "ISR" || deduccion.NombreDeduccion == "ISSS")
+                                {
+                                    continue;
+                                }
                                 <option value="@deduccion.IdDeduccion">@deduccion.NombreDeduccion (@deduccion.Porcentaje.ToString("0.00")%)</option>
                             }
                         </select>
