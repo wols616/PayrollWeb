@@ -1,71 +1,88 @@
 ﻿@model List<Categoria>
 
-<h2>Lista de Categorías</h2>
+<div style="min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px;">
+            <h2 style="color: #007bff;">Lista de Categorías</h2>
+        </div>
 
-<!-- Contenedor para mostrar mensajes dinámicos -->
-<div id="mensajeResultado"></div>
+        <!-- Contenedor para mostrar mensajes dinámicos -->
+        <div id="mensajeResultado"></div>
 
-<!-- Botón para abrir el modal de agregar categoría -->
-<a href="#" class="btn btn-primary mb-3" onclick="abrirAgregarCategoria()">Agregar Nueva Categoría</a>
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-delete-later">
-        @TempData["Error"]
-    </div>
-}
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Sueldo Base</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var categoria in Model)
+        @if (TempData["Error"] != null)
         {
-            <tr>
-                <td>@categoria.IdCategoria</td>
-                <td>@categoria.NombreCategoria</td>
-                <td>@categoria.SueldoBase.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
-                <td>
-                    <a href="#" class="btn btn-warning btn-sm" onclick="editarCategoria(@categoria.IdCategoria, '@categoria.NombreCategoria', @categoria.SueldoBase)">Editar</a>
-                    <a href="@Url.Action("EliminarCategoria", "Categoria", new { id = categoria.IdCategoria })" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta categoría?');">Eliminar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- Modal General para Agregar o Editar Categoría -->
-<div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="categoriaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="categoriaModalLabel">Agregar Categoría</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="alert alert-danger alert-delete-later">
+                @TempData["Error"]
             </div>
-            <div class="modal-body">
-                <form id="categoriaForm">
-                    <input type="hidden" id="idCategoria" name="IdCategoria">
+        }
 
-                    <div class="mb-3">
-                        <label for="nombreCategoria" class="form-label">Nombre de la Categoría</label>
-                        <input type="text" class="form-control" id="nombreCategoria" name="NombreCategoria" required>
-                        <span class="text-danger" id="errorNombre"></span>
+        <!-- Botón para abrir el modal de agregar categoría -->
+        <a href="#" class="btn btn-primary mb-3" onclick="abrirAgregarCategoria()">
+            <i class="bi bi-plus-circle"></i> Agregar Nueva Categoría
+        </a>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Sueldo Base</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var categoria in Model)
+                    {
+                        <tr>
+                            <td>@categoria.IdCategoria</td>
+                            <td>@categoria.NombreCategoria</td>
+                            <td>@categoria.SueldoBase.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                            <td class="text-center">
+                                <a href="#" class="btn btn-sm btn-outline-primary" onclick="editarCategoria(@categoria.IdCategoria, '@categoria.NombreCategoria', @categoria.SueldoBase)" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="@Url.Action("EliminarCategoria", "Categoria", new { id = categoria.IdCategoria })" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar esta categoría?');" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal General para Agregar o Editar Categoría -->
+        <div class="modal fade" id="categoriaModal" tabindex="-1" aria-labelledby="categoriaModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #007bff; color: white;">
+                        <h5 class="modal-title" id="categoriaModalLabel">Agregar Categoría</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" style="color: white;"></button>
                     </div>
+                    <div class="modal-body">
+                        <form id="categoriaForm">
+                            <input type="hidden" id="idCategoria" name="IdCategoria">
 
-                    <div class="mb-3">
-                        <label for="sueldoBase" class="form-label">Sueldo Base</label>
-                        <input type="number" class="form-control" id="sueldoBase" name="SueldoBase" step="0.01" min="0" required>
-                        <span class="text-danger" id="errorSueldo"></span>
+                            <div class="mb-3">
+                                <label for="nombreCategoria" class="form-label">Nombre de la Categoría</label>
+                                <input type="text" class="form-control" id="nombreCategoria" name="NombreCategoria" required>
+                                <span class="text-danger" id="errorNombre"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="sueldoBase" class="form-label">Sueldo Base</label>
+                                <input type="number" class="form-control" id="sueldoBase" name="SueldoBase" step="0.01" min="0" required>
+                                <span class="text-danger" id="errorSueldo"></span>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" id="guardarCategoria" style="background-color: #007bff; border-color: #007bff;">
+                                <i class="bi bi-save"></i> Guardar
+                            </button>
+                        </form>
                     </div>
-
-                    <button type="button" class="btn btn-primary" id="guardarCategoria">Guardar</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -136,4 +153,18 @@
             mensajeDiv.remove();
         }, 2000); // Desaparece después de 2 segundos
     }
+
+    // Eliminar mensajes temporales después de 3 segundos
+    setTimeout(function() {
+        var alertElements = document.querySelectorAll('.alert-delete-later');
+        alertElements.forEach(function(alert) {
+            alert.remove();
+        });
+    }, 3000);
 </script>
+
+<style>
+    body {
+        background-color: #f2f9ff;
+    }
+</style>
