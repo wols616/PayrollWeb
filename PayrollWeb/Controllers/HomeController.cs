@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using PayrollWeb.Models;
-
 namespace PayrollWeb.Controllers;
 
 public class HomeController : Controller

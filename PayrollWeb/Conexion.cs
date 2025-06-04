@@ -7,6 +7,7 @@ namespace PayrollWeb
     {
 
         private readonly string connectionString = "Server=HP_VICTUS_MARIO\\SQLSERVER;Database=payroll_web1;User Id=mario;Password=123456;Encrypt=False;";
+
         // Método para obtener la conexión
         public SqlConnection GetConnection()
         {

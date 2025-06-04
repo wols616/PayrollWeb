@@ -403,6 +403,54 @@ namespace PayrollWeb.Models
             return empleado;
         }
 
+
+
+        public Empleado ObtenerEmpleado(string correo)
+        {
+            Empleado empleado = null;
+
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "SELECT id_empleado, dui, nombre, apellidos, telefono, direccion, cuenta_corriente, estado, correo, contrasena " +
+                                   "FROM Empleado WHERE correo = @correo";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.Add("@correo", SqlDbType.NVarChar).Value = correo;
+
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                empleado = new Empleado
+                                {
+                                    IdEmpleado = Convert.ToInt32(reader["id_empleado"]),
+                                    Dui = reader["dui"].ToString(),
+                                    Nombre = reader["nombre"].ToString(),
+                                    Apellidos = reader["apellidos"].ToString(),
+                                    Telefono = reader["telefono"].ToString(),
+                                    Direccion = reader["direccion"].ToString(),
+                                    CuentaCorriente = reader["cuenta_corriente"].ToString(),
+                                    Estado = reader["estado"].ToString(),
+                                    Correo = reader["correo"].ToString(),
+                                    Contrasena = reader["contrasena"].ToString()
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener los datos del empleado: " + ex.Message);
+            }
+
+            return empleado;
+        }
+
         public bool ActualizarDatosGenerales(int idEmpleado, string dui, string nombre, string apellidos, string telefono, string direccion)
         {
             try
