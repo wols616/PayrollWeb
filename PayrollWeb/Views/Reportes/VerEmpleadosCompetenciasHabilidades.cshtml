@@ -7,6 +7,10 @@
 
 <h2 class="mt-4 mb-4">@ViewData["Title"]</h2>
 
+<div class="mb-3 d-flex text-primary">
+    <input type="text" id="buscarEmpleado" class="form-control" placeholder="Buscar por nombre o apellido" style="max-width: 300px;">
+</div>
+
 <div class="table-responsive">
     <table class="table table-bordered table-striped">
         <thead class="thead-dark">
@@ -40,3 +44,21 @@
         </tbody>
     </table>
 </div>
+
+<script>
+      document.getElementById("buscarEmpleado").addEventListener("input", function () {
+        var filtro = this.value.toLowerCase();
+        var filas = document.querySelectorAll("table tbody tr");
+
+        filas.forEach(function (fila) {
+            var nombre = fila.cells[1]?.textContent.toLowerCase();
+            var apellido = fila.cells[2]?.textContent.toLowerCase();
+
+            if (nombre.includes(filtro) || apellido.includes(filtro)) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    });
+</script>
