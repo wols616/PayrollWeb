@@ -215,6 +215,39 @@ namespace PayrollWeb.Models
         }
 
 
+        private string ObtenerEstadoEmpleado(int id_empleado)
+        {
+            string estado = "";
+
+            string query = "SELECT estado FROM empleado WHERE id_empleado = @id_empleado";
+
+            try
+            {
+                using (SqlConnection connection = conexion.GetConnection())
+                {
+                    connection.Open();
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@idEmpleado", id_empleado);
+
+                        object result = command.ExecuteScalar();
+                        if (result != null)
+                        {
+                            estado = result.ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener el estado del empleado: {ex.Message}");
+            }
+
+            return estado;
+        }
+
+
         public Boolean RegistrarAsistenciaEntrada(int idEmpleado, DateTime fecha, TimeSpan horaEntrada, TimeSpan horaSalida, string ausencia)
         {
             Boolean result = false;
@@ -224,44 +257,45 @@ namespace PayrollWeb.Models
                 Console.WriteLine("Ya existe una asistencia para este empleado en esta fecha.");
                 return false; // No se permite registrar doble asistencia para el mismo día
             }
+           
+
+                string query = "INSERT INTO Asistencia (id_empleado, fecha, hora_entrada, hora_salida, ausencia) " +
+                          "VALUES (@idEmpleado, @fecha, @horaEntrada, @horaSalida, @ausencia)";
 
 
-            string query = "INSERT INTO Asistencia (id_empleado, fecha, hora_entrada, hora_salida, ausencia) " +
-                           "VALUES (@idEmpleado, @fecha, @horaEntrada, @horaSalida, @ausencia)";
-
-
-            try
-            {
-                using (SqlConnection connection = conexion.GetConnection())
+                try
                 {
-                    connection.Open();
-
-                    using (SqlCommand commandInsert = new SqlCommand(query, connection))
+                    using (SqlConnection connection = conexion.GetConnection())
                     {
-                        commandInsert.Parameters.AddWithValue("@idEmpleado", idEmpleado);
-                        commandInsert.Parameters.AddWithValue("@fecha", fecha);
+                        connection.Open();
 
-                        commandInsert.Parameters.AddWithValue("@horaEntrada", horaEntrada);
+                        using (SqlCommand commandInsert = new SqlCommand(query, connection))
+                        {
+                            commandInsert.Parameters.AddWithValue("@idEmpleado", idEmpleado);
+                            commandInsert.Parameters.AddWithValue("@fecha", fecha);
 
-                        // Si horaSalida es null, usa DBNull.Value
-                        commandInsert.Parameters.AddWithValue("@horaSalida", horaSalida);
+                            commandInsert.Parameters.AddWithValue("@horaEntrada", horaEntrada);
 
-                        // Si ausencia es null, usa DBNull.Value
-                        commandInsert.Parameters.AddWithValue("@ausencia", string.IsNullOrEmpty(ausencia) ? (object)DBNull.Value : ausencia);
+                            // Si horaSalida es null, usa DBNull.Value
+                            commandInsert.Parameters.AddWithValue("@horaSalida", horaSalida);
 
-                        commandInsert.ExecuteNonQuery();
-                        result = true;
+                            // Si ausencia es null, usa DBNull.Value
+                            commandInsert.Parameters.AddWithValue("@ausencia", string.IsNullOrEmpty(ausencia) ? (object)DBNull.Value : ausencia);
+
+                            commandInsert.ExecuteNonQuery();
+                            result = true;
+                        }
                     }
+
+                    Console.WriteLine("Asistencia registrada correctamente.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al registrar la asistencia: {ex.Message}");
                 }
 
-                Console.WriteLine("Asistencia registrada correctamente.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al registrar la asistencia: {ex.Message}");
-            }
-
-            return result;
+                return result;
+                    
         }
 
 
@@ -418,13 +452,12 @@ namespace PayrollWeb.Models
                 // Consulta corregida: Obtiene empleados que NO tienen hora de entrada, hora de salida ni ausencia en la fecha
                 string query = @"
 SELECT Empleado.id_empleado, Empleado.nombre, Empleado.apellidos 
-FROM Empleado
-LEFT JOIN Asistencia ON Asistencia.id_empleado = Empleado.id_empleado 
-    AND Asistencia.fecha = @fecha
-WHERE Asistencia.id_empleado IS NULL 
-    OR (Asistencia.hora_entrada IS NULL 
-    AND Asistencia.hora_salida IS NULL 
-    AND Asistencia.ausencia IS NULL);";
+ FROM Empleado
+ LEFT JOIN Asistencia ON Asistencia.id_empleado = Empleado.id_empleado 
+     AND Asistencia.fecha = @fecha
+ WHERE Asistencia.id_empleado IS NULL 
+ AND Asistencia.ausencia IS NULL
+ AND Empleado.estado = 'Activo';";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -465,7 +498,8 @@ WHERE Asistencia.id_empleado IS NULL
                                 WHERE Asistencia.fecha = @fecha 
                                 AND Asistencia.hora_entrada <> '00:00'
                                 AND Asistencia.hora_salida = '00:00'
-                                AND Asistencia.ausencia IS NULL;";
+                                AND Asistencia.ausencia IS NULL
+                                AND Empleado.estado = 'Activo';";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -610,6 +644,7 @@ WHERE Asistencia.id_empleado IS NULL
 
         public List<string> ObtenerEmpleadosSinAsistenciaNiAusencia(DateTime fecha)
         {
+
             List<string> listado = new List<string>();
 
             using (SqlConnection connection = conexion.GetConnection())
@@ -623,7 +658,8 @@ WHERE Asistencia.id_empleado IS NULL
         LEFT JOIN Asistencia ON Asistencia.id_empleado = Empleado.id_empleado 
             AND Asistencia.fecha = @fecha
         WHERE Asistencia.id_empleado IS NULL 
-        AND Asistencia.ausencia IS NULL;";  // Sin ausencia registrada
+        AND Asistencia.ausencia IS NULL
+        AND Empleado.estado = 'Activo';";  // Sin ausencia registrada
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
