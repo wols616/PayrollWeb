@@ -100,7 +100,7 @@
         @if (ViewBag.ShowActions == "Empleados")
         {
             <h1><i class="bi bi-people"></i> Gestionar Empleados</h1>
-            <a href="@Url.Action("VerAgregarEmpleado", "Empleado")" class="btn custom-btn-info">
+            <a href="@Url.Action("VerAgregarEmpleado", "Empleado")" class="btn btn-primary">
                 <i class="bi bi-plus-square"></i> Agregar Empleado
             </a>
         }
@@ -126,6 +126,12 @@
             <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
         </div>
     }
+
+    <div class="mb-3 d-flex text-primary">
+        <input type="text" id="buscarEmpleado" class="form-control" placeholder="Buscar por nombre o apellido" style="max-width: 300px;">
+    </div>
+
+
 
     <div class="table-responsive">
         <table class="table">
@@ -233,6 +239,22 @@
 </div>
 
 <script>
+    document.getElementById("buscarEmpleado").addEventListener("input", function () {
+        var filtro = this.value.toLowerCase();
+        var filas = document.querySelectorAll("table tbody tr");
+
+        filas.forEach(function (fila) {
+            var nombre = fila.cells[1]?.textContent.toLowerCase();
+            var apellido = fila.cells[2]?.textContent.toLowerCase();
+
+            if (nombre.includes(filtro) || apellido.includes(filtro)) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    });
+
     setTimeout(function() {
         var alertElements = document.querySelectorAll('.alert-delete-later');
         alertElements.forEach(function(alert) {
