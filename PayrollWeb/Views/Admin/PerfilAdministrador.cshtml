@@ -2,114 +2,221 @@
 
 @{
     ViewData["Title"] = "Perfil del Administrador";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<style>
+    body {
+        background-color: #f2f9ff;
+    }
+    
+    h2 {
+        color: #007bff;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 25px;
+    }
+
+    h4 {
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+
+    h5 {
+        color: #495057;
+        margin-bottom: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 5px;
+        padding: 8px 20px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+    .input-group-append .btn {
+        border-radius: 0 5px 5px 0;
+    }
+
+    .alert {
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    hr {
+        margin: 25px 0;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .input-group-text {
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+    }
+
+    .card-header-sensible {
+        background-color: #e9ecef;
+        color: white;
+    }
+
+</style>
 
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger alert-delete-later">
-        @TempData["Error"]
+        <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
     </div>
 }
 
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-delete-later">
-        @TempData["Success"]
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
     </div>
 }
 
-<div class="container">
-    <h2>Perfil del Administrador</h2>
+<div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <h2><i class="bi bi-person-badge"></i> Perfil del Administrador</h2>
 
     <!-- Actualizar Datos Generales -->
     <div class="row mt-4">
         <div class="col-md-6">
-            <h4>Actualizar Datos Generales</h4>
-            <form asp-action="ActualizarDatosGeneralesAdministrador" method="post">
-                <input type="hidden" name="IdAdministrador" value="@Model.IdAdministrador" />
+            <div class="card mb-4">
 
-                <div class="form-group">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class=" bi-pencil-square"></i> Actualizar Datos Generales</h4>
                 </div>
 
-                <div class="form-group">
-                    <label for="apellidos">Apellidos</label>
-                    <input type="text" name="Apellidos" class="form-control" value="@Model.Apellidos" required />
-                </div>
 
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="text" name="Telefono" class="form-control" value="@Model.Telefono" required
-                           maxlength="9" oninput="formatearTelefono(this)" pattern="[0-9]{4}-[0-9]{4}" />
-                </div>
+                <div class="card-body">
+                    <form asp-action="ActualizarDatosGeneralesAdministrador" method="post">
+                        <input type="hidden" name="IdAdministrador" value="@Model.IdAdministrador" />
 
-                <div class="form-group">
-                    <label for="dui">DUI</label>
-                    <input type="text" name="Dui" class="form-control" value="@Model.Dui" required
-                           maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" />
-                </div>
+                        <div class="form-group">
+                            <label for="nombre"><i class="bi bi-person"></i> Nombre</label>
+                            <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
+                        </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Actualizar Datos Generales</button>
-            </form>
+                        <div class="form-group">
+                            <label for="apellidos"><i class="bi bi-people"></i> Apellidos</label>
+                            <input type="text" name="Apellidos" class="form-control" value="@Model.Apellidos" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefono"><i class="bi bi-telephone"></i> Teléfono</label>
+                            <input type="text" name="Telefono" class="form-control" value="@Model.Telefono" required
+                                   maxlength="9" oninput="formatearTelefono(this)" pattern="[0-9]{4}-[0-9]{4}" />
+                            <small class="form-text text-muted">Formato: 1234-5678</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dui"><i class="bi bi-credit-card"></i> DUI</label>
+                            <input type="text" name="Dui" class="form-control" value="@Model.Dui" required
+                                   maxlength="10" oninput="formatearDUI(this)" pattern="[0-9]{8}-[0-9]{1}" />
+                            <small class="form-text text-muted">Formato: 12345678-9</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="bi bi-save"></i> Actualizar Datos Generales
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Actualizar Datos Sensibles -->
-    <div class="row mt-4">
         <div class="col-md-6">
-            <h4>Actualizar Datos Sensibles</h4>
-            <form asp-action="ActualizarDatosSensiblesAdministrador" method="post">
-                <input type="hidden" name="idAdministrador" value="@Model.IdAdministrador" />
-
-                <div class="form-group">
-                    <label for="correo">Nuevo Correo</label>
-                    <input type="email" name="Correo" class="form-control" value="@Model.Correo" required />
+            <div class="card">
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class="bi bi-shield-lock"></i> Actualizar Datos Sensibles</h4>
                 </div>
+                <div class="card-body">
+                    <form asp-action="ActualizarDatosSensiblesAdministrador" method="post">
+                        <input type="hidden" name="idAdministrador" value="@Model.IdAdministrador" />
 
-                <div class="form-group">
-                    <label for="passwordActual">Contraseña Actual</label>
-                    <div class="input-group">
-                        <input type="password" name="passwordActual" class="form-control" id="passwordActual" required />
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('passwordActual')">
-                                <i id="eye-icon-passwordActual" class="bi bi-eye"></i>
-                            </button>
+                        <div class="form-group">
+                            <label for="correo"><i class="bi bi-envelope"></i> Nuevo Correo</label>
+                            <input type="email" name="Correo" class="form-control" value="@Model.Correo" required />
                         </div>
-                    </div>
-                </div>
 
-                <hr>
-                <h5>Cambiar Contraseña</h5>
-                <div class="form-group">
-                    <label for="nuevaPassword">Nueva Contraseña</label>
-                    <div class="input-group">
-                        <input type="password" name="nuevaPassword" class="form-control" id="nuevaPassword" />
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('nuevaPassword')">
-                                <i id="eye-icon-nuevaPassword" class="bi bi-eye"></i>
-                            </button>
+                        <div class="form-group">
+                            <label for="passwordActual"><i class="bi bi-key"></i> Contraseña Actual</label>
+                            <div class="input-group">
+                                <input type="password" name="passwordActual" class="form-control" id="passwordActual" required />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('passwordActual')">
+                                        <i id="eye-icon-passwordActual" class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
-                    <div class="input-group">
-                        <input type="password" name="confirmarPassword" class="form-control" id="confirmarPassword" />
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirmarPassword')">
-                                <i id="eye-icon-confirmarPassword" class="bi bi-eye"></i>
-                            </button>
+                        <hr>
+                        <h5><i class="bi bi-lock"></i> Cambiar Contraseña</h5>
+                        <div class="form-group">
+                            <label for="nuevaPassword">Nueva Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" name="nuevaPassword" class="form-control" id="nuevaPassword" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('nuevaPassword')">
+                                        <i id="eye-icon-nuevaPassword" class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Actualizar Datos Sensibles</button>
-            </form>
+                        <div class="form-group">
+                            <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" name="confirmarPassword" class="form-control" id="confirmarPassword" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirmarPassword')">
+                                        <i id="eye-icon-confirmarPassword" class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="bi bi-save"></i> Actualizar Datos Sensibles
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
+   
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
 
 @section Scripts {
     <script>
@@ -139,6 +246,6 @@
 
         setTimeout(() => {
             document.querySelectorAll('.alert-delete-later').forEach(a => a.remove());
-        }, 3000);
+        }, 5000);
     </script>
 }

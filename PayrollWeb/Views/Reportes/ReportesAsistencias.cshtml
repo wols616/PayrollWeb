@@ -5,110 +5,196 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<style>
+    body {
+        background-color: #f2f9ff;
+    }
 
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info">
-        No se encontraron asistencias para este empleado.
-    </div>
-}
-else
-{
-    var emp = (dynamic)Model.First();
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5>Datos del Empleado</h5>
-        </div>
-        <div class="card-body">
-            <p><strong>Nombre:</strong> @emp.nombreCompleto</p>
-            <p><strong>DUI:</strong> @emp.dui</p>
-            <p><strong>Correo:</strong> @emp.correo</p>
-            <p><strong>Teléfono:</strong> @emp.telefono</p>
-            <p><strong>Dirección:</strong> @emp.direccion</p>
-        </div>
-    </div>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-    <table class="table table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th>Fecha</th>
-                <th>Hora Entrada</th>
-                <th>Hora Salida</th>
-                <th>Ausencia</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                var a = (dynamic)item;
-                <tr>
-                    <td>@a.fecha.ToString("dd/MM/yyyy")</td>
-                    <td>@a.horaEntrada</td>
-                    <td>@a.horaSalida</td>
-                    <td>@(a.ausencia == "1" ? "Sí" : "No")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    .card-header {
+        background-color: #007bff !important;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
 
-    <div class="mt-4 botones">
-        <a href="javascript:window.print()" class="btn btn-outline-primary">
-            <i class="fas fa-print"></i> Imprimir Reporte
-        </a>
-        <a href="@Url.Action("VerEmpleados", "ReporteAsistencias")" class="btn btn-outline-secondary ml-2">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
-    </div>
+    .table-responsive {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-}
+    .table thead {
+        background-color: #007bff;
+        color: white;
+    }
 
-@section Styles {
-    <style>
+    .table th {
+        border: none;
+        padding: 12px 15px;
+    }
 
-        /* Estilos específicos para la impresión */
-        @@media print {
-            .no-print {
-                display: none !important;
-            }
-            /* Oculta el header de la página */
-            .site-header, /* Reemplaza con el selector correcto de tu header */
-            .navbar { /* Si tu header está en un navbar */
-                display: none !important;
-            }
+    .table td {
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
 
-            body {
-                padding: 20px;
-                font-size: 12px;
-            }
+    .table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
 
-            .botones {
-                display: none;
-            }
+    .table tbody tr:hover {
+        background-color: #e9f5ff;
+    }
 
-            .table {
-                width: 100% !important;
-            }
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+    }
 
-            @@page {
-                margin: 0;
-            }
-
-            a[href]:after {
-                content: none !important;
-            }
-
-            footer {
-                display: none;
-            }
-
-            .filtro-fecha {
-                display: none;
-            }
-
-            .indicaciones {
-                display: none;
-            }
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: white;
         }
-    </style>
-}
+
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #6c757d;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+
+    /* Estilos para impresión */
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            padding: 20px;
+            font-size: 12px;
+            background-color: white !important;
+        }
+
+        .botones {
+            display: none;
+        }
+
+        .table {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+
+            .table th {
+                background-color: #007bff !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+            }
+
+        @@page {
+            margin: 0;
+        }
+
+        a[href]:after {
+            content: none !important;
+        }
+
+        .site-header, .navbar, footer, .filtro-fecha, .indicaciones {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+        .card-header {
+            -webkit-print-color-adjust: exact;
+        }
+    }
+</style>
+
+<div style="background-color: #f2f9ff; min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #007bff;">@ViewData["Title"]</h2>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No se encontraron asistencias para este empleado.
+            </div>
+        }
+        else
+        {
+            var emp = (dynamic)Model.First();
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-badge"></i> Datos del Empleado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong><i class="bi bi-person"></i> Nombre:</strong> @emp.nombreCompleto</p>
+                            <p><strong><i class="bi bi-credit-card"></i> DUI:</strong> @emp.dui</p>
+                            <p><strong><i class="bi bi-envelope"></i> Correo:</strong> @emp.correo</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong><i class="bi bi-telephone"></i> Teléfono:</strong> @emp.telefono</p>
+                            <p><strong><i class="bi bi-geo-alt"></i> Dirección:</strong> @emp.direccion</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Fecha</th>
+                            <th style="width: 25%">Hora Entrada</th>
+                            <th style="width: 25%">Hora Salida</th>
+                            <th style="width: 25%">Ausencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var a = (dynamic)item;
+                            <tr>
+                                <td>@a.fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@a.horaEntrada</td>
+                                <td>@a.horaSalida</td>
+                                <td>
+                                    <span class="badge @(a.ausencia == "1" ? "bg-danger" : "bg-success")">
+                                        @(a.ausencia == "1" ? "Sí" : "No")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4 botones no-print">
+                <a href="javascript:window.print()" class="btn btn-outline-primary">
+                    <i class="bi bi-printer"></i> Imprimir Reporte
+                </a>
+                <a href="@Url.Action("VerEmpleados", "ReporteAsistencias")" class="btn btn-outline-secondary ml-2">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">

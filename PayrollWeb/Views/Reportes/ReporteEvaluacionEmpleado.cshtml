@@ -5,106 +5,81 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-<h2 class="mb-4">@ViewData["Title"]</h2>
-
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info">
-        No se encontraron evaluaciones para este empleado en la fecha seleccionada.
-    </div>
-}
-else
-{
-    var emp = (dynamic)Model.First();
-
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5>Datos del Empleado</h5>
-        </div>
-        <div class="card-body">
-            <p><strong>Nombre:</strong> @emp.nombreCompleto</p>
-            <p><strong>DUI:</strong> @emp.dui</p>
-            <p><strong>Correo:</strong> @emp.correo</p>
-            <p><strong>Teléfono:</strong> @emp.telefono</p>
-            <p><strong>Dirección:</strong> @emp.direccion</p>
-        </div>
-    </div>
-
-    var evaluaciones = Model.Cast<dynamic>().Where(e => e.kpi != null).ToList();
-
-    <div class="row mb-4 filtro-fecha">
-        <div class="col-md-4">
-            <label for="fechaFiltro">Filtrar por Fecha:</label>
-            <input type="date" id="fechaFiltro" class="form-control">
-        </div>
-        <div class="col-md-4 align-self-end">
-            <button id="btnFiltrar" class="btn btn-primary">
-                <i class="fas fa-search"></i> Buscar
-            </button>
-            <button id="btnLimpiar" class="btn btn-secondary ml-2">
-                Limpiar
-            </button>
-        </div>
-    </div>
-
-    <div class="card-header mb-4 indicaciones">
-        <h5>Evaluación de Competencias y Habilidades</h5>
-        <ul>
-            <li><strong>1 - Insatisfactorio</strong>: No cumple con las expectativas básicas</li>
-            <li><strong>2 - En desarrollo</strong>: Cumple parcialmente, necesita mejorar</li>
-            <li><strong>3 - Satisfactorio</strong>: Cumple con lo esperado</li>
-            <li><strong>4 - Bueno</strong>: Supera las expectativas</li>
-            <li><strong>5 - Excelente</strong>: Desempeño excepcional</li>
-        </ul>
-    </div>
-
-    @if (evaluaciones.Any())
-    {
-        var evaluacionesPorFecha = evaluaciones
-            .GroupBy(e => DateTime.Parse((string)e.fecha).ToString("yyyy-MM-dd"))
-            .OrderBy(g => g.Key)
-            .ToList();
-
-        <div id="contenedorTablas">
-            @foreach (var grupo in evaluacionesPorFecha)
-            {
-                <div class="grupo-evaluaciones" data-fecha="@grupo.Key">
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5>Evaluaciones del día @grupo.Key</h5>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>KPI</th>
-                                        <th>Puntuación</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var eval in grupo)
-                                    {
-                                        <tr>
-                                            <td>@eval.kpi</td>
-                                            <td>@eval.puntuacion</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-warning">
-            Este empleado no tiene evaluaciones registradas en la fecha seleccionada.
-        </div>
+<style>
+    body {
+        background-color: #f2f9ff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card-header {
+        background-color: #007bff !important;
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+        .card-header.bg-success {
+            background-color: #28a745 !important;
+        }
+
+    .table-responsive {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .table th {
+            border: none;
+            padding: 12px 15px;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .table tbody tr:hover {
+            background-color: #e9f5ff;
+        }
+
+    .btn-outline-primary {
+        color: #007bff;
+        border-color: #007bff;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #6c757d;
+    }
+
+  
+  
+  
     <div class="mt-4 botones">
         <a href="javascript:window.print()" class="btn btn-outline-primary">
             <i class="fas fa-print"></i> Imprimir Reporte
@@ -128,42 +103,229 @@ else
             .navbar { /* Si tu header está en un navbar */
                 display: none !important;
             }
-
-            body {
-                padding: 20px;
-                font-size: 12px;
-            }
-
-            .botones {
-                display: none;
-            }
-
-            .table {
-                width: 100% !important;
-            }
-
-            @@page {
-                margin: 0;
-            }
-
-            a[href]:after {
-                content: none !important;
-            }
-
-            footer {
-                display: none;
-            }
-
-            .filtro-fecha{
-                display: none;
-            }
-
-            .indicaciones{
-                display: none;
-            }
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
         }
-    </style>
-}
+
+    .star-rating {
+        display: inline-flex;
+        direction: row;
+    }
+
+    .star-filled {
+        color: #007bff;
+        font-size: 1.2rem;
+    }
+
+    .star-empty {
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+
+    /* Estilos para impresión */
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            padding: 20px;
+            font-size: 12px;
+            background-color: white !important;
+        }
+
+        .botones {
+            display: none;
+        }
+
+        .table {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+
+            .table th {
+                background-color: #007bff !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+            }
+
+        @@page {
+            margin: 0;
+        }
+
+        a[href]:after {
+            content: none !important;
+        }
+
+        .site-header, .navbar, footer, .filtro-fecha, .indicaciones {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none;
+            border: 1px solid #ddd !important;
+        }
+
+        .card-header {
+            -webkit-print-color-adjust: exact;
+        }
+
+        .table-responsive {
+            padding: 0;
+            box-shadow: none;
+        }
+    }
+</style>
+
+<div style="background-color: #f2f9ff; min-height: 100vh; padding: 20px;">
+    <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="border-bottom: 1px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="color: #007bff;">@ViewData["Title"]</h2>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No se encontraron evaluaciones para este empleado en la fecha seleccionada.
+            </div>
+        }
+        else
+        {
+            var emp = (dynamic)Model.First();
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-user-tie"></i> Datos del Empleado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-user"></i> Nombre:</strong> @emp.nombreCompleto</p>
+                            <p><strong><i class="fas fa-id-card"></i> DUI:</strong> @emp.dui</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-envelope"></i> Correo:</strong> @emp.correo</p>
+                            <p><strong><i class="fas fa-phone"></i> Teléfono:</strong> @emp.telefono</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong><i class="fas fa-map-marker-alt"></i> Dirección:</strong> @emp.direccion</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            var evaluaciones = Model.Cast<dynamic>().Where(e => e.kpi != null).ToList();
+
+            <div class="row mb-4 filtro-fecha">
+                <div class="col-md-4">
+                    <label for="fechaFiltro"><i class="fas fa-filter"></i> Filtrar por Fecha:</label>
+                    <input type="date" id="fechaFiltro" class="form-control">
+                </div>
+                <div class="col-md-4 align-self-end">
+                    <button id="btnFiltrar" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <button id="btnLimpiar" class="btn btn-outline-secondary ml-2">
+                        <i class="fas fa-broom"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+
+            <div class="card mb-4 indicaciones">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-info-circle"></i> Evaluación de Competencias y Habilidades</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>1 - Insatisfactorio</strong>: No cumple con las expectativas básicas</li>
+                        <li><strong>2 - En desarrollo</strong>: Cumple parcialmente, necesita mejorar</li>
+                        <li><strong>3 - Satisfactorio</strong>: Cumple con lo esperado</li>
+                        <li><strong>4 - Bueno</strong>: Supera las expectativas</li>
+                        <li><strong>5 - Excelente</strong>: Desempeño excepcional</li>
+                    </ul>
+                </div>
+            </div>
+
+            @if (evaluaciones.Any())
+            {
+                var evaluacionesPorFecha = evaluaciones
+                .GroupBy(e => DateTime.Parse((string)e.fecha).ToString("yyyy-MM-dd"))
+                .OrderBy(g => g.Key)
+                .ToList();
+
+                <div id="contenedorTablas">
+                    @foreach (var grupo in evaluacionesPorFecha)
+                    {
+                        <div class="grupo-evaluaciones" data-fecha="@grupo.Key">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4 text-primary">
+                                        <i class="fas fa-calendar-day"></i> Evaluaciones del día @grupo.Key
+                                    </h5>
+                                    <div>
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 70%">KPI</th>
+                                                    <th style="width: 30%">Puntuación</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var eval in grupo)
+                                                {
+                                                    <tr>
+                                                        <td>@eval.kpi</td>
+                                                        <td>
+                                                            <div class="star-rating">
+                                                                @for (int i = 1; i <= 5; i++)
+                                                                {
+                                                                    if (i <= eval.puntuacion)
+                                                                    {
+                                                                        <span class="star-filled">★</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="star-empty">★</span>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> Este empleado no tiene evaluaciones registradas en la fecha seleccionada.
+                </div>
+            }
+
+            <div class="mt-4 botones no-print">
+                <a href="javascript:window.print()" class="btn btn-outline-primary">
+                    <i class="fas fa-print"></i> Imprimir Reporte
+                </a>
+                <a href="@Url.Action("VerEmpleados", "ReporteEvaluacionEmpleado")" class="btn btn-outline-secondary ml-2">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 
 

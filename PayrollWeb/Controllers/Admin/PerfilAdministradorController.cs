@@ -68,8 +68,8 @@ namespace PayrollWeb.Controllers.Admin
                 return RedirectToAction("VerPerfil");
             }
 
-            string contrasenaFinal = string.IsNullOrEmpty(nuevaPassword) ? null : Metodos.EncriptarContrasena(nuevaPassword);
-
+            //cambiar la linea de contrase;a encriptada
+            string contrasenaFinal = string.IsNullOrEmpty(nuevaPassword) ? null : nuevaPassword;
             bool actualizado = _admin.ActualizarDatosSensibles(idAdministrador, correo, contrasenaFinal);
 
             if (actualizado)
