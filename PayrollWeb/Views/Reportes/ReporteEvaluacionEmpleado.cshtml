@@ -77,32 +77,6 @@
         border-color: #6c757d;
     }
 
-  
-  
-  
-    <div class="mt-4 botones">
-        <a href="javascript:window.print()" class="btn btn-outline-primary">
-            <i class="fas fa-print"></i> Imprimir Reporte
-        </a>
-        <a href="@Url.Action("VerEmpleados", "ReporteEvaluacionEmpleado")" class="btn btn-outline-secondary ml-2">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
-    </div>
-}
-@section Styles {
-    <style>
-
-        /* Estilos específicos para la impresión */
-        @@media print {
-            .no-print {
-                display: none !important;
-            }
-
-            /* Oculta el header de la página */
-            .site-header, /* Reemplaza con el selector correcto de tu header */
-            .navbar { /* Si tu header está en un navbar */
-                display: none !important;
-            }
         .btn-outline-secondary:hover {
             background-color: #6c757d;
             color: white;
