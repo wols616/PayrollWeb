@@ -174,8 +174,8 @@
                                 <td>@a.horaEntrada</td>
                                 <td>@a.horaSalida</td>
                                 <td>
-                                    <span class="badge @(a.ausencia == "1" ? "bg-danger" : "bg-success")">
-                                        @(a.ausencia == "1" ? "Sí" : "No")
+                                    <span class="badge @(a.ausencia == "" ? "bg-success" : "bg-danger")">
+                                        @(a.ausencia == "" ? "No" : "Sí")
                                     </span>
                                 </td>
                             </tr>
