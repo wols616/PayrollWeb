@@ -136,7 +136,7 @@
 
 <div class="container" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1)">
 
-    <h1><i class="bi bi-graph-up"></i> Evaluaciones de @ViewBag.Empleado.Nombre</h1>
+    <h2 class="text-primary"><i class="bi bi-graph-up text-primary"></i> Evaluaciones de @ViewBag.Empleado.Nombre</h2>
 
     @if (TempData["Error"] != null)
     {
@@ -163,7 +163,7 @@
         </div>
         <div class="card-body">
             <form id="filtroForm" method="get"
-                  asp-controller="EmpleadoEvaluacion"
+                  asp-controller="EvaluacionEmpleado"
                   asp-action="MisEvaluaciones"
                   asp-route-idEmpleado="@ViewBag.Empleado.IdEmpleado">
                 <div class="row align-items-end">
@@ -174,7 +174,7 @@
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-primary me-2"><i class="bi bi-filter"></i> Filtrar</button>
-                        <a href="@Url.Action("MisEvaluaciones", "EmpleadoEvaluacion", new { idEmpleado = ViewBag.Empleado.IdEmpleado })"
+                        <a href="@Url.Action("MisEvaluaciones", "EvaluacionEmpleado", new { idEmpleado = ViewBag.Empleado.IdEmpleado })"
                            class="btn btn-outline-secondary"><i class="bi bi-list-ul"></i> Mostrar todas</a>
                     </div>
                 </div>
