@@ -6,7 +6,7 @@ namespace PayrollWeb
     public class Conexion
     {
 
-        private readonly string connectionString = "Server=LOCALHOST;Database=payroll_web1;User Id=brenda;Password=Beds123;Encrypt=False;";
+        private readonly string connectionString = "Server=payroll_web1.mssql.somee.com;Database=payroll_web1;User Id=wilber_SQLLogin_1;Password=ia8my4alu5;Encrypt=False;";
 
         // Método para obtener la conexión
         public SqlConnection GetConnection()
