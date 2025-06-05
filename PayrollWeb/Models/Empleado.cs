@@ -126,6 +126,36 @@ namespace PayrollWeb.Models
             }
         }
 
+        public decimal ObtenerSueldoBaseEmpleado(int idEmpleado)
+        {
+            decimal sueldoBase = 0;
+            try
+            {
+                using (SqlConnection con = conexion.GetConnection())
+                {
+                    string query = "select sueldo_base from Empleado JOIN Contrato ON Contrato.id_empleado = Empleado.id_empleado " +
+                        "JOIN Puesto ON Puesto.id_puesto = Contrato.id_puesto WHERE Empleado.id_empleado = @IdEmpleado AND Contrato.vigente = 'S'";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@IdEmpleado", idEmpleado);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                sueldoBase = reader.GetDecimal(0);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el contrato vigente: " + ex.Message, "Error");
+            }
+            return sueldoBase;
+        }
+
         public Empleado ObtenerEmpleadoPorCorreo(string correo)
         {
             Empleado empleado = null;
