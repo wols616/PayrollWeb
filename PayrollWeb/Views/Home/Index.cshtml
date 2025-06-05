@@ -2,21 +2,21 @@
     ViewData["Title"] = "Home Page";
 }
 
-<body class="page-center">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg rounded-4 border-0">
+<body class="page-center" style="background: url('https://i.ibb.co/twDjMqdV/fondo.jpg'); background-repeat: no-repeat; background-size: cover; background-position: center center">
+    <div class="row w-100 d-flex align-items-center justify-content-center">
+        <div class="col-md-8 ">
+            <div class="card shadow-lg border-0" style="opacity: 0.9; border-radius: 10px">
                 <div class="card-body text-center p-5" style="color: #064789">
                     @if (User.IsInRole("Admin"))
                     {
                         <h1 class="display-5 fw-bold text-primary mb-4">
-                            Welcome, @ViewBag.Admin.Nombre @ViewBag.Admin.Apellidos
+                            Bienvenido/a, @ViewBag.Admin.Nombre @ViewBag.Admin.Apellidos
                         </h1>
                     }
                     else if (User.IsInRole("Empleado"))
                     {
                         <h1 class="display-5 fw-bold text-primary mb-5">
-                            Welcome, @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos
+                            Bienvenido/a, @ViewBag.Empleado.Nombre @ViewBag.Empleado.Apellidos
                         </h1>
                     }
                     else

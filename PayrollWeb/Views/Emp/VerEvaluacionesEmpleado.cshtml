@@ -31,7 +31,7 @@
     </div>
     <div class="card-body">
         <form id="filtroForm" method="get"
-              asp-controller="EmpleadoEvaluacion"
+              asp-controller="EvaluacionEmpleado"
               asp-action="MisEvaluaciones"
               asp-route-idEmpleado="@ViewBag.Empleado.IdEmpleado">
             <div class="row align-items-end">
@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <a href="@Url.Action("MisEvaluaciones", "EmpleadoEvaluacion", new { idEmpleado = ViewBag.Empleado.IdEmpleado })"
+                    <a href="@Url.Action("MisEvaluaciones", "EvaluacionEmpleado", new { idEmpleado = ViewBag.Empleado.IdEmpleado })"
                        class="btn btn-outline-secondary">Mostrar todas</a>
                 </div>
             </div>
