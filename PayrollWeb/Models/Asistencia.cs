@@ -300,14 +300,57 @@ namespace PayrollWeb.Models
     return count > 0;
 }
 
+        //public Boolean RegistrarHoraSalida(int idEmpleado, DateTime fecha, TimeSpan nuevaHoraSalida)
+        //{
+        //    Boolean result = false;
+
+        //    string query = "UPDATE Asistencia SET hora_salida = @nuevaHoraSalida " +
+        //                   "WHERE id_empleado = @idEmpleado AND fecha = @fecha";
+
+        //    Console.WriteLine("Comando SQL: " + query); // Para depuración
+
+        //    try
+        //    {
+        //        using (SqlConnection connection = conexion.GetConnection())
+        //        {
+        //            connection.Open();
+
+        //            using (SqlCommand commandUpdate = new SqlCommand(query, connection))
+        //            {
+        //                commandUpdate.Parameters.AddWithValue("@nuevaHoraSalida", nuevaHoraSalida);
+        //                commandUpdate.Parameters.AddWithValue("@idEmpleado", idEmpleado);
+        //                commandUpdate.Parameters.AddWithValue("@fecha", fecha);
+
+        //                int filasAfectadas = commandUpdate.ExecuteNonQuery();
+
+        //                if (filasAfectadas > 0)
+        //                {
+        //                    result = true;
+        //                    Console.WriteLine("Hora de salida actualizada correctamente.");
+        //                }
+        //                else
+        //                {
+        //                    Console.WriteLine("No se encontró el registro para actualizar.");
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error al actualizar la hora de salida: {ex.Message}");
+        //    }
+
+        //    return result;
+        //}
+
+
+
         public Boolean RegistrarHoraSalida(int idEmpleado, DateTime fecha, TimeSpan nuevaHoraSalida)
         {
             Boolean result = false;
 
-            string query = "UPDATE Asistencia SET hora_salida = @nuevaHoraSalida " +
-                           "WHERE id_empleado = @idEmpleado AND fecha = @fecha";
-
-            Console.WriteLine("Comando SQL: " + query); // Para depuración
+            string querySelect = "SELECT hora_salida FROM Asistencia WHERE id_empleado = @idEmpleado AND fecha = @fecha";
+            string queryUpdate = "UPDATE Asistencia SET hora_salida = @nuevaHoraSalida WHERE id_empleado = @idEmpleado AND fecha = @fecha";
 
             try
             {
@@ -315,7 +358,26 @@ namespace PayrollWeb.Models
                 {
                     connection.Open();
 
-                    using (SqlCommand commandUpdate = new SqlCommand(query, connection))
+                    // Primero consultamos la hora de salida actual
+                    using (SqlCommand commandSelect = new SqlCommand(querySelect, connection))
+                    {
+                        commandSelect.Parameters.AddWithValue("@idEmpleado", idEmpleado);
+                        commandSelect.Parameters.AddWithValue("@fecha", fecha);
+
+                        object resultado = commandSelect.ExecuteScalar();
+
+                        if (resultado != null && TimeSpan.TryParse(resultado.ToString(), out TimeSpan horaActual))
+                        {
+                            if (horaActual != TimeSpan.Zero)
+                            {
+                                Console.WriteLine("Ya se ha registrado una hora de salida diferente a 00:00.");
+                                return false;
+                            }
+                        }
+                    }
+
+                    // Si la hora de salida es 00:00, entonces sí actualizamos
+                    using (SqlCommand commandUpdate = new SqlCommand(queryUpdate, connection))
                     {
                         commandUpdate.Parameters.AddWithValue("@nuevaHoraSalida", nuevaHoraSalida);
                         commandUpdate.Parameters.AddWithValue("@idEmpleado", idEmpleado);
