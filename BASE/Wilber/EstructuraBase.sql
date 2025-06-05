@@ -187,3 +187,58 @@ CREATE TABLE Trienios(
 	FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
 );
 
+-- Crear tabla Categoria_bonificación
+CREATE TABLE Categoria_bonificacion (
+    id_categoria_bono INT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Crear tabla Bonificación
+CREATE TABLE Bonificacion (
+    id_bonificacion INT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    categoria_id INT NOT NULL,
+    monto DECIMAL(10, 2) NOT NULL,
+    Fecha DATE NOT NULL,
+    FOREIGN KEY (categoria_id) REFERENCES Categoria_bonificacion(id_categoria_bono),
+    FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
+);
+
+-- Tabla principal: Nomina
+CREATE TABLE Nomina (
+    id_nomina INT IDENTITY(1,1) PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    fecha_emision DATE NOT NULL,
+    total_deducciones DECIMAL(10, 2),
+    total_devengos DECIMAL(10, 2),
+    tota_no_sujetos_de_renta DECIMAL(10, 2),
+    salario_neto DECIMAL(10, 2),
+    FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado)
+);
+
+-- Tabla: Nomina_devengos
+CREATE TABLE Nomina_devengos (
+    id_nomina_cargo INT IDENTITY(1,1) PRIMARY KEY,
+    id_nomina INT NOT NULL,
+    nombre_devengo VARCHAR(100) NOT NULL,
+    monto DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_nomina) REFERENCES Nomina(id_nomina)
+);
+
+-- Tabla: Nomina_no_sujetos_de_renta
+CREATE TABLE Nomina_no_sujetos_de_renta (
+    id_nomina_cargo INT IDENTITY(1,1) PRIMARY KEY,
+    id_nomina INT NOT NULL,
+    nombre_devengo VARCHAR(100) NOT NULL,
+    monto DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_nomina) REFERENCES Nomina(id_nomina)
+);
+
+-- Tabla: Nomina_Deduccion
+CREATE TABLE Nomina_Deduccion (
+    id_nomina_deduccion INT IDENTITY(1,1) PRIMARY KEY,
+    id_nomina INT NOT NULL,
+    nombre_deduccion VARCHAR(100) NOT NULL,
+    monto_deduccion DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_nomina) REFERENCES Nomina(id_nomina)
+);

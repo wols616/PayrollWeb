@@ -33,14 +33,17 @@ namespace PayrollWeb.Controllers
             var resultado = new List<object>();
             foreach (var e in lista)
             {
+                decimal sueldoBase = _empleadoModel.ObtenerSueldoBaseEmpleado(e.IdEmpleado);
                 resultado.Add(new
                 {
                     e.IdEmpleado,
-                    NombreCompleto = $"{e.Nombre} {e.Apellidos}"
+                    NombreCompleto = $"{e.Nombre} {e.Apellidos}",
+                    SueldoBase = sueldoBase
                 });
             }
             return Json(resultado);
         }
+
 
         /// <summary>
         /// Obtiene las bonificaciones de un empleado específico (o todas si idEmpleado=0).
@@ -53,11 +56,11 @@ namespace PayrollWeb.Controllers
             foreach (var b in lista)
             {
                 string nombreCategoria = "";
-                if (b.CategoriaId > 0)
+                if (b.CategoriaId > 1)
                 {
                     // Obtener nombre de la categoría (puede optimizarse con diccionario)
                     var cat = _categoriaModel.ObtenerTodas().Find(c => c.IdCategoriaBono == b.CategoriaId);
-                    nombreCategoria = cat != null ? cat.Nombre : "—";
+                    nombreCategoria = cat != null ? cat.Nombre : "-";
                 }
                 else
                 {

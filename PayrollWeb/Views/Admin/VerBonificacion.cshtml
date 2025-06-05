@@ -81,7 +81,7 @@
                     @foreach (var b in bonosIniciales)
                     {
                         string nombreCat = "";
-                        if (b.CategoriaId > 0)
+                        if (b.CategoriaId > 1)
                         {
                             var c = categoriasIniciales.FirstOrDefault(x => x.IdCategoriaBono == b.CategoriaId);
                             nombreCat = c != null ? c.Nombre : "—";
@@ -124,7 +124,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Categoría</label>
+                        <label id="labelCategoria">Categoría</label>
                         <select id="cmbCategorias" class="form-control">
                             <option value="">-- Seleccione categoría --</option>
                             @foreach (var c in categoriasIniciales)
@@ -135,7 +135,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Monto</label>
+                        <label id="labelMonto">Monto</label>
                         <input type="number" step="0.01" id="txtMonto" class="form-control" placeholder="0.00" />
                     </div>
 
@@ -154,7 +154,7 @@
                         <hr />
                         <div class="form-group">
                             <label>Salario Base</label>
-                            <input type="number" step="0.01" id="txtSalarioBase" class="form-control" placeholder="0.00" />
+                            <input type="number" step="0.01" id="txtSalarioBase" class="form-control" placeholder="0.00" readonly />
                         </div>
                         <div class="form-group">
                             <label>Años de Servicio</label>
@@ -232,9 +232,11 @@
                         let ul = $("#lista-empleados");
                         ul.empty();
                         data.forEach(function (item) {
-                            ul.append(`<li class="list-group-item" data-id="${item.idEmpleado}">
-                                                ${item.nombreCompleto}
-                                            </li>`);
+                            ul.append(`<li class="list-group-item"
+                                data-id="${item.idEmpleado}"
+                                data-sueldo-base="${item.sueldoBase}">
+                            ${item.nombreCompleto}
+                        </li>`);
                         });
                     }
                 });
@@ -244,8 +246,10 @@
             $("#lista-empleados").on("click", "li", function () {
                 empleadoSeleccionadoId = $(this).data("id");
                 let texto = $(this).text();
+                let sueldoBase = $(this).data("sueldoBase") || "0.00"; // Si no hay sueldo base, mostrar N/A
                 $("#txtEmpleadoSeleccionado").val(texto);
                 $("#hdnIdEmpleadoSeleccionado").val(empleadoSeleccionadoId);
+                $("#txtSalarioBase").val(sueldoBase);
                 cargarBonificaciones(empleadoSeleccionadoId);
             });
 
@@ -259,6 +263,7 @@
                         let ul = $("#lista-bonificaciones");
                         ul.empty();
                         data.forEach(function (b) {
+
                             // Convertimos "2025-06-03T00:00:00" a "2025-06-03":
                             let soloFecha = b.fecha.split('T')[0];
                             ul.append(`<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${b.idBonificacion}">
@@ -266,7 +271,7 @@
                                                     <span><strong>${b.categoria}</strong> - ${soloFecha}</span><br/>
                                                     <small>Empleado ID: ${b.idEmpleado}</small>
                                                 </div>
-                                                <span class="badge badge-primary">${b.monto.toFixed(2)}</span>
+                                                <span class="badge badge-primary text-black">${b.monto.toFixed(2)}</span>
                                             </li>`);
                         });
                     }
@@ -309,10 +314,24 @@
             $("#chkAguinaldo").change(function () {
                 if ($(this).is(":checked")) {
                     $("#seccionAguinaldo").removeClass("oculto");
+                    $("#cmbCategorias").addClass("oculto");
+                    $("#txtMonto").addClass("oculto");
+                    $("#labelCategoria").addClass("oculto");
+                    $("#labelMonto").addClass("oculto");
+
+
+
                     $("#cmbCategorias").prop("disabled", true);
+                    $("#txtMonto").prop("disabled", true);
                 } else {
                     $("#seccionAguinaldo").addClass("oculto");
                     $("#cmbCategorias").prop("disabled", false);
+                    $("#txtMonto").prop("disabled", false);
+                    $("#cmbCategorias").removeClass("oculto");
+                    $("#txtMonto").removeClass("oculto");
+                    $("#labelCategoria").removeClass("oculto");
+                    $("#labelMonto").removeClass("oculto");
+
                 }
             });
 
@@ -324,6 +343,7 @@
                     empleadoSeleccionadoId = null;
                     $("#txtEmpleadoSeleccionado").val("Todos los empleados");
                     $("#txtBuscarEmpleado").prop("disabled", true);
+
                     $("#lista-empleados").empty();
                 } else {
                     $("#txtBuscarEmpleado").prop("disabled", false);
