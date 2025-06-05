@@ -211,62 +211,50 @@
     </div>
 </div>
 
+
 <script>
-    // Filtrar por fecha y por nombre del empleado
-    document.getElementById("fechaBusqueda").addEventListener("change", function () {
-        var fechaSeleccionada = this.value;
-        var empleados = document.querySelectorAll(".fecha-asistencia");
+    const fechaInput = document.getElementById("fechaBusqueda");
+    const empleadoInput = document.getElementById("empleadoBusqueda");
 
-        empleados.forEach(function (grupoFecha) {
-            if (grupoFecha.getAttribute("data-fecha") === fechaSeleccionada || fechaSeleccionada === "") {
-                grupoFecha.style.display = "block";
-            } else {
-                grupoFecha.style.display = "none";
-            }
-        });
+    fechaInput.addEventListener("change", aplicarFiltros);
+    empleadoInput.addEventListener("input", aplicarFiltros);
 
-        document.getElementById("empleadoBusqueda").value = "";
-        filtrarEmpleados();
-    });   
+    function aplicarFiltros() {
+        const fechaSeleccionada = fechaInput.value;
+        const nombreEmpleado = empleadoInput.value.trim().toLowerCase();
+        const gruposFecha = document.querySelectorAll(".fecha-asistencia");
 
+        gruposFecha.forEach(grupo => {
+            const fechaGrupo = grupo.getAttribute("data-fecha");
+            let mostrarGrupo = false;
 
-    document.getElementById("empleadoBusqueda").addEventListener("input", function() {
-        var nombreEmpleado = this.value.toLowerCase();
-        var gruposFecha = document.querySelectorAll(".fecha-asistencia");
+            const empleados = grupo.querySelectorAll(".empleado");
 
-        // Ocultar todos los grupos primero
-        gruposFecha.forEach(function(grupo) {
-            grupo.style.display = "none";
-        });
+            empleados.forEach(empleado => {
+                const nombre = empleado.getAttribute("data-empleado").toLowerCase();
+                const coincideNombre = nombre.includes(nombreEmpleado);
+                const coincideFecha = !fechaSeleccionada || fechaGrupo === fechaSeleccionada;
 
-        if (nombreEmpleado === "") {
-            // Si no hay búsqueda, mostrar todos
-            gruposFecha.forEach(function(grupo) {
-                grupo.style.display = "block";
+                const mostrarFila = coincideNombre && coincideFecha;
+
+                // Mostrar u ocultar la fila según los filtros
+                empleado.style.display = mostrarFila ? "table-row" : "none";
+
+                // Si al menos una fila es visible, mostramos el grupo
+                if (mostrarFila) mostrarGrupo = true;
             });
-            return;
-        }
 
-        // Buscar en cada grupo de fecha
-        gruposFecha.forEach(function(grupo) {
-            var empleadosEnFecha = grupo.querySelectorAll(".empleado");
-            var empleadoEncontrado = false;
+            grupo.style.display = mostrarGrupo ? "block" : "none";
+        });
 
-            // Verificar si algún empleado en esta fecha coincide
-            empleadosEnFecha.forEach(function(empleado) {
-                var nombre = empleado.getAttribute("data-empleado").toLowerCase();
-                if (nombre.includes(nombreEmpleado)) {
+        // Si ambos filtros están vacíos, mostrar todo
+        if (fechaSeleccionada === "" && nombreEmpleado === "") {
+            gruposFecha.forEach(grupo => {
+                grupo.style.display = "block";
+                grupo.querySelectorAll(".empleado").forEach(empleado => {
                     empleado.style.display = "table-row";
-                    empleadoEncontrado = true;
-                } else {
-                    empleado.style.display = "none";
-                }
+                });
             });
-
-            // Mostrar el grupo solo si se encontró el empleado
-            if (empleadoEncontrado) {
-                grupo.style.display = "block";
-            }
-        });
-    });
+        }
+    }
 </script>
