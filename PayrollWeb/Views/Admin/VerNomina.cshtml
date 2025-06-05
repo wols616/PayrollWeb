@@ -2,82 +2,10 @@
     Layout = "_Layout";
 }
 
-@section Styles {
-    <style>
-        /* Mantenemos los estilos existentes pero eliminamos .oculto */
-        .nomina-container {
-            margin-top: 30px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 20px;
-        }
-
-        .nomina-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .nomina-section {
-            margin-bottom: 20px;
-        }
-
-        .nomina-table {
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-            .nomina-table th {
-                background-color: #f8f9fa;
-            }
-
-        .nomina-total {
-            font-weight: bold;
-            text-align: right;
-        }
-
-        .nomina-grand-total {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 20px;
-            text-align: right;
-            border-top: 2px solid #333;
-            padding-top: 10px;
-        }
-
-        body {
-            background-color: #f2f9ff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .main-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            padding: 25px;
-            margin: 20px auto;
-            max-width: 1200px;
-        }
-
-        h1 {
-            color: #007bff;
-            font-size: 28px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-    </style>
-}
 
 
-<div class="row main-container">
+
+<div class="row main-container no-print">
     <div class="header-section">
         <h1 class=""><i class="bi bi-file-earmark-text"></i> Ver Nómina Mensual</h1>
     </div>
@@ -134,23 +62,30 @@
     </div>
 </div>
 
-<div class="d-flex justify-content-between mt-3">
-    <button type="button" id="btnVerNomina" class="btn btn-primary flex-fill mx-1" disabled>
+<div class="d-flex justify-content-between mt-3 no-imprimir">
+    <button type="button" id="btnVerNomina" class="btn btn-outline-primary flex-fill mx-1" disabled>
         <i class="fa-solid fa-file-invoice-dollar"></i> Ver Nómina
     </button>
-    <button type="button" id="btnGenerarNomina" class="btn btn-primary flex-fill mx-1">
+    <button type="button" id="btnGenerarNomina" class="btn btn-outline-primary flex-fill mx-1">
         <i class="fa-solid fa-file-invoice-dollar"></i> Generar Nóminas
+    </button>
+    <button type="button" id="btnImprimirNomina" class="btn btn-outline-primary flex-fill mx-1 no-imprimir">
+        <i class="fas fa-print"></i> Imprimir Nómina
     </button>
     <!-- Botón de exportar PDF eliminado según solicitud -->
 </div>
 
 <!-- Contenedor de nómina siempre visible -->
 <div id="nominaContainer" class="nomina-container">
-    <div class="nomina-header">
-        <h3>NÓMINA MENSUAL</h3>
-        <p id="nominaPeriodo">Seleccione un empleado y un mes</p>
-        <p id="nominaEmpleado"></p>
+    <div class="nomina-header pb-3" style="border-bottom: 1px solid #e0e0e0">
+        <h1 class="text-start"><i class="bi bi-cash-stack me-3"></i>Nómina Mensual</h1>
+
     </div>
+    <div class="nomina-header">
+        <p id="nominaPeriodo" class="text-center">Seleccione un empleado y un mes</p>
+        <p id="nominaEmpleado" class="text-center"></p>
+    </div>
+
 
     <!-- Sección Devengos -->
     <div class="nomina-section">
@@ -223,6 +158,138 @@
         <p>SALARIO NETO: <span id="salarioNeto">0.00</span></p>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Mantenemos los estilos existentes pero eliminamos .oculto */
+        .nomina-container {
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 25px;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+        }
+
+        .nomina-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nomina-section {
+            margin-bottom: 20px;
+        }
+
+        .nomina-table {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+            .nomina-table th {
+                background-color: #f8f9fa;
+            }
+
+        .nomina-total {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .nomina-grand-total {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+            border-top: 2px solid #333;
+            padding-top: 10px;
+        }
+
+        body {
+            background-color: #f2f9ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+
+        h1 {
+            color: #007bff;
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Estilos específicos para la impresión */
+        @@media print {
+            .no-print {
+                display: none !important;
+            }
+            /* Oculta elementos no deseados */
+            .header-section,
+            .main-container > .row > .col-md-4, /* Panel izquierdo de búsqueda */
+            .main-container > .row > .col-md-8 > .card:first-child, /* Info empleado */
+            .d-flex.justify-content-between /* Botones */ {
+                display: none !important;
+            }
+
+            .site-header, /* Reemplaza con el selector correcto de tu header */
+            .navbar { /* Si tu header está en un navbar */
+                display: none !important;
+            }
+            /* Ajusta el contenedor de nómina */
+            .nomina-container {
+                border: none;
+                padding: 0;
+                margin: 0;
+                box-shadow: 0 0 0 white;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+                font-size: 12px;
+                background-color: white !important;
+            }
+
+            @@page {
+                margin: 0;
+            }
+            /* Mejora la legibilidad de las tablas */
+            .nomina-table th {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Oculta enlaces en la impresión */
+            a[href]:after {
+                content: none !important;
+            }
+
+            .no-imprimir {
+                display: none;
+            }
+
+            footer {
+                display: none;
+            }
+        }
+    </style>
+}
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -388,6 +455,18 @@
                 // Salario neto
                 $("#salarioNeto").text(nomina.salarioNeto ? nomina.salarioNeto.toFixed(2) : "0.00");
             }
+
+            // Controlador para el botón de imprimir
+            $("#btnImprimirNomina").click(function() {
+                // Verificar que hay una nómina cargada
+                if (!nominaActual) {
+                    alert("Primero debe cargar una nómina para imprimir");
+                    return;
+                }
+
+                // Abrir ventana de impresión
+                window.print();
+            });
         });
     </script>
 }
